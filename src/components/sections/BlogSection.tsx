@@ -19,14 +19,17 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   }, []);
 
   useEffect(() => {
-    // Check if there's a post ID in the URL hash
+    // Check if there's a post slug in the URL hash
     const handleHashChange = () => {
       const hash = window.location.hash;
-      if (hash.startsWith('#post-')) {
-        const postId = hash.replace('#post-', '');
-        const post = posts.find(p => p.id === postId);
+      if (hash.startsWith('#post/')) {
+        const slug = hash.replace('#post/', '');
+        const post = posts.find(p => p.slug === slug);
         if (post) {
           setSelectedPost(post);
+        } else if (posts.length > 0) {
+          // If post not found but we have posts, try to fetch it
+          fetchPostBySlug(slug);
         }
       } else if (hash === '#blog' || hash === '') {
         setSelectedPost(null);
@@ -49,6 +52,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   const fetchPosts = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching blog posts...');
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
@@ -74,34 +78,106 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     }
   };
 
+  const fetchPostBySlug = async (slug: string) => {
+    try {
+      console.log('Fetching post by slug:', slug);
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_published', true)
+        .single();
+
+      if (error) {
+        console.error('Error fetching post by slug:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('Post found by slug:', data.title);
+        setSelectedPost(data);
+      }
+    } catch (error) {
+      console.error('Error fetching post by slug:', error);
+    }
+  };
+
   const handlePostClick = (post: BlogPost) => {
-    // Update URL hash to create a unique link for the post
-    window.location.hash = `post-${post.id}`;
+    console.log('Post clicked:', post.title, 'Slug:', post.slug);
+    // Update URL hash to create a unique link for the post using slug
+    const newHash = `#post/${post.slug}`;
+    console.log('Setting hash to:', newHash);
+    window.location.hash = newHash;
     setSelectedPost(post);
   };
 
   const handleClosePost = () => {
+    console.log('Closing post, returning to blog');
     // Return to blog section
-    window.location.hash = 'blog';
+    window.location.hash = '#blog';
     setSelectedPost(null);
     if (onNavigateHome) onNavigateHome();
   };
 
+  const getPostUrl = (post: BlogPost) => {
+    return `${window.location.origin}${window.location.pathname}#post/${post.slug}`;
+  };
+
   const copyPostLink = (post: BlogPost) => {
-    const url = `${window.location.origin}${window.location.pathname}#post-${post.id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      // Simple feedback - you could add a toast notification here
-      alert('Link copiado para a área de transferência!');
-    }).catch(() => {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = url;
-      document.body.appendChild(textArea);
-      textArea.select();
+    const url = getPostUrl(post);
+    console.log('Copying link:', url);
+    
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Link copiado para a área de transferência!');
+      }).catch(() => {
+        fallbackCopyTextToClipboard(url);
+      });
+    } else {
+      fallbackCopyTextToClipboard(url);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.position = 'fixed';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
       document.execCommand('copy');
-      document.body.removeChild(textArea);
       alert('Link copiado para a área de transferência!');
-    });
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+      alert('Não foi possível copiar o link automaticamente. URL: ' + text);
+    }
+    
+    document.body.removeChild(textArea);
+  };
+
+  const sharePost = (post: BlogPost, platform: string) => {
+    const url = getPostUrl(post);
+    const text = `Confira esta postagem: ${post.title}`;
+    
+    switch (platform) {
+      case 'whatsapp':
+        window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'native':
+        if (navigator.share) {
+          navigator.share({ title: post.title, text, url });
+        } else {
+          copyPostLink(post);
+        }
+        break;
+    }
   };
 
   // Show loading state
@@ -271,7 +347,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   
                   <Button
                     variant="outline"
-                    onClick={() => copyPostLink(selectedPost)}
+                    onClick={() => sharePost(selectedPost, 'native')}
                     className="flex items-center gap-2"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,15 +430,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          const url = `${window.location.origin}${window.location.pathname}#post-${selectedPost.id}`;
-                          const text = `Confira esta postagem: ${selectedPost.title}`;
-                          if (navigator.share) {
-                            navigator.share({ title: selectedPost.title, text, url });
-                          } else {
-                            window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
-                          }
-                        }}
+                        onClick={() => sharePost(selectedPost, 'whatsapp')}
                         className="flex items-center gap-2"
                       >
                         <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
@@ -373,11 +441,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          const url = `${window.location.origin}${window.location.pathname}#post-${selectedPost.id}`;
-                          const text = `Confira esta postagem: ${selectedPost.title} - ${url}`;
-                          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-                        }}
+                        onClick={() => sharePost(selectedPost, 'facebook')}
                         className="flex items-center gap-2"
                       >
                         <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
