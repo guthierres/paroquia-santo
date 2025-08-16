@@ -73,7 +73,7 @@ Hoje, olhamos para o futuro com esperança, gratos por tudo que o Senhor nos con
       icon: Users
     },
     {
-      year: '2024',
+      year: '2025',
       title: '40 Anos de Fé',
       description: 'Celebração de quatro décadas de bênçãos e milagres',
       icon: Heart
