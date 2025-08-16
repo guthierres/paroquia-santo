@@ -238,7 +238,45 @@ export const TimelineSection: React.FC = () => {
                   <img
                     src={currentEvent.image_url}
                     alt={currentEvent.title}
-                    className="w-full h-64 md:h-full object-cover rounded-lg"
+                    className="w-full h-64 md:h-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => {
+                      // Create a modal for the image
+                      const modal = document.createElement('div');
+                      modal.className = 'fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4';
+                      modal.onclick = () => modal.remove();
+                      
+                      const content = document.createElement('div');
+                      content.className = 'relative max-w-4xl max-h-[95vh] bg-white rounded-xl overflow-hidden shadow-2xl';
+                      content.onclick = (e) => e.stopPropagation();
+                      
+                      content.innerHTML = `
+                        <button class="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center" onclick="this.closest('.fixed').remove()">
+                          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                        <div class="max-h-[95vh] overflow-y-auto">
+                          <div class="aspect-video overflow-hidden">
+                            <img src="${currentEvent.image_url}" alt="${currentEvent.title}" class="w-full h-full object-cover" />
+                          </div>
+                          <div class="p-8">
+                            <div class="flex items-center gap-3 mb-4">
+                              <div class="w-12 h-12 bg-gradient-to-r from-red-800 to-amber-600 rounded-full flex items-center justify-center">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                              </div>
+                              <h3 class="text-3xl font-bold text-red-900">${currentEvent.year}</h3>
+                            </div>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-6">${currentEvent.title}</h1>
+                            <p class="text-gray-700 leading-relaxed text-lg">${currentEvent.description}</p>
+                          </div>
+                        </div>
+                      `;
+                      
+                      modal.appendChild(content);
+                      document.body.appendChild(modal);
+                    }}
                   />
                 </div>
               )}

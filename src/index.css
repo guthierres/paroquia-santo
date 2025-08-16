@@ -73,4 +73,48 @@
   .prose h3 {
     font-size: 1.125rem;
   }
+  
+  /* Modal improvements for mobile */
+  .fixed.inset-0 {
+    padding: 1rem;
+  }
+  
+  .fixed .max-w-4xl {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .fixed .max-h-\[95vh\] {
+    max-height: 90vh;
+  }
+}
+
+/* Improved button styles */
+.btn-publish {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-publish:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+.btn-draft {
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+  color: white;
+  border: none;
+}
+
+/* Enhanced card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }

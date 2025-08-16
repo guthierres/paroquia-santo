@@ -3,7 +3,9 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { FileUpload } from '../ui/FileUpload';
-import { Plus, Edit2, Trash2, Save, X, Calendar, Image } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Calendar, Image, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 interface TimelineEvent {
   id: string;
@@ -20,6 +22,7 @@ export function TimelineManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<TimelineEvent | null>(null);
   const [formData, setFormData] = useState({
     year: new Date().getFullYear(),
     title: '',
@@ -52,12 +55,12 @@ export function TimelineManager() {
 
     const file = files[0];
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione apenas arquivos de imagem.');
+      toast.error('Por favor, selecione apenas arquivos de imagem.');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem deve ter no máximo 5MB.');
+      toast.error('A imagem deve ter no máximo 5MB.');
       return;
     }
 
@@ -65,22 +68,23 @@ export function TimelineManager() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `timeline/${fileName}`;
+      const filePath = `photos/timeline/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('parish-images')
+        .from('parish-photos')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
-        .from('parish-images')
+        .from('parish-photos')
         .getPublicUrl(filePath);
 
       setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
+      toast.success('Imagem carregada com sucesso!');
     } catch (error) {
       console.error('Erro no upload:', error);
-      alert('Erro ao fazer upload da imagem.');
+      toast.error('Erro ao fazer upload da imagem.');
     } finally {
       setUploading(false);
     }
@@ -90,7 +94,7 @@ export function TimelineManager() {
     e.preventDefault();
     
     if (!formData.title.trim() || !formData.description.trim()) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
@@ -107,6 +111,7 @@ export function TimelineManager() {
           .eq('id', editingEvent.id);
 
         if (error) throw error;
+        toast.success('Evento atualizado com sucesso!');
       } else {
         const { error } = await supabase
           .from('timeline_events')
@@ -118,13 +123,14 @@ export function TimelineManager() {
           }]);
 
         if (error) throw error;
+        toast.success('Evento criado com sucesso!');
       }
 
       await fetchEvents();
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);
-      alert('Erro ao salvar evento.');
+      toast.error('Erro ao salvar evento.');
     }
   };
 
@@ -140,7 +146,7 @@ export function TimelineManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este evento?')) return;
+    if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
 
     try {
       const { error } = await supabase
@@ -150,9 +156,10 @@ export function TimelineManager() {
 
       if (error) throw error;
       await fetchEvents();
+      toast.success('Evento excluído com sucesso!');
     } catch (error) {
       console.error('Erro ao excluir evento:', error);
-      alert('Erro ao excluir evento.');
+      toast.error('Erro ao excluir evento.');
     }
   };
 
@@ -255,11 +262,20 @@ export function TimelineManager() {
                 Imagem (opcional)
               </label>
               <FileUpload
-                onFileChange={handleImageUpload}
+                onFileSelect={handleImageUpload}
                 accept="image/*"
                 disabled={uploading}
-                className="w-full"
-              />
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading}
+                  className="w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading ? 'Carregando...' : 'Carregar Imagem'}
+                </Button>
+              </FileUpload>
               {uploading && (
                 <p className="text-sm text-blue-600 mt-1">Fazendo upload...</p>
               )}
@@ -270,6 +286,14 @@ export function TimelineManager() {
                     alt="Preview"
                     className="w-32 h-32 object-cover rounded-md border"
                   />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                    className="mt-2 text-red-600"
+                  >
+                    Remover Imagem
+                  </Button>
                 </div>
               )}
             </div>
@@ -319,7 +343,8 @@ export function TimelineManager() {
                       <img
                         src={event.image_url}
                         alt={event.title}
-                        className="w-48 h-32 object-cover rounded-md border"
+                        className="w-48 h-32 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setSelectedImage(event)}
                       />
                     </div>
                   )}
@@ -349,6 +374,76 @@ export function TimelineManager() {
           ))
         )}
       </div>
+
+      {/* Image Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative max-w-4xl max-h-[95vh] bg-white rounded-xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                variant="outline" 
+                className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full w-10 h-10 p-0"
+                onClick={() => setSelectedImage(null)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+              
+              <div className="max-h-[95vh] overflow-y-auto">
+                {selectedImage.image_url && (
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={selectedImage.image_url}
+                      alt={selectedImage.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="p-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-red-800 to-amber-600 rounded-full flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-3xl font-bold text-red-900">{selectedImage.year}</h3>
+                    </div>
+                  </div>
+                  
+                  <h1 className="text-3xl font-bold text-gray-800 mb-6">
+                    {selectedImage.title}
+                  </h1>
+                  
+                  <p className="text-gray-700 leading-relaxed text-lg">
+                    {selectedImage.description}
+                  </p>
+                  
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    <p className="text-sm text-gray-500">
+                      Evento adicionado em: {new Date(selectedImage.created_at).toLocaleDateString('pt-BR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

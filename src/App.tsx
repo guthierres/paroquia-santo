@@ -90,10 +90,10 @@ function App() {
       <main>
         <SlidesSection />
         <HeroSection onNavigate={handleNavigate} />
-        <BlogSection />
         <HistorySection />
         <TimelineSection />
         <PhotoGallery />
+        <BlogSection />
         <ContactSection />
       </main>
 

@@ -220,7 +220,7 @@ export const PhotoGallery: React.FC = () => {
               >
                 <Button
                   variant="outline" 
-                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg"
+                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full w-10 h-10 p-0"
                   onClick={() => setSelectedPhoto(null)}
                 >
                   <X className="h-5 w-5" />

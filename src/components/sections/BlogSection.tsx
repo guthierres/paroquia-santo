@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, User, ArrowRight, X, FileText } from 'lucide-react';
+import { Calendar, User, ArrowRight, X, FileText, Clock } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase, BlogPost } from '../../lib/supabase';
@@ -36,7 +36,7 @@ export const BlogSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section id="blog" className="py-20 bg-white">
+      <section id="blog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-800 mx-auto mb-4"></div>
@@ -52,7 +52,7 @@ export const BlogSection: React.FC = () => {
   }
 
   return (
-    <section id="blog" className="py-20 bg-white">
+    <section id="blog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -95,7 +95,11 @@ export const BlogSection: React.FC = () => {
                   <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      {new Date(post.created_at).toLocaleDateString('pt-BR')}
+                      {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
                     </div>
                     <div className="flex items-center gap-1">
                       <User className="h-4 w-4" />
@@ -110,6 +114,15 @@ export const BlogSection: React.FC = () => {
                   <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
                     {post.excerpt}
                   </p>
+                  
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                    <Clock className="h-3 w-3" />
+                    <span>Publicado em {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}</span>
+                  </div>
                   
                   <div className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors">
                     <span>Ler mais</span>
@@ -140,7 +153,7 @@ export const BlogSection: React.FC = () => {
               >
                 <Button
                   variant="outline" 
-                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg"
+                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full w-10 h-10 p-0"
                   onClick={() => setSelectedPost(null)}
                 >
                   <X className="h-5 w-5" />
@@ -178,7 +191,7 @@ export const BlogSection: React.FC = () => {
                     </h1>
                     
                     <div 
-                      className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                      className="prose prose-lg max-w-none text-gray-700 leading-relaxed prose-headings:text-gray-800 prose-a:text-red-800 prose-strong:text-gray-800"
                       dangerouslySetInnerHTML={{ __html: selectedPost.content }}
                     />
                   </div>

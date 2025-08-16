@@ -390,16 +390,24 @@ export const BlogManager: React.FC = () => {
                       type="checkbox"
                       checked={editingPost.is_published}
                       onChange={(e) => setEditingPost(prev => prev ? { ...prev, is_published: e.target.checked } : null)}
-                      className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-2"
                     />
-                    <span className="text-sm text-gray-700">Publicar post</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {editingPost.is_published ? '✅ Post será publicado' : '📝 Salvar como rascunho'}
+                    </span>
                   </label>
+                  
+                  {editingPost.is_published && (
+                    <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                      Visível no site
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t">
                   <Button onClick={handleSavePost} className="flex-1">
                     <Save className="h-4 w-4" />
-                    Salvar Post
+                    {editingPost.is_published ? 'Publicar Post' : 'Salvar Rascunho'}
                   </Button>
                   <Button
                     variant="outline"
