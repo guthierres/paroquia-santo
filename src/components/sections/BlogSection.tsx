@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, User, ArrowRight, X, FileText, Clock } from 'lucide-react';
+import { Calendar, User, ArrowRight, X, FileText, Clock, ArrowLeft } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase, BlogPost } from '../../lib/supabase';
 
-export const BlogSection: React.FC = () => {
+interface BlogSectionProps {
+  onNavigateHome?: () => void;
+}
+
+export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -141,60 +145,82 @@ export const BlogSection: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-              onClick={() => setSelectedPost(null)}
+              className="fixed inset-0 z-50 bg-white"
             >
+              {/* Header with Back Button */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 z-10">
+                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedPost(null);
+                      if (onNavigateHome) onNavigateHome();
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Voltar
+                  </Button>
+                  <div className="flex items-center gap-2 text-red-800">
+                    <FileText className="h-5 w-5" />
+                    <span className="font-semibold">Blog da Paróquia</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Article Content */}
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="relative max-w-4xl max-h-[95vh] bg-white rounded-xl overflow-hidden shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-4xl mx-auto px-4 py-8"
               >
-                <Button
-                  variant="outline" 
-                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full w-10 h-10 p-0"
-                  onClick={() => setSelectedPost(null)}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-                
-                <div className="max-h-[95vh] overflow-y-auto">
-                  {selectedPost.featured_image && (
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={selectedPost.featured_image}
-                        alt={selectedPost.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="p-8">
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(selectedPost.created_at).toLocaleDateString('pt-BR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        {selectedPost.author}
-                      </div>
-                    </div>
-                    
-                    <h1 className="text-3xl font-bold text-gray-800 mb-6">
-                      {selectedPost.title}
-                    </h1>
-                    
-                    <div 
-                      className="prose prose-lg max-w-none text-gray-700 leading-relaxed prose-headings:text-gray-800 prose-a:text-red-800 prose-strong:text-gray-800"
-                      dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                {selectedPost.featured_image && (
+                  <div className="aspect-video overflow-hidden rounded-xl mb-8 shadow-lg">
+                    <img
+                      src={selectedPost.featured_image}
+                      alt={selectedPost.title}
+                      className="w-full h-full object-cover"
                     />
                   </div>
+                )}
+                
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(selectedPost.created_at).toLocaleDateString('pt-BR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <User className="h-4 w-4" />
+                    {selectedPost.author}
+                  </div>
+                </div>
+                
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-8 leading-tight">
+                  {selectedPost.title}
+                </h1>
+                
+                <div 
+                  className="prose prose-lg max-w-none text-gray-700 leading-relaxed prose-headings:text-gray-800 prose-a:text-red-800 prose-strong:text-gray-800 prose-blockquote:border-red-800 prose-blockquote:bg-red-50"
+                  dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                />
+                
+                {/* Back to Blog Button */}
+                <div className="mt-12 pt-8 border-t border-gray-200 text-center">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      setSelectedPost(null);
+                      if (onNavigateHome) onNavigateHome();
+                    }}
+                    className="flex items-center gap-2 mx-auto"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Voltar ao Blog
+                  </Button>
                 </div>
               </motion.div>
             </motion.div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase, Photo } from '../../lib/supabase';
@@ -10,6 +10,10 @@ export const PhotoGallery: React.FC = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const categories = [
     { id: 'all', label: 'Todas', icon: Sparkles },
@@ -98,6 +102,47 @@ export const PhotoGallery: React.FC = () => {
     ? photos 
     : photos.filter(photo => photo.category === selectedCategory);
 
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - imagePosition.x,
+        y: e.clientY - imagePosition.y
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setImagePosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handlePhotoSelect = (photo: Photo) => {
+    setSelectedPhoto(photo);
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
   if (isLoading) {
     return (
       <section id="photos" className="py-20 bg-gray-50">
@@ -172,7 +217,7 @@ export const PhotoGallery: React.FC = () => {
                 >
                   <Card 
                     className="cursor-pointer group overflow-hidden"
-                    onClick={() => setSelectedPhoto(photo)}
+                    onClick={() => handlePhotoSelect(photo)}
                   >
                     <div className="aspect-square overflow-hidden">
                       <img
@@ -209,62 +254,98 @@ export const PhotoGallery: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-              onClick={() => setSelectedPhoto(null)}
             >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="relative max-w-5xl max-h-[95vh] bg-white rounded-xl overflow-hidden shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
+              {/* Zoom Controls */}
+              <div className="absolute top-4 left-4 z-20 flex gap-2">
                 <Button
-                  variant="outline" 
-                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full w-10 h-10 p-0"
-                  onClick={() => setSelectedPhoto(null)}
+                  variant="outline"
+                  size="sm"
+                  onClick={handleZoomIn}
+                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
                 >
-                  <X className="h-5 w-5" />
+                  <ZoomIn className="h-4 w-4" />
                 </Button>
-                
-                <div className="flex flex-col max-h-[95vh]">
-                  <div className="flex-1 overflow-hidden">
-                    <img
-                      src={selectedPhoto.image_url}
-                      alt={selectedPhoto.title}
-                      className="w-full h-full object-contain bg-gray-50"
-                    />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleZoomOut}
+                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetZoom}
+                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Close Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedPhoto(null)}
+                className="absolute top-4 right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+
+              {/* Image Container */}
+              <div 
+                className="relative w-full h-full flex items-center justify-center overflow-hidden"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{ cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+              >
+                <img
+                  src={selectedPhoto.image_url}
+                  alt={selectedPhoto.title}
+                  className="max-w-none transition-transform duration-200 select-none"
+                  style={{
+                    transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
+                    maxHeight: '90vh',
+                    maxWidth: '90vw'
+                  }}
+                  draggable={false}
+                />
+              </div>
+
+              {/* Photo Info Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-2xl font-bold flex-1">
+                      {selectedPhoto.title}
+                    </h3>
+                    <span className="inline-block px-3 py-1 text-sm bg-red-600 rounded-full ml-4">
+                      {categories.find(c => c.id === selectedPhoto.category)?.label}
+                    </span>
                   </div>
                   
-                  <div className="p-6 bg-white border-t border-gray-100">
-                    <div className="max-w-2xl">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-2xl font-bold text-gray-800 flex-1">
-                          {selectedPhoto.title}
-                        </h3>
-                        <span className="inline-block px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full ml-4">
-                          {categories.find(c => c.id === selectedPhoto.category)?.label}
-                        </span>
-                      </div>
-                      
-                      {selectedPhoto.description && (
-                        <p className="text-gray-600 leading-relaxed text-lg">
-                          {selectedPhoto.description}
-                        </p>
-                      )}
-                      
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <p className="text-sm text-gray-500">
-                          Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  {selectedPhoto.description && (
+                    <p className="text-gray-200 leading-relaxed mb-3">
+                      {selectedPhoto.description}
+                    </p>
+                  )}
+                  
+                  <p className="text-sm text-gray-400">
+                    Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                  
+                  <p className="text-xs text-gray-500 mt-2">
+                    Use os controles de zoom ou arraste a imagem para navegar
+                  </p>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

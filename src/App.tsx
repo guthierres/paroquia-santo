@@ -93,7 +93,7 @@ function App() {
         <HistorySection />
         <TimelineSection />
         <PhotoGallery />
-        <BlogSection />
+        <BlogSection onNavigateHome={() => handleNavigate('home')} />
         <ContactSection />
       </main>
 
