@@ -215,31 +215,54 @@ export const PhotoGallery: React.FC = () => {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
-                className="relative max-w-4xl max-h-[90vh] bg-white rounded-xl overflow-hidden"
+                className="relative max-w-5xl max-h-[95vh] bg-white rounded-xl overflow-hidden shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Button
-                  variant="outline"
-                  className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white"
+                  variant="outline" 
+                  className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white shadow-lg"
                   onClick={() => setSelectedPhoto(null)}
                 >
                   <X className="h-5 w-5" />
                 </Button>
-                <img
-                  src={selectedPhoto.image_url}
-                  alt={selectedPhoto.title}
-                  className="w-full max-h-[70vh] object-contain"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {selectedPhoto.title}
-                  </h3>
-                  {selectedPhoto.description && (
-                    <p className="text-gray-600 mb-2">{selectedPhoto.description}</p>
-                  )}
-                  <span className="inline-block px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full">
-                    {categories.find(c => c.id === selectedPhoto.category)?.label}
-                  </span>
+                
+                <div className="flex flex-col max-h-[95vh]">
+                  <div className="flex-1 overflow-hidden">
+                    <img
+                      src={selectedPhoto.image_url}
+                      alt={selectedPhoto.title}
+                      className="w-full h-full object-contain bg-gray-50"
+                    />
+                  </div>
+                  
+                  <div className="p-6 bg-white border-t border-gray-100">
+                    <div className="max-w-2xl">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-2xl font-bold text-gray-800 flex-1">
+                          {selectedPhoto.title}
+                        </h3>
+                        <span className="inline-block px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full ml-4">
+                          {categories.find(c => c.id === selectedPhoto.category)?.label}
+                        </span>
+                      </div>
+                      
+                      {selectedPhoto.description && (
+                        <p className="text-gray-600 leading-relaxed text-lg">
+                          {selectedPhoto.description}
+                        </p>
+                      )}
+                      
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <p className="text-sm text-gray-500">
+                          Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
