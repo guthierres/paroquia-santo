@@ -16,7 +16,9 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
 
   useEffect(() => {
     fetchPosts();
-    
+  }, []);
+
+  useEffect(() => {
     // Check if there's a post ID in the URL hash
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -34,7 +36,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     // Listen for hash changes
     window.addEventListener('hashchange', handleHashChange);
     
-    // Check initial hash
+    // Check initial hash only after posts are loaded
     if (posts.length > 0) {
       handleHashChange();
     }
@@ -43,10 +45,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [posts]);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -58,11 +56,19 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
         .order('created_at', { ascending: false })
         .limit(6);
 
-      if (data) {
+      if (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]);
+      } else if (data) {
+        console.log('Posts loaded:', data.length);
         setPosts(data);
+      } else {
+        console.log('No posts found');
+        setPosts([]);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
+      setPosts([]);
     } finally {
       setIsLoading(false);
     }
@@ -84,28 +90,50 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   const copyPostLink = (post: BlogPost) => {
     const url = `${window.location.origin}${window.location.pathname}#post-${post.id}`;
     navigator.clipboard.writeText(url).then(() => {
-      // You could add a toast notification here
-      console.log('Link copiado para a área de transferência');
+      // Simple feedback - you could add a toast notification here
+      alert('Link copiado para a área de transferência!');
+    }).catch(() => {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Link copiado para a área de transferência!');
     });
   };
 
+  // Show loading state
   if (isLoading) {
     return (
       <section id="blog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-800 to-amber-600 bg-clip-text text-transparent mb-4">
+              Blog da Paróquia
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Acompanhe as novidades, reflexões e acontecimentos da nossa comunidade
+            </p>
+          </motion.div>
+          
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-800 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando posts...</p>
+            <p className="text-gray-600">Carregando publicações...</p>
           </div>
         </div>
       </section>
     );
   }
 
-  if (posts.length === 0) {
-    return null; // Don't show section if no posts
-  }
-
+  // Always show the blog section, even if no posts
   return (
     <section id="blog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -124,70 +152,95 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post, index) => (
-            <motion.div
-              key={post.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+        {/* Show message if no posts */}
+        {posts.length === 0 ? (
+          <Card className="p-12 text-center max-w-2xl mx-auto">
+            <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              Nenhuma publicação encontrada
+            </h3>
+            <p className="text-gray-500 mb-4">
+              As publicações do blog aparecerão aqui quando forem criadas no painel administrativo.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="mx-auto"
             >
-              <Card 
-                className="cursor-pointer group h-full flex flex-col"
-                onClick={() => handlePostClick(post)}
+              Recarregar
+            </Button>
+          </Card>
+        ) : (
+          /* Posts Grid */
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                {post.featured_image && (
-                  <div className="aspect-video overflow-hidden">
-                    <img
-                      src={post.featured_image}
-                      alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(post.created_at).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
+                <Card 
+                  className="cursor-pointer group h-full flex flex-col hover:shadow-xl transition-shadow duration-300"
+                  onClick={() => handlePostClick(post)}
+                >
+                  {post.featured_image && (
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={post.featured_image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          // Hide image if it fails to load
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        {post.author}
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
+                      {post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...'}
+                    </p>
+                    
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                      <Clock className="h-3 w-3" />
+                      <span>Publicado em {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                        day: 'numeric',
+                        month: 'long',
                         year: 'numeric'
-                      })}
+                      })}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      {post.author}
+                    
+                    <div className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors">
+                      <span>Ler mais</span>
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
-                  
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
-                    {post.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                    <Clock className="h-3 w-3" />
-                    <span>Publicado em {new Date(post.created_at).toLocaleDateString('pt-BR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors">
-                    <span>Ler mais</span>
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Post Modal */}
         <AnimatePresence>
@@ -196,19 +249,26 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-white"
+              className="fixed inset-0 z-50 bg-white overflow-y-auto"
             >
               {/* Header with Back Button */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 z-10">
-                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleClosePost}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Voltar
-                  </Button>
+              <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
+                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={handleClosePost}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Voltar
+                    </Button>
+                    <div className="flex items-center gap-2 text-red-800">
+                      <FileText className="h-5 w-5" />
+                      <span className="font-semibold">Blog da Paróquia</span>
+                    </div>
+                  </div>
+                  
                   <Button
                     variant="outline"
                     onClick={() => copyPostLink(selectedPost)}
@@ -219,10 +279,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                     </svg>
                     Compartilhar
                   </Button>
-                  <div className="flex items-center gap-2 text-red-800">
-                    <FileText className="h-5 w-5" />
-                    <span className="font-semibold">Blog da Paróquia</span>
-                  </div>
                 </div>
               </div>
 
@@ -238,6 +294,10 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                       src={selectedPost.featured_image}
                       alt={selectedPost.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Hide image if it fails to load
+                        e.currentTarget.parentElement!.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
@@ -271,15 +331,15 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   <Button
                     variant="primary"
                     onClick={handleClosePost}
-                    className="flex items-center gap-2 mx-auto"
+                    className="flex items-center gap-2 mx-auto mb-6"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Voltar ao Blog
                   </Button>
                   
-                  <div className="mt-4 text-center">
-                    <p className="text-sm text-gray-500 mb-2">Compartilhe esta postagem:</p>
-                    <div className="flex justify-center gap-2">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500 mb-4">Compartilhe esta postagem:</p>
+                    <div className="flex justify-center gap-3 flex-wrap">
                       <Button
                         variant="outline"
                         size="sm"
@@ -309,6 +369,21 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                         </svg>
                         WhatsApp
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const url = `${window.location.origin}${window.location.pathname}#post-${selectedPost.id}`;
+                          const text = `Confira esta postagem: ${selectedPost.title} - ${url}`;
+                          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        Facebook
                       </Button>
                     </div>
                   </div>
