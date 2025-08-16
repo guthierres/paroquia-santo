@@ -11,6 +11,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
 
   const menuItems = [
     { id: 'home', label: 'Início' },
+    { id: 'blog', label: 'Blog' },
     { id: 'timeline', label: 'Linha do Tempo' },
     { id: 'history', label: 'História' },
     { id: 'photos', label: 'Fotos' },

@@ -37,3 +37,24 @@ export interface Slide {
   is_active: boolean;
   created_at: string;
 }
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  featured_image: string | null;
+  author: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Schedule {
+  id: string;
+  day_of_week: string;
+  time: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+}

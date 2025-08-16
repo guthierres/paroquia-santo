@@ -9,6 +9,7 @@ import { PhotoGallery } from './components/sections/PhotoGallery';
 import { ContactSection } from './components/sections/ContactSection';
 import { TimelineSection } from './components/sections/TimelineSection';
 import { SlidesSection } from './components/sections/SlidesSection';
+import { BlogSection } from './components/sections/BlogSection';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -89,6 +90,7 @@ function App() {
       <main>
         <SlidesSection />
         <HeroSection onNavigate={handleNavigate} />
+        <BlogSection />
         <HistorySection />
         <TimelineSection />
         <PhotoGallery />

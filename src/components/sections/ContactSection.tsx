@@ -1,37 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Church } from 'lucide-react';
 import { Card } from '../ui/Card';
+import { supabase, Parish, Schedule } from '../../lib/supabase';
 
 export const ContactSection: React.FC = () => {
+  const [parishData, setParishData] = useState<Parish | null>(null);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch parish data
+      const { data: parishData } = await supabase
+        .from('parishes')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (parishData) {
+        setParishData(parishData);
+      }
+
+      // Fetch schedules
+      const { data: schedulesData } = await supabase
+        .from('schedules')
+        .select('*')
+        .eq('is_active', true)
+        .order('day_of_week', { ascending: true });
+
+      if (schedulesData) {
+        setSchedules(schedulesData);
+      }
+    } catch (error) {
+      console.error('Error fetching contact data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getDayLabel = (dayId: string) => {
+    const days: { [key: string]: string } = {
+      'sunday': 'Domingo',
+      'monday': 'Segunda',
+      'tuesday': 'Terça',
+      'wednesday': 'Quarta',
+      'thursday': 'Quinta',
+      'friday': 'Sexta',
+      'saturday': 'Sábado'
+    };
+    return days[dayId] || dayId;
+  };
+
   const contactInfo = [
     {
       icon: MapPin,
       title: 'Endereço',
-      content: 'Tiradentes, São Paulo',
+      content: parishData?.address || 'Tiradentes, São Paulo',
       subContent: 'Centro da cidade'
     },
     {
       icon: Phone,
       title: 'Telefone',
-      content: '(11) 9999-9999',
+      content: parishData?.phone || '(11) 9999-9999',
       subContent: 'Segunda a Sexta, 8h às 18h'
     },
     {
       icon: Mail,
       title: 'E-mail',
-      content: 'contato@paroquiatiradentes.com.br',
+      content: parishData?.email || 'contato@paroquiatiradentes.com.br',
       subContent: 'Resposta em até 24h'
     },
     {
       icon: Clock,
       title: 'Horário de Missas',
-      content: 'Dom: 8h, 10h e 19h',
-      subContent: 'Ter a Sex: 19h | Sáb: 17h'
+      content: schedules.length > 0 ? 'Veja horários ao lado' : 'Dom: 8h, 10h e 19h',
+      subContent: schedules.length > 0 ? 'Horários atualizados' : 'Ter a Sex: 19h | Sáb: 17h'
     }
   ];
 
-  const schedules = [
+  const defaultSchedules = [
     { day: 'Domingo', times: '8h00, 10h00 e 19h00' },
     { day: 'Segunda', times: 'Sem missa' },
     { day: 'Terça', times: '19h00' },
@@ -40,6 +93,19 @@ export const ContactSection: React.FC = () => {
     { day: 'Sexta', times: '19h00' },
     { day: 'Sábado', times: '17h00' }
   ];
+
+  if (isLoading) {
+    return (
+      <section id="contact" className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-800 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando informações de contato...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="contact" className="py-20 bg-gradient-to-b from-white to-gray-50">
@@ -105,7 +171,7 @@ export const ContactSection: React.FC = () => {
             
             <Card className="p-6">
               <div className="space-y-4">
-                {schedules.map((schedule, index) => (
+                {(schedules.length > 0 ? schedules : defaultSchedules).map((schedule, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, x: 20 }}
@@ -114,8 +180,17 @@ export const ContactSection: React.FC = () => {
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                     className="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
                   >
-                    <span className="font-medium text-gray-800">{schedule.day}</span>
-                    <span className="text-red-800 font-semibold">{schedule.times}</span>
+                    <span className="font-medium text-gray-800">
+                      {schedules.length > 0 ? getDayLabel(schedule.day_of_week || schedule.day) : schedule.day}
+                    </span>
+                    <div className="text-right">
+                      <span className="text-red-800 font-semibold">
+                        {schedules.length > 0 ? schedule.time : schedule.times}
+                      </span>
+                      {schedules.length > 0 && schedule.description && (
+                        <div className="text-xs text-gray-600">{schedule.description}</div>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>

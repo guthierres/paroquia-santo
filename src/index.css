@@ -1,3 +1,76 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Rich Text Editor Styles */
+.ql-editor {
+  font-family: inherit;
+}
+
+.ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4, .ql-editor h5, .ql-editor h6 {
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+}
+
+.ql-editor h1 { font-size: 2em; }
+.ql-editor h2 { font-size: 1.5em; }
+.ql-editor h3 { font-size: 1.25em; }
+
+.ql-editor p {
+  margin: 0.5em 0;
+}
+
+.ql-editor blockquote {
+  border-left: 4px solid #dc2626;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  background: #fef2f2;
+  padding: 1em;
+  border-radius: 0.5em;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .ql-toolbar {
+    border: 1px solid #ccc;
+  }
+  
+  .ql-toolbar .ql-formats {
+    margin-right: 8px;
+  }
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 640px) {
+  .prose {
+    font-size: 0.9rem;
+  }
+  
+  .prose h1 {
+    font-size: 1.5rem;
+  }
+  
+  .prose h2 {
+    font-size: 1.25rem;
+  }
+  
+  .prose h3 {
+    font-size: 1.125rem;
+  }
+}
