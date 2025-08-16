@@ -1,0 +1,163 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, Phone, Mail, Clock, Church } from 'lucide-react';
+import { Card } from '../ui/Card';
+
+export const ContactSection: React.FC = () => {
+  const contactInfo = [
+    {
+      icon: MapPin,
+      title: 'Endereço',
+      content: 'Tiradentes, São Paulo',
+      subContent: 'Centro da cidade'
+    },
+    {
+      icon: Phone,
+      title: 'Telefone',
+      content: '(11) 9999-9999',
+      subContent: 'Segunda a Sexta, 8h às 18h'
+    },
+    {
+      icon: Mail,
+      title: 'E-mail',
+      content: 'contato@paroquiatiradentes.com.br',
+      subContent: 'Resposta em até 24h'
+    },
+    {
+      icon: Clock,
+      title: 'Horário de Missas',
+      content: 'Dom: 8h, 10h e 19h',
+      subContent: 'Ter a Sex: 19h | Sáb: 17h'
+    }
+  ];
+
+  const schedules = [
+    { day: 'Domingo', times: '8h00, 10h00 e 19h00' },
+    { day: 'Segunda', times: 'Sem missa' },
+    { day: 'Terça', times: '19h00' },
+    { day: 'Quarta', times: '19h00' },
+    { day: 'Quinta', times: '19h00' },
+    { day: 'Sexta', times: '19h00' },
+    { day: 'Sábado', times: '17h00' }
+  ];
+
+  return (
+    <section id="contact" className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-800 to-amber-600 bg-clip-text text-transparent mb-4">
+            Contato
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Venha nos visitar e fazer parte da nossa família paroquial
+          </p>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          {/* Contact Information */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h3 className="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+              <Church className="h-7 w-7 text-red-800" />
+              Informações de Contato
+            </h3>
+            
+            <div className="grid sm:grid-cols-2 gap-6">
+              {contactInfo.map((info, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <Card className="p-6 h-full">
+                    <info.icon className="h-8 w-8 text-red-800 mb-4" />
+                    <h4 className="font-semibold text-gray-800 mb-2">{info.title}</h4>
+                    <p className="text-gray-700 font-medium mb-1">{info.content}</p>
+                    <p className="text-sm text-gray-600">{info.subContent}</p>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Mass Schedule */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h3 className="text-2xl font-bold text-gray-800 mb-8">
+              Horários de Missas
+            </h3>
+            
+            <Card className="p-6">
+              <div className="space-y-4">
+                {schedules.map((schedule, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
+                  >
+                    <span className="font-medium text-gray-800">{schedule.day}</span>
+                    <span className="text-red-800 font-semibold">{schedule.times}</span>
+                  </motion.div>
+                ))}
+              </div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="mt-6 p-4 bg-gradient-to-r from-red-50 to-amber-50 rounded-lg border border-red-100"
+              >
+                <p className="text-sm text-gray-700">
+                  <strong>Nota:</strong> Em datas especiais e festividades, os horários podem sofrer alterações. 
+                  Consulte nossos avisos paroquiais ou entre em contato conosco.
+                </p>
+              </motion.div>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Map placeholder */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <Card className="p-8 text-center bg-gradient-to-br from-red-50 to-amber-50">
+            <MapPin className="h-16 w-16 text-red-800 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              Localização
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Estamos localizados no coração de Tiradentes, São Paulo. 
+              Venha nos visitar e participar das nossas celebrações.
+            </p>
+            <p className="text-lg font-semibold text-red-800">
+              Tiradentes, São Paulo - Centro
+            </p>
+          </Card>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
