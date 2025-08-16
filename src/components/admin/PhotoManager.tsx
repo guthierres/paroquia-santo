@@ -40,16 +40,14 @@ export const PhotoManager: React.FC = () => {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0) return;
-
     await processFiles(files);
   };
 
-  const handleFilesSelected = async (files: FileList) => {
+  const handleFilesSelected = async (files: FileList | null) => {
     await processFiles(files);
   };
 
-  const processFiles = async (files: FileList) => {
+  const processFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
@@ -171,6 +169,7 @@ export const PhotoManager: React.FC = () => {
         <div>
           <FileUpload
             onFileSelect={handleFilesSelected}
+            accept="image/*"
             multiple
             disabled={isUploading}
           >
@@ -191,20 +190,20 @@ export const PhotoManager: React.FC = () => {
           <p className="text-gray-500 mb-4">
             Comece adicionando algumas fotos da paróquia
           </p>
+          <input
+            id="photo-upload-empty"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => processFiles(e.target.files)}
+            className="hidden"
+          />
           <label htmlFor="photo-upload-empty" className="cursor-pointer">
             <Button variant="primary">
               <Upload className="h-4 w-4" />
               Adicionar Primeira Foto
             </Button>
           </label>
-          <input
-            id="photo-upload-empty"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileUpload}
-            className="hidden"
-          />
         </Card>
       )}
 
