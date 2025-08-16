@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 interface FileUploadProps {
   onFileSelect: (files: FileList | null) => void;
   accept?: string;
+  multiple?: boolean;
   disabled?: boolean;
   children: React.ReactNode;
   className?: string;
@@ -11,6 +12,7 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({
   onFileSelect,
   accept = 'image/*',
+  multiple = false,
   disabled = false,
   children,
   className = ''
@@ -38,11 +40,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         onChange={handleFileChange}
         disabled={disabled}
         className="hidden"
       />
-      <div onClick={handleClick} className="cursor-pointer">
+      <div onClick={handleClick} className={`cursor-pointer ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}>
         {children}
       </div>
     </div>
