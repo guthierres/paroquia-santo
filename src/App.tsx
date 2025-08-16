@@ -35,6 +35,17 @@ function App() {
       }
     });
 
+    // Handle initial URL hash for blog posts
+    const handleInitialHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#post-')) {
+        // Navigate to blog section when a post is accessed directly
+        setCurrentSection('blog');
+      }
+    };
+
+    handleInitialHash();
+
     return () => subscription.unsubscribe();
   }, []);
 
