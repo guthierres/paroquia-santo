@@ -14,12 +14,19 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // NOVO useEffect para carregar o post diretamente pela URL
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    const hash = window.location.hash;
+    if (hash.startsWith('#post/')) {
+      const slug = hash.replace('#post/', '');
+      fetchPostBySlug(slug);
+    } else {
+      fetchPosts();
+    }
+  }, []); // Executa apenas uma vez no carregamento inicial
 
+  // useEffect para lidar com as mudanças de hash (navegação interna)
   useEffect(() => {
-    // Check if there's a post slug in the URL hash
     const handleHashChange = () => {
       const hash = window.location.hash;
       if (hash.startsWith('#post/')) {
@@ -27,8 +34,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
         const post = posts.find(p => p.slug === slug);
         if (post) {
           setSelectedPost(post);
-        } else if (posts.length > 0) {
-          // If post not found but we have posts, try to fetch it
+        } else {
           fetchPostBySlug(slug);
         }
       } else if (hash === '#blog' || hash === '') {
@@ -36,18 +42,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
       }
     };
 
-    // Listen for hash changes
     window.addEventListener('hashchange', handleHashChange);
-    
-    // Check initial hash only after posts are loaded
-    if (posts.length > 0) {
-      handleHashChange();
-    }
-
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [posts]);
+  }, [posts, fetchPostBySlug]);
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -90,7 +89,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
 
       if (error) {
         console.error('Error fetching post by slug:', error);
-        // If post not found, redirect to blog section
         window.location.hash = '#blog';
         return;
       }
@@ -98,7 +96,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
       if (data) {
         console.log('Post found by slug:', data.title);
         setSelectedPost(data);
-        // Add post to posts array if not already there
         setPosts(prev => {
           const exists = prev.find(p => p.id === data.id);
           if (!exists) {
@@ -110,12 +107,13 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     } catch (error) {
       console.error('Error fetching post by slug:', error);
       window.location.hash = '#blog';
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handlePostClick = (post: BlogPost) => {
     console.log('Post clicked:', post.title, 'Slug:', post.slug);
-    // Não precisa mais da verificação if (!post.slug)
     const newHash = `#post/${post.slug}`;
     console.log('Setting hash to:', newHash);
     window.location.hash = newHash;
@@ -124,7 +122,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
 
   const handleClosePost = () => {
     console.log('Closing post, returning to blog');
-    // Return to blog section
     window.location.hash = '#blog';
     setSelectedPost(null);
   };
@@ -278,7 +275,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          // Hide image if it fails to load
                           e.currentTarget.style.display = 'none';
                         }}
                       />
@@ -381,7 +377,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                       alt={selectedPost.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        // Hide image if it fails to load
                         e.currentTarget.parentElement!.style.display = 'none';
                       }}
                     />
