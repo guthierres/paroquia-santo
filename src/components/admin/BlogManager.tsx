@@ -33,7 +33,7 @@ export const BlogManager: React.FC = () => {
   };
 
   const handleCreatePost = () => {
-    const newPost: Partial<BlogPost> = { // Use Partial para permitir que 'id' seja omitido
+    const newPost: Partial<BlogPost> = {
       title: '',
       content: '',
       excerpt: '',
@@ -44,7 +44,7 @@ export const BlogManager: React.FC = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    setEditingPost(newPost as BlogPost); // Converta de volta para BlogPost
+    setEditingPost(newPost as BlogPost);
     setIsCreating(true);
   };
 
@@ -52,6 +52,19 @@ export const BlogManager: React.FC = () => {
     if (!editingPost || !editingPost.title || !editingPost.content) {
       toast.error('Preencha título e conteúdo');
       return;
+    }
+
+    // --- LÓGICA DE GERAÇÃO DE SLUG CORRIGIDA ---
+    let postSlug = editingPost.slug;
+    if (!postSlug) {
+      // Gera um slug a partir do título, removendo acentos e caracteres especiais
+      postSlug = editingPost.title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-");
     }
 
     try {
@@ -63,7 +76,7 @@ export const BlogManager: React.FC = () => {
         author: editingPost.author || 'Administrador',
         is_published: editingPost.is_published,
         updated_at: new Date().toISOString(),
-        slug: editingPost.slug // Certifique-se de incluir o slug
+        slug: postSlug, // Adiciona o slug gerado
       };
 
       if (isCreating) {
@@ -76,7 +89,6 @@ export const BlogManager: React.FC = () => {
         if (error) throw error;
         setPosts(prev => [data, ...prev]);
       } else {
-        // Correção: Use 'editingPost.id' para a atualização
         const { error } = await supabase
           .from('blog_posts')
           .update(postData)
