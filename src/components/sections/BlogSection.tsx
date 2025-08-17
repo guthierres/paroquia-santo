@@ -115,12 +115,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
 
   const handlePostClick = (post: BlogPost) => {
     console.log('Post clicked:', post.title, 'Slug:', post.slug);
-    // Ensure post has a slug
-    if (!post.slug) {
-      console.error('Post has no slug:', post.title);
-      return;
-    }
-    
+    // Não precisa mais da verificação if (!post.slug)
     const newHash = `#post/${post.slug}`;
     console.log('Setting hash to:', newHash);
     window.location.hash = newHash;
