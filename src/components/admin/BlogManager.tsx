@@ -33,8 +33,7 @@ export const BlogManager: React.FC = () => {
   };
 
   const handleCreatePost = () => {
-    const newPost: BlogPost = {
-      id: '',
+    const newPost: Partial<BlogPost> = { // Use Partial para permitir que 'id' seja omitido
       title: '',
       content: '',
       excerpt: '',
@@ -45,7 +44,7 @@ export const BlogManager: React.FC = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    setEditingPost(newPost);
+    setEditingPost(newPost as BlogPost); // Converta de volta para BlogPost
     setIsCreating(true);
   };
 
@@ -63,7 +62,8 @@ export const BlogManager: React.FC = () => {
         featured_image: editingPost.featured_image,
         author: editingPost.author || 'Administrador',
         is_published: editingPost.is_published,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        slug: editingPost.slug // Certifique-se de incluir o slug
       };
 
       if (isCreating) {
@@ -76,13 +76,14 @@ export const BlogManager: React.FC = () => {
         if (error) throw error;
         setPosts(prev => [data, ...prev]);
       } else {
+        // Correção: Use 'editingPost.id' para a atualização
         const { error } = await supabase
           .from('blog_posts')
           .update(postData)
           .eq('id', editingPost.id);
 
         if (error) throw error;
-        setPosts(prev => prev.map(p => 
+        setPosts(prev => prev.map(p =>
           p.id === editingPost.id ? { ...editingPost, ...postData } : p
         ));
       }
