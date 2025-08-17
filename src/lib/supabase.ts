@@ -47,6 +47,7 @@ export interface BlogPost {
   author: string;
   is_published: boolean;
   slug: string;
+  slug: string;
   created_at: string;
   updated_at: string;
 }
