@@ -14,69 +14,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // NOVO useEffect para carregar o post diretamente pela URL
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#post/')) {
-      const slug = hash.replace('#post/', '');
-      fetchPostBySlug(slug);
-    } else {
-      fetchPosts();
-    }
-  }, []); // Executa apenas uma vez no carregamento inicial
-
-  // useEffect para lidar com as mudanças de hash (navegação interna)
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash.startsWith('#post/')) {
-        const slug = hash.replace('#post/', '');
-        const post = posts.find(p => p.slug === slug);
-        if (post) {
-          setSelectedPost(post);
-        } else {
-          fetchPostBySlug(slug);
-        }
-      } else if (hash === '#blog' || hash === '') {
-        setSelectedPost(null);
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, [posts, fetchPostBySlug]);
-
-  const fetchPosts = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Fetching blog posts...');
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false })
-        .limit(6);
-
-      if (error) {
-        console.error('Error fetching posts:', error);
-        setPosts([]);
-      } else if (data) {
-        console.log('Posts loaded:', data.length);
-        setPosts(data);
-      } else {
-        console.log('No posts found');
-        setPosts([]);
-      }
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      setPosts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // A função fetchPostBySlug precisa ser definida antes para ser usada no useEffect
   const fetchPostBySlug = async (slug: string) => {
     try {
       console.log('Fetching post by slug:', slug);
@@ -90,50 +28,99 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
       if (error) {
         console.error('Error fetching post by slug:', error);
         window.location.hash = '#blog';
-        return;
+        return null;
       }
-
-      if (data) {
-        console.log('Post found by slug:', data.title);
-        setSelectedPost(data);
-        setPosts(prev => {
-          const exists = prev.find(p => p.id === data.id);
-          if (!exists) {
-            return [data, ...prev];
-          }
-          return prev;
-        });
-      }
+      return data;
     } catch (error) {
       console.error('Error fetching post by slug:', error);
       window.location.hash = '#blog';
-    } finally {
-      setIsLoading(false);
+      return null;
     }
   };
 
+  // Centraliza a lógica de carregamento e navegação em um único useEffect
+  useEffect(() => {
+    const loadContent = async () => {
+      setIsLoading(true);
+      const hash = window.location.hash;
+
+      if (hash.startsWith('#post/')) {
+        const slug = hash.replace('#post/', '');
+        const post = await fetchPostBySlug(slug);
+        if (post) {
+          setSelectedPost(post);
+        }
+      }
+
+      // Sempre busca os posts recentes para popular a lista
+      const { data: postsData, error: postsError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (postsError) {
+        console.error('Error fetching posts:', postsError);
+      } else if (postsData) {
+        setPosts(postsData);
+      }
+
+      setIsLoading(false);
+    };
+
+    loadContent();
+
+    // Listener para navegação interna
+    const handleHashChange = async () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#post/')) {
+        const slug = hash.replace('#post/', '');
+        const post = posts.find(p => p.slug === slug);
+        if (post) {
+          setSelectedPost(post);
+        } else {
+          const newPost = await fetchPostBySlug(slug);
+          if (newPost) {
+            setSelectedPost(newPost);
+            setPosts(prev => {
+              const exists = prev.find(p => p.id === newPost.id);
+              if (!exists) {
+                return [newPost, ...prev];
+              }
+              return prev;
+            });
+          }
+        }
+      } else {
+        setSelectedPost(null);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []); // Dependência vazia para rodar apenas no mount
+
   const handlePostClick = (post: BlogPost) => {
-    console.log('Post clicked:', post.title, 'Slug:', post.slug);
     const newHash = `#post/${post.slug}`;
-    console.log('Setting hash to:', newHash);
     window.location.hash = newHash;
     setSelectedPost(post);
   };
 
   const handleClosePost = () => {
-    console.log('Closing post, returning to blog');
     window.location.hash = '#blog';
     setSelectedPost(null);
   };
-
+  
+  // As funções getPostUrl, copyPostLink e sharePost permanecem as mesmas
   const getPostUrl = (post: BlogPost) => {
     return `${window.location.origin}${window.location.pathname}#post/${post.slug || 'post-' + post.id}`;
   };
 
   const copyPostLink = (post: BlogPost) => {
     const url = getPostUrl(post);
-    console.log('Copying link:', url);
-    
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(url).then(() => {
         alert('Link copiado para a área de transferência!');
@@ -187,7 +174,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     }
   };
 
-  // Show loading state
+
   if (isLoading) {
     return (
       <section id="blog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -216,7 +203,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     );
   }
 
-  // Always show the blog section, even if no posts
   return (
     <section id="blog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -235,7 +221,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
           </p>
         </motion.div>
 
-        {/* Show message if no posts */}
         {posts.length === 0 ? (
           <Card className="p-12 text-center max-w-2xl mx-auto">
             <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -254,7 +239,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
             </Button>
           </Card>
         ) : (
-          /* Posts Grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post, index) => (
               <motion.div
@@ -324,7 +308,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
           </div>
         )}
 
-        {/* Post Modal */}
         <AnimatePresence>
           {selectedPost && (
             <motion.div
@@ -333,7 +316,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-white overflow-y-auto"
             >
-              {/* Header with Back Button */}
               <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -364,7 +346,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                 </div>
               </div>
 
-              {/* Article Content */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -407,7 +388,6 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   dangerouslySetInnerHTML={{ __html: selectedPost.content }}
                 />
                 
-                {/* Back to Blog Button */}
                 <div className="mt-12 pt-8 border-t border-gray-200 text-center">
                   <Button
                     variant="primary"
