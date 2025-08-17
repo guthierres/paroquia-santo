@@ -317,7 +317,7 @@ export const BlogManager: React.FC = () => {
                       placeholder="slug-da-postagem (deixe vazio para gerar automaticamente)"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      URL da postagem: /blog/{editingPost.slug || 'slug-gerado-automaticamente'}
+                      URL da postagem: {window.location.origin}#post/{editingPost.slug || 'slug-gerado-automaticamente'}
                     </p>
                   </div>
                 </div>

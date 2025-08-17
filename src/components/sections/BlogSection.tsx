@@ -90,21 +90,37 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
 
       if (error) {
         console.error('Error fetching post by slug:', error);
+        // If post not found, redirect to blog section
+        window.location.hash = '#blog';
         return;
       }
 
       if (data) {
         console.log('Post found by slug:', data.title);
         setSelectedPost(data);
+        // Add post to posts array if not already there
+        setPosts(prev => {
+          const exists = prev.find(p => p.id === data.id);
+          if (!exists) {
+            return [data, ...prev];
+          }
+          return prev;
+        });
       }
     } catch (error) {
       console.error('Error fetching post by slug:', error);
+      window.location.hash = '#blog';
     }
   };
 
   const handlePostClick = (post: BlogPost) => {
     console.log('Post clicked:', post.title, 'Slug:', post.slug);
-    // Update URL hash to create a unique link for the post using slug
+    // Ensure post has a slug
+    if (!post.slug) {
+      console.error('Post has no slug:', post.title);
+      return;
+    }
+    
     const newHash = `#post/${post.slug}`;
     console.log('Setting hash to:', newHash);
     window.location.hash = newHash;
@@ -116,11 +132,10 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     // Return to blog section
     window.location.hash = '#blog';
     setSelectedPost(null);
-    if (onNavigateHome) onNavigateHome();
   };
 
   const getPostUrl = (post: BlogPost) => {
-    return `${window.location.origin}${window.location.pathname}#post/${post.slug}`;
+    return `${window.location.origin}${window.location.pathname}#post/${post.slug || 'post-' + post.id}`;
   };
 
   const copyPostLink = (post: BlogPost) => {
