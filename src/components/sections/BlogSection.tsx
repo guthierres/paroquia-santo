@@ -27,13 +27,12 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
 
       if (error) {
         console.error('Error fetching post by slug:', error);
-        window.location.hash = '#blog';
+        // Don't redirect on error, just return null
         return null;
       }
       return data;
     } catch (error) {
       console.error('Error fetching post by slug:', error);
-      window.location.hash = '#blog';
       return null;
     }
   };
@@ -104,7 +103,12 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   }, []); // Dependência vazia para rodar apenas no mount
 
   const handlePostClick = (post: BlogPost) => {
+    if (!post.slug) {
+      console.error('Post has no slug:', post);
+      return;
+    }
     const newHash = `#post/${post.slug}`;
+    console.log('Navigating to:', newHash);
     window.location.hash = newHash;
     setSelectedPost(post);
   };
@@ -116,7 +120,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   
   // As funções getPostUrl, copyPostLink e sharePost permanecem as mesmas
   const getPostUrl = (post: BlogPost) => {
-    return `${window.location.origin}${window.location.pathname}#post/${post.slug || 'post-' + post.id}`;
+    return `${window.location.origin}${window.location.pathname}#post/${post.slug}`;
   };
 
   const copyPostLink = (post: BlogPost) => {
