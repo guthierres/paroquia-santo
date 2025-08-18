@@ -10,6 +10,7 @@ import { ContactSection } from './components/sections/ContactSection';
 import { TimelineSection } from './components/sections/TimelineSection';
 import { SlidesSection } from './components/sections/SlidesSection';
 import { BlogSection } from './components/sections/BlogSection';
+import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
@@ -125,6 +126,7 @@ function App() {
           <SlidesSection />
           <HeroSection onNavigate={handleNavigate} />
           <HistorySection />
+          <PriestSection />
           <TimelineSection />
           <PhotoGallery onNavigateToFullGallery={handleShowFullGallery} />
           <BlogSection onNavigateHome={() => handleNavigate('home')} />
