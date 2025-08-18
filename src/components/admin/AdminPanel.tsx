@@ -9,6 +9,7 @@ import { TimelineManager } from './TimelineManager';
 import { SlideManager } from './SlideManager';
 import { BlogManager } from './BlogManager';
 import { ScheduleManager } from './ScheduleManager';
+import { PriestManager } from './PriestManager';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -22,6 +23,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const tabs = [
     { id: 'parish', label: 'Informações da Paróquia', icon: FileText },
     { id: 'blog', label: 'Blog', icon: FileText },
+    { id: 'priests', label: 'Clero', icon: Users },
     { id: 'photos', label: 'Galeria de Fotos', icon: Image },
     { id: 'timeline', label: 'Linha do Tempo', icon: Calendar },
     { id: 'slides', label: 'Slides do Site', icon: Settings },
@@ -44,6 +46,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <ParishManager />;
       case 'blog':
         return <BlogManager />;
+      case 'priests':
+        return <PriestManager />;
       case 'photos':
         return <PhotoManager />;
       case 'timeline':
