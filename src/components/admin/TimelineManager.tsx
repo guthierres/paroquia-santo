@@ -343,7 +343,7 @@ export function TimelineManager() {
                       <img
                         src={event.image_url}
                         alt={event.title}
-                        className="w-48 h-32 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-opacity"
+                        className="max-w-[350px] max-h-[350px] w-48 h-32 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => setSelectedImage(event)}
                       />
                     </div>

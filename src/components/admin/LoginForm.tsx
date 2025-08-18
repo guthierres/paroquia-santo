@@ -111,16 +111,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
                 <LogIn className="h-4 w-4" />
                 {isLoading ? 'Entrando...' : 'Entrar'}
               </Button>
-              
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleSignUp}
-                disabled={isLoading}
-              >
-                Criar Conta Admin
-              </Button>
             </div>
           </form>
 

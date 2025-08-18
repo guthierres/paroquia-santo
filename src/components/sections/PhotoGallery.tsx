@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, ArrowRight } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase, Photo } from '../../lib/supabase';
 
-export const PhotoGallery: React.FC = () => {
+interface PhotoGalleryProps {
+  onNavigateToFullGallery: () => void;
+}
+
+export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGallery }) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -99,8 +103,14 @@ export const PhotoGallery: React.FC = () => {
   };
 
   const filteredPhotos = selectedCategory === 'all' 
-    ? photos 
-    : photos.filter(photo => photo.category === selectedCategory);
+    ? photos.slice(0, 6)
+    : photos.filter(photo => photo.category === selectedCategory).slice(0, 6);
+
+  const totalPhotosInCategory = selectedCategory === 'all' 
+    ? photos.length 
+    : photos.filter(photo => photo.category === selectedCategory).length;
+
+  const hasMorePhotos = totalPhotosInCategory > 6;
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.5, 3));
@@ -201,49 +211,72 @@ export const PhotoGallery: React.FC = () => {
             </p>
           </Card>
         ) : (
-          <motion.div 
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
-            <AnimatePresence>
-              {filteredPhotos.map((photo) => (
-                <motion.div
-                  key={photo.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Card 
-                    className="cursor-pointer group overflow-hidden"
-                    onClick={() => handlePhotoSelect(photo)}
+          <>
+            <motion.div 
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              <AnimatePresence>
+                {filteredPhotos.map((photo) => (
+                  <motion.div
+                    key={photo.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.4 }}
                   >
-                    <div className="aspect-square overflow-hidden">
-                      <img
-                        src={photo.image_url}
-                        alt={photo.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-800 group-hover:text-red-800 transition-colors">
-                        {photo.title}
-                      </h3>
-                      {photo.description && (
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{photo.description}</p>
-                      )}
-                      <div className="mt-2">
-                        <span className="inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                          {categories.find(c => c.id === photo.category)?.label}
-                        </span>
+                    <Card 
+                      className="cursor-pointer group overflow-hidden"
+                      onClick={() => handlePhotoSelect(photo)}
+                    >
+                      <div className="aspect-square overflow-hidden">
+                        <img
+                          src={photo.image_url}
+                          alt={photo.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
                       </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-gray-800 group-hover:text-red-800 transition-colors">
+                          {photo.title}
+                        </h3>
+                        {photo.description && (
+                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{photo.description}</p>
+                        )}
+                        <div className="mt-2">
+                          <span className="inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                            {categories.find(c => c.id === photo.category)?.label}
+                          </span>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Ver Mais Button */}
+            {hasMorePhotos && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="text-center mt-12"
+              >
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={onNavigateToFullGallery}
+                  className="flex items-center gap-2"
+                >
+                  Ver Galeria Completa ({totalPhotosInCategory} fotos)
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            )}
+          </>
         )}
 
         {/* Photo Modal */}

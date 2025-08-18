@@ -61,8 +61,8 @@ export const ContactSection: React.FC = () => {
     {
       icon: MapPin,
       title: 'Endereço',
-      content: parishData?.address || 'Tiradentes, São Paulo',
-      subContent: 'Centro da cidade'
+      content: parishData?.address || 'R. dos Têxteis, 653 - Chacara Santa Etelvina',
+      subContent: 'São Paulo - SP, 08490-582 - Cidade Tiradentes'
     },
     {
       icon: Phone,
@@ -227,8 +227,11 @@ export const ContactSection: React.FC = () => {
               Estamos localizados no coração de Tiradentes, São Paulo. 
               Venha nos visitar e participar das nossas celebrações.
             </p>
-            <p className="text-lg font-semibold text-red-800">
-              Tiradentes, São Paulo - Centro
+            <p className="text-lg font-semibold text-red-800 mb-2">
+              R. dos Têxteis, 653 - Chacara Santa Etelvina
+            </p>
+            <p className="text-base text-gray-700">
+              São Paulo - SP, 08490-582 - Cidade Tiradentes
             </p>
           </Card>
         </motion.div>
