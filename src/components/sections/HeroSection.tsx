@@ -87,7 +87,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           className="text-white/70"
         >
           <p className="text-sm">
-            "Porque onde estiverem dois ou três reunidos em meu nome, aí estou eu no meio deles."
+            "Porque onde estiverem dois ou três reunidos em meu nome, aí estou eu no meio deles".
           </p>
           <p className="text-xs mt-1 text-amber-200">- Mateus 18,20</p>
         </motion.div>
