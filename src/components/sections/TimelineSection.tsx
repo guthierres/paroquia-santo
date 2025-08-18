@@ -238,7 +238,7 @@ export const TimelineSection: React.FC = () => {
                   <img
                     src={currentEvent.image_url}
                     alt={currentEvent.title}
-                    className="w-full max-w-[350px] max-h-[350px] object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity mx-auto"
+                    className="w-[350px] h-[350px] object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity mx-auto"
                     onClick={() => {
                       // Create a modal for the image
                       const modal = document.createElement('div');
