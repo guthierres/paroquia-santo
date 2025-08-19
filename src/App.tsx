@@ -64,9 +64,21 @@ function App() {
   const handleNavigate = (section: string) => {
     setCurrentSection(section);
     setShowFullGallery(false);
+    
+    // Close mobile menu if open
+    const mobileMenuButton = document.querySelector('[data-mobile-menu]');
+    if (mobileMenuButton) {
+      mobileMenuButton.click();
+    }
+    
     const element = document.getElementById(section);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const headerHeight = window.innerWidth < 1024 ? 56 : 64; // Mobile vs desktop header height
+      const elementPosition = element.offsetTop - headerHeight;
+      window.scrollTo({ 
+        top: elementPosition, 
+        behavior: 'smooth' 
+      });
     } else if (section === 'home') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -105,7 +117,7 @@ function App() {
   }, [isAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -135,7 +147,7 @@ function App() {
       )}
 
       {!showFullGallery && (
-        <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-12">
+        <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -144,16 +156,16 @@ function App() {
               transition={{ duration: 0.8 }}
               className="text-center"
             >
-              <h3 className="text-2xl font-bold mb-4">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4">
                 Paróquia Senhor Santo Cristo dos Milagres
               </h3>
-              <p className="text-amber-200 mb-6">
+              <p className="text-base sm:text-lg text-amber-200 mb-4 sm:mb-6">
                 40 Anos de Fé, Esperança e Amor
               </p>
-              <p className="text-sm text-red-200">
+              <p className="text-sm text-red-200 mb-2">
                 © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Tiradentes, SP.
               </p>
-              <p className="text-xs text-red-300 mt-2">
+              <p className="text-xs text-red-300">
                 "Que o Senhor abençoe a todos que visitam nossa casa"
               </p>
             </motion.div>

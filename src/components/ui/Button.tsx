@@ -31,9 +31,9 @@ export const Button: React.FC<ButtonProps> = ({
   };
   
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-6 py-2.5 text-base',
-    lg: 'px-8 py-3 text-lg'
+    sm: 'px-3 py-2 text-sm min-h-[40px]',
+    md: 'px-6 py-2.5 text-base min-h-[44px]',
+    lg: 'px-8 py-3 text-lg min-h-[48px]'
   };
 
   return (
@@ -43,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} touch-manipulation ${className}`}
       title={title}
     >
       {children}
