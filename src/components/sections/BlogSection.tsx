@@ -253,7 +253,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-white overflow-y-auto"
+            className="fixed inset-0 z-50 bg-white overflow-y-auto overscroll-contain"
           >
             <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
               <div className="max-w-4xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between safe-area-inset-top">

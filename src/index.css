@@ -13,15 +13,16 @@
   }
 }
 
-/* Touch optimizations */
-.touch-pan-y {
-  touch-action: pan-y;
-}
-
 /* Smooth scrolling for mobile */
 html {
   scroll-behavior: smooth;
+}
+
+/* Fix for iOS momentum scrolling */
+body {
   -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Mobile viewport fix */
@@ -29,6 +30,19 @@ html {
   .min-h-screen {
     min-height: 100vh;
     min-height: -webkit-fill-available;
+  }
+  
+  /* Ensure smooth scrolling on mobile */
+  html, body {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Fix for iOS Safari bounce */
+  body {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: scroll;
   }
 }
 

@@ -113,7 +113,7 @@ export const SlidesSection: React.FC = () => {
   }
 
   return (
-    <section className="relative h-screen overflow-hidden touch-pan-y">
+    <section className="relative h-screen overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}

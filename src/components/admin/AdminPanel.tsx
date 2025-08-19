@@ -67,7 +67,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden overscroll-contain"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-red-800 to-red-900 text-white p-6">

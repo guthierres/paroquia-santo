@@ -224,7 +224,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-y-auto">
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
