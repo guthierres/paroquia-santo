@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               <p className="text-amber-200 text-xs sm:text-sm">40 Anos de Fé</p>
             </div>
             <div className="block sm:hidden">
-              <h1 className="text-white font-bold text-sm">Santo Cristo</h1>
+              <h1 className="text-white font-bold text-sm">Paróquia Santo Cristo</h1>
             </div>
           </motion.div>
 
