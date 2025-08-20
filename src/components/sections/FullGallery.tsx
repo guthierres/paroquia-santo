@@ -288,7 +288,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
         ) : (
           <motion.div 
             layout
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
           >
             <AnimatePresence>
               {filteredPhotos.map((photo, index) => (
@@ -304,29 +304,30 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                     className="cursor-pointer group overflow-hidden hover:shadow-lg transition-all duration-300"
                     onClick={() => handlePhotoSelect(photo)}
                   >
-                    <div className="aspect-square overflow-hidden relative">
+                    <div className="aspect-square overflow-hidden relative bg-gray-100">
                       <img
                         src={photo.image_url}
                         alt={photo.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                            <ZoomIn className="h-6 w-6 text-gray-800" />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/90 rounded-full flex items-center justify-center">
+                            <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-800" />
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-gray-800 text-sm group-hover:text-red-800 transition-colors line-clamp-1">
+                    <div className="p-2 sm:p-3">
+                      <h3 className="font-medium text-gray-800 text-xs sm:text-sm group-hover:text-red-800 transition-colors line-clamp-1">
                         {photo.title}
                       </h3>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                      <div className="flex items-center justify-between mt-1 sm:mt-2">
+                        <span className="inline-block px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs bg-red-100 text-red-800 rounded-full">
                           {categories.find(c => c.id === photo.category)?.label}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 hidden sm:inline">
                           #{index + 1}
                         </span>
                       </div>
@@ -345,7 +346,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+              className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
             >
               {/* Navigation Arrows */}
               {filteredPhotos.length > 1 && (
@@ -354,46 +355,46 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                     variant="outline"
                     size="sm"
                     onClick={handlePrevPhoto}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-12 h-12 p-0"
+                    className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
                   >
-                    <ArrowLeft className="h-5 w-5" />
+                    <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleNextPhoto}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-12 h-12 p-0"
+                    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
                   >
-                    <ArrowLeft className="h-5 w-5 rotate-180" />
+                    <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
                   </Button>
                 </>
               )}
 
               {/* Zoom Controls */}
-              <div className="absolute top-4 left-4 z-20 flex gap-2">
+              <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 flex gap-1 sm:gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleZoomIn}
-                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
                 >
-                  <ZoomIn className="h-4 w-4" />
+                  <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleZoomOut}
-                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
                 >
-                  <ZoomOut className="h-4 w-4" />
+                  <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleResetZoom}
-                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
                 >
-                  <RotateCcw className="h-4 w-4" />
+                  <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
 
@@ -402,19 +403,19 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedPhoto(null)}
-                className="absolute top-4 right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
 
               {/* Photo Counter */}
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm">
                 {currentPhotoIndex + 1} de {filteredPhotos.length}
               </div>
 
               {/* Image Container */}
               <div 
-                className="relative w-full h-full flex items-center justify-center overflow-hidden p-4"
+                className="relative w-full h-full flex items-center justify-center overflow-hidden p-2 sm:p-4"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -427,33 +428,33 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                   className="max-w-none transition-transform duration-200 select-none"
                   style={{
                     transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
-                    maxHeight: '85vh',
-                    maxWidth: '85vw'
+                    maxHeight: '90vh',
+                    maxWidth: '95vw'
                   }}
                   draggable={false}
                 />
               </div>
 
               {/* Photo Info Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 sm:p-6 text-white">
                 <div className="max-w-4xl mx-auto">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-2xl font-bold flex-1">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
+                    <h3 className="text-lg sm:text-2xl font-bold flex-1">
                       {selectedPhoto.title}
                     </h3>
-                    <span className="inline-block px-3 py-1 text-sm bg-red-600 rounded-full ml-4">
+                    <span className="inline-block px-2 py-1 sm:px-3 text-xs sm:text-sm bg-red-600 rounded-full ml-2 sm:ml-4">
                       {categories.find(c => c.id === selectedPhoto.category)?.label}
                     </span>
                   </div>
                   
                   {selectedPhoto.description && (
-                    <p className="text-gray-200 leading-relaxed mb-3">
+                    <p className="text-gray-200 leading-relaxed mb-2 sm:mb-3 text-sm sm:text-base">
                       {selectedPhoto.description}
                     </p>
                   )}
                   
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p className="text-xs sm:text-sm text-gray-400">
                       Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
                         day: 'numeric',
                         month: 'long',
@@ -461,7 +462,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                       })}
                     </p>
                     
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 hidden sm:block">
                       Use ← → para navegar | ESC para fechar
                     </p>
                   </div>
