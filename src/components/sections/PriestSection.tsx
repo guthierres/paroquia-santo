@@ -128,14 +128,14 @@ Além de suas atividades paroquiais, Padre João é ativo em obras sociais da re
                     {/* Foto do Padre */}
                     <div className="flex-shrink-0">
                       <div className="relative">
-                        <OptimizedImage
-                          src={mainPriest.photo_url || 'https://images.pexels.com/photos/8468502/pexels-photo-8468502.jpeg'}
-                          alt={mainPriest.name}
-                          width={200}
-                          height={200}
-                          quality={80}
-                          className="w-[200px] h-[200px] rounded-full object-cover border-4 border-red-100 group-hover:border-red-300 transition-colors duration-300"
-                        />
+                        <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-4 border-red-100 group-hover:border-red-300 transition-colors duration-300 mx-auto">
+                          <img
+                            src={mainPriest.photo_url || 'https://images.pexels.com/photos/8468502/pexels-photo-8468502.jpeg'}
+                            alt={mainPriest.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
                         <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     </div>
@@ -143,14 +143,14 @@ Além de suas atividades paroquiais, Padre João é ativo em obras sociais da re
                     {/* Informações do Padre */}
                     <div className="flex-1 text-center md:text-left">
                       <div className="mb-4">
-                        <h3 className="text-3xl font-bold text-gray-800 mb-2 group-hover:text-red-800 transition-colors duration-300">
+                        <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 group-hover:text-red-800 transition-colors duration-300">
                           {mainPriest.name}
                         </h3>
-                        <p className="text-xl text-red-800 font-semibold mb-2">
+                        <p className="text-lg sm:text-xl text-red-800 font-semibold mb-2">
                           {mainPriest.title}
                         </p>
                         
-                        <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 text-sm text-gray-600 mb-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-4 text-sm text-gray-600 mb-4">
                           {mainPriest.ordination_year && (
                             <div className="flex items-center gap-2">
                               <Church className="h-4 w-4 text-red-800" />
@@ -206,11 +206,14 @@ Além de suas atividades paroquiais, Padre João é ativo em obras sociais da re
                       onClick={() => setSelectedPriest(priest)}
                     >
                       <div className="flex items-center gap-4">
-                        <img
-                          src={priest.photo_url || 'https://images.pexels.com/photos/8468502/pexels-photo-8468502.jpeg'}
-                          alt={priest.name}
-                          className="w-16 h-16 rounded-full object-cover border-2 border-red-100"
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-red-100 flex-shrink-0">
+                          <img
+                            src={priest.photo_url || 'https://images.pexels.com/photos/8468502/pexels-photo-8468502.jpeg'}
+                          alt={mainPriest.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
                         />
+                        </div>
                         <div className="flex-1">
                           <h4 className="font-bold text-gray-800 group-hover:text-red-800 transition-colors">
                             {priest.name}
@@ -278,7 +281,7 @@ Além de suas atividades paroquiais, Padre João é ativo em obras sociais da re
                     <img
                       src={selectedPriest.photo_url || 'https://images.pexels.com/photos/8468502/pexels-photo-8468502.jpeg'}
                       alt={selectedPriest.name}
-                      className="w-[200px] h-[200px] rounded-full object-cover border-4 border-red-100 mx-auto mb-6"
+                      className="w-48 h-48 rounded-full object-cover border-4 border-red-100 mx-auto mb-6"
                     />
                     
                     <div className="space-y-4">
