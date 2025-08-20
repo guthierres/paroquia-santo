@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, User, ArrowRight, X, FileText, Clock, ArrowLeft } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { OptimizedImage } from '../ui/OptimizedImage';
 import { supabase, BlogPost } from '../../lib/supabase';
 
 interface BlogSectionProps {
@@ -184,13 +185,13 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   >
                     {post.featured_image && (
                       <div className="aspect-video overflow-hidden rounded-t-xl">
-                        <img
+                        <OptimizedImage
                           src={post.featured_image}
                           alt={post.title}
+                          width={600}
+                          height={338}
+                          quality={75}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
                         />
                       </div>
                     )}

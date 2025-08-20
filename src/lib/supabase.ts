@@ -3,7 +3,55 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'your-supabase-url';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  db: {
+    schema: 'public',
+  },
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400'
+    }
+  }
+});
+
+// Image optimization helper
+export const getOptimizedImageUrl = (url: string, width?: number, height?: number, quality: number = 80) => {
+  if (!url || !url.includes('supabase')) return url;
+  
+  const params = new URLSearchParams();
+  if (width) params.append('width', width.toString());
+  if (height) params.append('height', height.toString());
+  params.append('quality', quality.toString());
+  params.append('format', 'webp');
+  
+  return `${url}?${params.toString()}`;
+};
+
+// Cache management
+const imageCache = new Map<string, string>();
+
+export const getCachedImageUrl = (originalUrl: string, options?: { width?: number; height?: number; quality?: number }) => {
+  const cacheKey = `${originalUrl}_${JSON.stringify(options || {})}`;
+  
+  if (imageCache.has(cacheKey)) {
+    return imageCache.get(cacheKey)!;
+  }
+  
+  const optimizedUrl = getOptimizedImageUrl(
+    originalUrl, 
+    options?.width, 
+    options?.height, 
+    options?.quality || 80
+  );
+  
+  imageCache.set(cacheKey, optimizedUrl);
+  return optimizedUrl;
+};
 
 // Database types
 export interface Parish {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { OptimizedImage } from '../ui/OptimizedImage';
 import { supabase, Slide } from '../../lib/supabase';
 
 export const SlidesSection: React.FC = () => {
@@ -123,9 +124,14 @@ export const SlidesSection: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="absolute inset-0"
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${slides[currentSlide].image_url})` }}
+          <OptimizedImage
+            src={slides[currentSlide].image_url}
+            alt={slides[currentSlide].title}
+            width={1920}
+            height={1080}
+            quality={85}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
           

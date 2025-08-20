@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, ArrowRight } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { OptimizedImage } from '../ui/OptimizedImage';
 import { supabase, Photo } from '../../lib/supabase';
 
 interface PhotoGalleryProps {
@@ -231,9 +232,12 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                       onClick={() => handlePhotoSelect(photo)}
                     >
                       <div className="aspect-square overflow-hidden">
-                        <img
+                        <OptimizedImage
                           src={photo.image_url}
                           alt={photo.title}
+                          width={400}
+                          height={400}
+                          quality={75}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                       </div>

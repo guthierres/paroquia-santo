@@ -7,6 +7,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    assetsInlineLimit: 0, // Don't inline assets to reduce bundle size
     rollupOptions: {
       output: {
         manualChunks: {
@@ -20,4 +21,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    headers: {
+      'Cache-Control': 'public, max-age=31536000'
+    }
+  }
 });

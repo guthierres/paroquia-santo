@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Church, User, Mail, Phone } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { OptimizedImage } from '../ui/OptimizedImage';
 import { supabase, Priest } from '../../lib/supabase';
 
 export const PriestSection: React.FC = () => {
@@ -127,9 +128,12 @@ Além de suas atividades paroquiais, Padre João é ativo em obras sociais da re
                     {/* Foto do Padre */}
                     <div className="flex-shrink-0">
                       <div className="relative">
-                        <img
+                        <OptimizedImage
                           src={mainPriest.photo_url || 'https://images.pexels.com/photos/8468502/pexels-photo-8468502.jpeg'}
                           alt={mainPriest.name}
+                          width={200}
+                          height={200}
+                          quality={80}
                           className="w-[200px] h-[200px] rounded-full object-cover border-4 border-red-100 group-hover:border-red-300 transition-colors duration-300"
                         />
                         <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
