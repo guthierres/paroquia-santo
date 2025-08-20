@@ -215,7 +215,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
           <>
             <motion.div 
               layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
             >
               <AnimatePresence>
                 {filteredPhotos.map((photo) => (
@@ -231,25 +231,30 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                       className="cursor-pointer group overflow-hidden"
                       onClick={() => handlePhotoSelect(photo)}
                     >
-                      <div className="aspect-square overflow-hidden">
-                        <OptimizedImage
+                      <div className="aspect-square overflow-hidden relative">
+                        <img
                           src={photo.image_url}
                           alt={photo.title}
-                          width={400}
-                          height={400}
-                          quality={75}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          loading="lazy"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 rounded-full flex items-center justify-center">
+                              <ZoomIn className="h-5 w-5 sm:h-6 sm:w-6 text-gray-800" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-800 group-hover:text-red-800 transition-colors">
+                      <div className="p-2 sm:p-3 md:p-4">
+                        <h3 className="font-semibold text-gray-800 group-hover:text-red-800 transition-colors text-sm sm:text-base line-clamp-1">
                           {photo.title}
                         </h3>
                         {photo.description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{photo.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2 hidden sm:block">{photo.description}</p>
                         )}
-                        <div className="mt-2">
-                          <span className="inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                        <div className="mt-1 sm:mt-2">
+                          <span className="inline-block px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs bg-red-100 text-red-800 rounded-full">
                             {categories.find(c => c.id === photo.category)?.label}
                           </span>
                         </div>
