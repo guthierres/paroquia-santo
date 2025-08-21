@@ -163,7 +163,7 @@ function App() {
                 40 Anos de Fé, Esperança e Amor
               </p>
               <p className="text-sm text-red-200 mb-2">
-                © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Tiradentes, SP.
+                © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Cid. Tiradentes, SP.
               </p>
               <p className="text-xs text-red-300">
                 "Que o Senhor abençoe a todos que visitam nossa casa"
