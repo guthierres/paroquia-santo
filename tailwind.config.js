@@ -10,6 +10,12 @@ export default {
         '18': '4.5rem',
         '88': '22rem',
       },
+      height: {
+        'screen-safe': ['100vh', '100dvh'],
+      },
+      minHeight: {
+        'screen-safe': ['100vh', '100dvh'],
+      },
       typography: {
         DEFAULT: {
           css: {

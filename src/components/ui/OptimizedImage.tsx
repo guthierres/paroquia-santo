@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getCachedImageUrl } from '../../lib/supabase';
+import { getCloudinaryUrl, getCloudinaryConfig } from '../../lib/cloudinary';
 
 interface OptimizedImageProps {
   src: string;
@@ -11,6 +11,7 @@ interface OptimizedImageProps {
   loading?: 'lazy' | 'eager';
   onClick?: () => void;
   onError?: () => void;
+  publicId?: string; // Para imagens do Cloudinary
 }
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
@@ -22,13 +23,40 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   className = '',
   loading = 'lazy',
   onClick,
-  onError
+  onError,
+  publicId
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [optimizedSrc, setOptimizedSrc] = useState(src);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  // Determinar a URL otimizada
+  useEffect(() => {
+    const getOptimizedUrl = async () => {
+      if (publicId) {
+        // Usar Cloudinary se publicId estiver disponível
+        const config = await getCloudinaryConfig();
+        if (config.enabled && config.cloudName) {
+          const cloudinaryUrl = getCloudinaryUrl(publicId, {
+            width,
+            height,
+            quality,
+            format: 'auto',
+            crop: 'fill'
+          });
+          setOptimizedSrc(cloudinaryUrl);
+          return;
+        }
+      }
+      
+      // Fallback para URL original
+      setOptimizedSrc(src);
+    };
+
+    getOptimizedUrl();
+  }, [src, publicId, width, height, quality]);
   // Intersection Observer for lazy loading
   useEffect(() => {
     if (loading === 'eager') {
@@ -56,7 +84,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return () => observer.disconnect();
   }, [loading]);
 
-  const optimizedSrc = getCachedImageUrl(src, { width, height, quality });
 
   const handleLoad = () => {
     setIsLoaded(true);

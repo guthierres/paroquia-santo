@@ -72,6 +72,7 @@ export interface Photo {
   title: string;
   description: string | null;
   image_url: string;
+  cloudinary_public_id: string | null;
   category: 'history' | 'events' | 'celebrations' | 'community';
   created_at: string;
 }
@@ -81,6 +82,7 @@ export interface Slide {
   title: string;
   description: string;
   image_url: string;
+  cloudinary_public_id: string | null;
   order_index: number;
   is_active: boolean;
   created_at: string;
@@ -94,6 +96,7 @@ export interface BlogPost {
   featured_image: string | null;
   author: string;
   is_published: boolean;
+  cloudinary_public_id: string | null;
   slug: string;
   slug: string;
   created_at: string;

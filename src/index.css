@@ -11,6 +11,13 @@
   .safe-area-inset-bottom {
     padding-bottom: max(env(safe-area-inset-bottom), 0px);
   }
+  
+  .safe-area-inset {
+    padding-top: max(env(safe-area-inset-top), 0px);
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
 }
 
 /* Smooth scrolling for mobile */
@@ -32,6 +39,12 @@ body {
     min-height: -webkit-fill-available;
   }
   
+  /* Full height for slides on mobile */
+  .h-screen {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+  
   /* Ensure smooth scrolling on mobile */
   html, body {
     overscroll-behavior: contain;
@@ -43,6 +56,11 @@ body {
     position: relative;
     overflow-x: hidden;
     overflow-y: scroll;
+  }
+  
+  /* Prevent zoom on double tap for slides */
+  .slide-container {
+    touch-action: manipulation;
   }
 }
 

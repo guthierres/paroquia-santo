@@ -10,6 +10,7 @@ import { SlideManager } from './SlideManager';
 import { BlogManager } from './BlogManager';
 import { ScheduleManager } from './ScheduleManager';
 import { PriestManager } from './PriestManager';
+import { CloudinarySettings } from './CloudinarySettings';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -22,6 +23,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
   const tabs = [
     { id: 'parish', label: 'Informações da Paróquia', icon: FileText },
+    { id: 'cloudinary', label: 'Cloudinary', icon: Settings },
     { id: 'blog', label: 'Blog', icon: FileText },
     { id: 'priests', label: 'Clero', icon: Users },
     { id: 'photos', label: 'Galeria de Fotos', icon: Image },
@@ -44,6 +46,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     switch (activeTab) {
       case 'parish':
         return <ParishManager />;
+      case 'cloudinary':
+        return <CloudinarySettings />;
       case 'blog':
         return <BlogManager />;
       case 'priests':
