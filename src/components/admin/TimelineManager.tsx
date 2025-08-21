@@ -90,6 +90,19 @@ export function TimelineManager() {
     }
   };
 
+  const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      image_url: result.secureUrl,
+      cloudinary_public_id: result.publicId 
+    }));
+    toast.success('Imagem carregada com sucesso!');
+  };
+
+  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
+    setFormData(prev => ({ ...prev, image_url: result.url }));
+    toast.success('Imagem carregada com sucesso!');
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -262,6 +275,8 @@ export function TimelineManager() {
                 Imagem (opcional)
               </label>
               <FileUpload
+                onCloudinaryUpload={handleCloudinaryUpload}
+                onSupabaseUpload={handleSupabaseUpload}
                 onFileSelect={handleImageUpload}
                 accept="image/*"
                 disabled={uploading}

@@ -47,6 +47,56 @@ export const PhotoManager: React.FC = () => {
     await processFiles(files);
   };
 
+  const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
+    try {
+      // Salvar no banco com dados do Cloudinary
+      const { data, error } = await supabase
+        .from('photos')
+        .insert([
+          {
+            title: 'Nova Foto',
+            description: '',
+            image_url: result.secureUrl,
+            cloudinary_public_id: result.publicId,
+            category: 'community'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setPhotos(prev => [data, ...prev]);
+      toast.success('Foto adicionada com sucesso!');
+    } catch (error) {
+      console.error('Error saving photo:', error);
+      toast.error('Erro ao salvar foto no banco de dados');
+    }
+  };
+
+  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
+    try {
+      // Salvar no banco com dados do Supabase
+      const { data, error } = await supabase
+        .from('photos')
+        .insert([
+          {
+            title: 'Nova Foto',
+            description: '',
+            image_url: result.url,
+            category: 'community'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setPhotos(prev => [data, ...prev]);
+      toast.success('Foto adicionada com sucesso!');
+    } catch (error) {
+      console.error('Error saving photo:', error);
+      toast.error('Erro ao salvar foto no banco de dados');
+    }
+  };
   const processFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -65,50 +115,10 @@ export const PhotoManager: React.FC = () => {
           continue;
         }
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `photo-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `photos/${fileName}`;
-
-        // Upload to Supabase storage
-        const { error: uploadError } = await supabase.storage
-          .from('parish-photos')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          toast.error(`Erro ao carregar ${file.name}`);
-          continue;
-        }
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('parish-photos')
-          .getPublicUrl(filePath);
-
-        // Insert into database
-        const { data, error } = await supabase
-          .from('photos')
-          .insert([
-            {
-              title: file.name.split('.')[0],
-              description: '',
-              image_url: urlData.publicUrl,
-              category: 'community'
-            }
-          ])
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Database error:', error);
-          toast.error(`Erro ao salvar ${file.name}`);
-          continue;
-        }
-
-        setPhotos(prev => [data, ...prev]);
+        // Este processamento agora será feito pelos callbacks do FileUpload
+        // Mantemos apenas para compatibilidade com uploads diretos
       }
 
-      toast.success('Fotos carregadas com sucesso!');
     } catch (error) {
       console.error('Error uploading photos:', error);
       toast.error('Erro ao carregar fotos');
@@ -168,7 +178,8 @@ export const PhotoManager: React.FC = () => {
         <h3 className="text-2xl font-bold text-gray-800">Gerenciar Fotos</h3>
         <div>
           <FileUpload
-            onFileSelect={handleFilesSelected}
+            onCloudinaryUpload={handleCloudinaryUpload}
+            onSupabaseUpload={handleSupabaseUpload}
             accept="image/*"
             multiple
             disabled={isUploading}

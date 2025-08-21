@@ -156,6 +156,21 @@ export const PriestManager: React.FC = () => {
     }
   };
 
+  const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
+    if (!editingPriest) return;
+    setEditingPriest(prev => prev ? { 
+      ...prev, 
+      photo_url: result.secureUrl,
+      cloudinary_public_id: result.publicId 
+    } : null);
+    toast.success('Foto carregada com sucesso!');
+  };
+
+  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
+    if (!editingPriest) return;
+    setEditingPriest(prev => prev ? { ...prev, photo_url: result.url } : null);
+    toast.success('Foto carregada com sucesso!');
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -338,6 +353,8 @@ export const PriestManager: React.FC = () => {
                   )}
                   <div className="flex gap-2">
                     <FileUpload
+                      onCloudinaryUpload={handleCloudinaryUpload}
+                      onSupabaseUpload={handleSupabaseUpload}
                       onFileSelect={handleImageUpload}
                       disabled={isUploading}
                       className="flex-1"

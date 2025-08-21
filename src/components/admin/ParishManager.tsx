@@ -92,24 +92,38 @@ export const ParishManager: React.FC = () => {
   };
 
   // This is the single, corrected image upload function
+  const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
+    setParish(prev => ({ 
+      ...prev, 
+      logo_url: result.secureUrl,
+      cloudinary_public_id: result.publicId 
+    }));
+    toast.success('Logo carregado com sucesso!');
+  };
+
+  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
+    setParish(prev => ({ ...prev, logo_url: result.url }));
+    toast.success('Logo carregado com sucesso!');
+  };
+
   const handleLogoUpload = async (files: FileList | null) => {
     const file = files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecione uma imagem válida');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Imagem muito grande (máximo 5MB)');
-      return;
-    }
-
     setIsUploading(true);
     try {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Por favor, selecione uma imagem válida');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Imagem muito grande (máximo 5MB)');
+        return;
+      }
+
       const fileExt = file.name.split('.').pop();
       // Ensure a consistent file name for the logo, using upsert to replace it
       const fileName = `logo.${fileExt}`;
@@ -239,7 +253,9 @@ export const ParishManager: React.FC = () => {
             )}
             
             <FileUpload
-              onFileSelect={handleLogoUpload} // Correctly points to the single upload function
+              onCloudinaryUpload={handleCloudinaryUpload}
+              onSupabaseUpload={handleSupabaseUpload}
+              onFileSelect={handleLogoUpload}
               disabled={isUploading}
             >
               <Button variant="secondary" disabled={isUploading}>

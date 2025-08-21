@@ -180,24 +180,40 @@ export const SlideManager: React.FC = () => {
   };
 
   // This is the single, corrected image upload function
+  const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
+    if (!editingSlide) return;
+    setEditingSlide(prev => prev ? { 
+      ...prev, 
+      image_url: result.secureUrl,
+      cloudinary_public_id: result.publicId 
+    } : null);
+    toast.success('Imagem carregada com sucesso!');
+  };
+
+  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
+    if (!editingSlide) return;
+    setEditingSlide(prev => prev ? { ...prev, image_url: result.url } : null);
+    toast.success('Imagem carregada com sucesso!');
+  };
+
   const handleImageUpload = async (files: FileList | null) => {
     const file = files?.[0];
     if (!file || !editingSlide) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecione uma imagem válida');
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Imagem muito grande (máximo 10MB)');
-      return;
-    }
-
     setIsUploading(true);
     try {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Por favor, selecione uma imagem válida');
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Imagem muito grande (máximo 10MB)');
+        return;
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `slide-${Date.now()}.${fileExt}`;
       const filePath = `slides/${fileName}`;
@@ -402,7 +418,9 @@ export const SlideManager: React.FC = () => {
                   )}
                   <div className="flex gap-2">
                     <FileUpload
-                      onFileSelect={handleImageUpload} // Correctly points to the single image upload function
+                      onCloudinaryUpload={handleCloudinaryUpload}
+                      onSupabaseUpload={handleSupabaseUpload}
+                      onFileSelect={handleImageUpload}
                       disabled={isUploading}
                       className="flex-1"
                     >

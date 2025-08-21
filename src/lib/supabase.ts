@@ -63,6 +63,7 @@ export interface Parish {
   phone: string;
   email: string;
   logo_url: string | null;
+  cloudinary_public_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -98,7 +99,6 @@ export interface BlogPost {
   is_published: boolean;
   cloudinary_public_id: string | null;
   slug: string;
-  slug: string;
   created_at: string;
   updated_at: string;
 }
@@ -110,4 +110,19 @@ export interface Schedule {
   description: string;
   is_active: boolean;
   created_at: string;
+}
+
+export interface Priest {
+  id: string;
+  name: string;
+  title: string;
+  photo_url: string | null;
+  cloudinary_public_id?: string | null;
+  short_bio: string;
+  full_bio: string;
+  ordination_year: number | null;
+  parish_since: number | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }

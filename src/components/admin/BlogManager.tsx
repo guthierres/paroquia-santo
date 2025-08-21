@@ -185,6 +185,21 @@ export const BlogManager: React.FC = () => {
     }
   };
 
+  const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
+    if (!editingPost) return;
+    setEditingPost(prev => prev ? { 
+      ...prev, 
+      featured_image: result.secureUrl,
+      cloudinary_public_id: result.publicId 
+    } : null);
+    toast.success('Imagem carregada com sucesso!');
+  };
+
+  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
+    if (!editingPost) return;
+    setEditingPost(prev => prev ? { ...prev, featured_image: result.url } : null);
+    toast.success('Imagem carregada com sucesso!');
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -398,6 +413,8 @@ export const BlogManager: React.FC = () => {
                   )}
                   <div className="flex gap-2">
                     <FileUpload
+                      onCloudinaryUpload={handleCloudinaryUpload}
+                      onSupabaseUpload={handleSupabaseUpload}
                       onFileSelect={handleImageUpload}
                       disabled={isUploading}
                       className="flex-1"
