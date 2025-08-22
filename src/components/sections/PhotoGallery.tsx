@@ -32,6 +32,17 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
     fetchPhotos();
   }, []);
 
+  // Preload first 3 images for better UX
+  useEffect(() => {
+    if (photos.length > 0) {
+      const preloadUrls = photos.slice(0, 3).map(photo => photo.image_url);
+      preloadUrls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+  }, [photos]);
+
   const fetchPhotos = async () => {
     setIsLoading(true);
     try {

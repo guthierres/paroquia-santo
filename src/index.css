@@ -279,6 +279,22 @@ body {
   }
 }
 
+/* Image optimization */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Prevent layout shift */
+img[width][height] {
+  height: auto;
+}
+
+/* Optimize font loading */
+@font-face {
+  font-display: swap;
+}
+
 /* Focus styles for better accessibility */
 button:focus-visible,
 a:focus-visible,

@@ -28,6 +28,19 @@ export const SlidesSection: React.FC = () => {
     fetchSlides();
   }, []);
 
+  // Preload next slide image
+  useEffect(() => {
+    if (slides.length > 1) {
+      const nextIndex = (currentSlide + 1) % slides.length;
+      const nextSlide = slides[nextIndex];
+      if (nextSlide?.image_url && !imageLoaded[nextIndex]) {
+        const img = new Image();
+        img.onload = () => setImageLoaded(prev => ({ ...prev, [nextIndex]: true }));
+        img.src = nextSlide.image_url;
+      }
+    }
+  }, [currentSlide, slides, imageLoaded]);
+
   useEffect(() => {
     if (!isAutoPlay || slides.length <= 1) return;
 

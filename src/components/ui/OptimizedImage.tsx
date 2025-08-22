@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { getCachedImageUrl } from '../../lib/supabase';
 import { getCloudinaryUrl, getCloudinaryConfig } from '../../lib/cloudinary';
 
 interface OptimizedImageProps {
@@ -11,7 +12,8 @@ interface OptimizedImageProps {
   loading?: 'lazy' | 'eager';
   onClick?: () => void;
   onError?: () => void;
-  publicId?: string; // Para imagens do Cloudinary
+  publicId?: string;
+  priority?: boolean; // For critical images
 }
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
@@ -19,81 +21,94 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   alt,
   width,
   height,
-  quality = 80,
+  quality = 75,
   className = '',
   loading = 'lazy',
   onClick,
   onError,
-  publicId
+  publicId,
+  priority = false
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const [optimizedSrc, setOptimizedSrc] = useState(src);
+  const [isInView, setIsInView] = useState(priority || loading === 'eager');
+  const [optimizedSrc, setOptimizedSrc] = useState('');
   const imgRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Determinar a URL otimizada
-  useEffect(() => {
-    const getOptimizedUrl = async () => {
-      if (publicId) {
-        // Usar Cloudinary se publicId estiver disponível
+  // Memoized URL generation
+  const generateOptimizedUrl = useCallback(async () => {
+    if (!src) return '';
+
+    // Priority 1: Cloudinary if available
+    if (publicId) {
+      try {
         const config = await getCloudinaryConfig();
         if (config.enabled && config.cloudName) {
-          const cloudinaryUrl = getCloudinaryUrl(publicId, {
+          return getCloudinaryUrl(publicId, {
             width,
             height,
             quality,
             format: 'auto',
             crop: 'fill'
           });
-          setOptimizedSrc(cloudinaryUrl);
-          return;
         }
+      } catch (error) {
+        console.warn('Cloudinary failed, using fallback:', error);
       }
-      
-      // Fallback para URL original
-      setOptimizedSrc(src);
-    };
+    }
+    
+    // Priority 2: Supabase with aggressive caching
+    if (src.includes('supabase')) {
+      return getCachedImageUrl(src, { width, height, quality });
+    }
 
-    getOptimizedUrl();
+    // Priority 3: External URLs (no optimization)
+    return src;
   }, [src, publicId, width, height, quality]);
+
+  // Generate optimized URL
+  useEffect(() => {
+    generateOptimizedUrl().then(setOptimizedSrc);
+  }, [generateOptimizedUrl]);
+
   // Intersection Observer for lazy loading
   useEffect(() => {
-    if (loading === 'eager') {
+    if (priority || loading === 'eager') {
       setIsInView(true);
       return;
     }
 
-    const observer = new IntersectionObserver(
+    if (!imgRef.current) return;
+
+    observerRef.current = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsInView(true);
-          observer.disconnect();
+          observerRef.current?.disconnect();
         }
       },
       { 
         threshold: 0.1,
-        rootMargin: '50px'
+        rootMargin: priority ? '0px' : '100px' // Preload critical images immediately
       }
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
+    observerRef.current.observe(imgRef.current);
 
-    return () => observer.disconnect();
-  }, [loading]);
+    return () => observerRef.current?.disconnect();
+  }, [loading, priority]);
 
-
-  const handleLoad = () => {
+  const handleLoad = useCallback(() => {
     setIsLoaded(true);
-  };
+  }, []);
 
-  const handleError = () => {
+  const handleError = useCallback(() => {
     setHasError(true);
     onError?.();
-  };
+  }, [onError]);
 
+  // Error fallback
   if (hasError) {
     return (
       <div 
@@ -107,18 +122,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   return (
     <div className={`relative ${className}`} ref={imgRef}>
-      {/* Placeholder */}
-      {!isLoaded && isInView && (
+      {/* Loading placeholder */}
+      {!isLoaded && isInView && optimizedSrc && (
         <div 
           className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center"
           style={{ width, height }}
         >
-          <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
       
-      {/* Actual Image */}
-      {isInView && (
+      {/* Actual image */}
+      {isInView && optimizedSrc && (
         <img
           src={optimizedSrc}
           alt={alt}
@@ -128,7 +143,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           onClick={onClick}
-          loading={loading}
+          loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           style={{
             maxWidth: '100%',

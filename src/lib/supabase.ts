@@ -14,43 +14,124 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400'
+      'Cache-Control': 'public, max-age=31536000, stale-while-revalidate=604800'
     }
   }
 });
 
-// Image optimization helper
-export const getOptimizedImageUrl = (url: string, width?: number, height?: number, quality: number = 80) => {
-  if (!url || !url.includes('supabase')) return url;
-  
-  const params = new URLSearchParams();
-  if (width) params.append('width', width.toString());
-  if (height) params.append('height', height.toString());
-  params.append('quality', quality.toString());
-  params.append('format', 'webp');
-  
-  return `${url}?${params.toString()}`;
+// Advanced image cache with localStorage persistence
+class ImageCacheManager {
+  private memoryCache = new Map<string, string>();
+  private cachePrefix = 'parish_img_cache_';
+  private maxCacheAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+  constructor() {
+    this.cleanExpiredCache();
+  }
+
+  private cleanExpiredCache() {
+    try {
+      const now = Date.now();
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(this.cachePrefix)) {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          if (now - data.timestamp > this.maxCacheAge) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Cache cleanup failed:', error);
+    }
+  }
+
+  getCachedUrl(originalUrl: string, options?: { width?: number; height?: number; quality?: number }): string {
+    const cacheKey = `${originalUrl}_${JSON.stringify(options || {})}`;
+    
+    // Check memory cache first
+    if (this.memoryCache.has(cacheKey)) {
+      return this.memoryCache.get(cacheKey)!;
+    }
+
+    // Check localStorage cache
+    try {
+      const storageKey = this.cachePrefix + btoa(cacheKey).slice(0, 50);
+      const cached = localStorage.getItem(storageKey);
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (Date.now() - data.timestamp < this.maxCacheAge) {
+          this.memoryCache.set(cacheKey, data.url);
+          return data.url;
+        }
+      }
+    } catch (error) {
+      console.warn('Cache read failed:', error);
+    }
+
+    // Generate optimized URL
+    const optimizedUrl = this.getOptimizedImageUrl(originalUrl, options?.width, options?.height, options?.quality);
+    
+    // Cache the result
+    this.memoryCache.set(cacheKey, optimizedUrl);
+    try {
+      const storageKey = this.cachePrefix + btoa(cacheKey).slice(0, 50);
+      localStorage.setItem(storageKey, JSON.stringify({
+        url: optimizedUrl,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.warn('Cache write failed:', error);
+    }
+
+    return optimizedUrl;
+  }
+
+  private getOptimizedImageUrl(url: string, width?: number, height?: number, quality: number = 75): string {
+    if (!url) return url;
+    
+    // Don't optimize external URLs or already optimized URLs
+    if (!url.includes('supabase') || url.includes('?')) return url;
+    
+    const params = new URLSearchParams();
+    if (width) params.append('width', Math.min(width, 1920).toString()); // Max width 1920px
+    if (height) params.append('height', Math.min(height, 1080).toString()); // Max height 1080px
+    params.append('quality', Math.min(quality, 85).toString()); // Max quality 85%
+    params.append('format', 'webp');
+    params.append('resize', 'cover');
+    
+    return `${url}?${params.toString()}`;
+  }
+}
+
+// Global cache instance
+const imageCache = new ImageCacheManager();
+
+// Export optimized functions
+export const getCachedImageUrl = (originalUrl: string, options?: { width?: number; height?: number; quality?: number }) => {
+  return imageCache.getCachedUrl(originalUrl, options);
 };
 
-// Cache management
-const imageCache = new Map<string, string>();
+// Preload critical images
+export const preloadImage = (url: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = url;
+  });
+};
 
-export const getCachedImageUrl = (originalUrl: string, options?: { width?: number; height?: number; quality?: number }) => {
-  const cacheKey = `${originalUrl}_${JSON.stringify(options || {})}`;
-  
-  if (imageCache.has(cacheKey)) {
-    return imageCache.get(cacheKey)!;
+// Batch preload images
+export const preloadImages = async (urls: string[], maxConcurrent = 3): Promise<void> => {
+  const chunks = [];
+  for (let i = 0; i < urls.length; i += maxConcurrent) {
+    chunks.push(urls.slice(i, i + maxConcurrent));
   }
-  
-  const optimizedUrl = getOptimizedImageUrl(
-    originalUrl, 
-    options?.width, 
-    options?.height, 
-    options?.quality || 80
-  );
-  
-  imageCache.set(cacheKey, optimizedUrl);
-  return optimizedUrl;
+
+  for (const chunk of chunks) {
+    await Promise.allSettled(chunk.map(preloadImage));
+  }
 };
 
 // Database types
