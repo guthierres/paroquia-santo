@@ -42,12 +42,12 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   };
 
   const handlePostClick = (post: BlogPost) => {
-    console.log('Post clicked:', post.title);
     setSelectedPost(post);
   };
 
   const handleClosePost = () => {
     setSelectedPost(null);
+    window.history.pushState(null, '', window.location.pathname);
   };
 
   const copyPostLink = (post: BlogPost) => {
@@ -72,7 +72,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-    
+
     try {
       document.execCommand('copy');
       alert('Link copiado para a área de transferência!');
@@ -80,14 +80,14 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
       console.error('Fallback: Oops, unable to copy', err);
       alert('Não foi possível copiar o link automaticamente. URL: ' + text);
     }
-    
+
     document.body.removeChild(textArea);
   };
 
   const sharePost = (post: BlogPost, platform: string) => {
     const url = `${window.location.origin}${window.location.pathname}#blog-post-${post.id}`;
     const text = `Confira esta postagem: ${post.title}`;
-    
+
     switch (platform) {
       case 'whatsapp':
         window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
@@ -161,8 +161,8 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
               <p className="text-gray-500 mb-4">
                 As publicações do blog aparecerão aqui quando forem criadas no painel administrativo.
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => window.location.reload()}
                 className="mx-auto"
               >
@@ -179,67 +179,72 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Card 
-                    className="cursor-pointer group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-mobile"
-                    onClick={() => handlePostClick(post)}
+                  {/* O Card inteiro agora é um link */}
+                  <a
+                    href={`#blog-post-${post.id}`}
+                    onClick={(e) => {
+                      e.preventDefault(); // Impede a navegação padrão
+                      handlePostClick(post);
+                    }}
+                    className="block"
                   >
-                    {post.featured_image && (
-                      <div className="aspect-video overflow-hidden rounded-t-xl">
-                        <OptimizedImage
-                          src={post.featured_image}
-                          alt={post.title}
-                          width={600}
-                          height={338}
-                          quality={75}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    )}
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500 mb-3">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(post.created_at).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
+                    <Card
+                      className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-mobile"
+                    >
+                      {post.featured_image && (
+                        <div className="aspect-video overflow-hidden rounded-t-xl">
+                          <OptimizedImage
+                            src={post.featured_image}
+                            alt={post.title}
+                            width={600}
+                            height={338}
+                            quality={75}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <div className="p-6 flex-1 flex flex-col">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500 mb-3">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            {post.author}
+                          </div>
+                        </div>
+
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+
+                        <p className="text-sm sm:text-base text-gray-600 mb-4 flex-1 line-clamp-3">
+                          {post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...'}
+                        </p>
+
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-3 flex-wrap">
+                          <Clock className="h-3 w-3" />
+                          <span>Publicado em {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                            day: 'numeric',
+                            month: 'long',
                             year: 'numeric'
-                          })}
+                          })}</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          {post.author}
+
+                        <div
+                          className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-sm sm:text-base"
+                        >
+                          <span>Ler mais</span>
+                          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
-                      
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
-                        {post.title}
-                      </h3>
-                      
-                      <p className="text-sm sm:text-base text-gray-600 mb-4 flex-1 line-clamp-3">
-                        {post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...'}
-                      </p>
-                      
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-3 flex-wrap">
-                        <Clock className="h-3 w-3" />
-                        <span>Publicado em {new Date(post.created_at).toLocaleDateString('pt-BR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}</span>
-                      </div>
-                      
-                      <div 
-                        className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-sm sm:text-base"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePostClick(post);
-                        }}
-                      >
-                        <span>Ler mais</span>
-                        <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </a>
                 </motion.div>
               ))}
             </div>
@@ -272,7 +277,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                     <span className="font-semibold">Blog da Paróquia</span>
                   </div>
                 </div>
-                
+
                 <Button
                   variant="outline"
                   onClick={() => sharePost(selectedPost, 'native')}
@@ -303,7 +308,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   />
                 </div>
               )}
-              
+
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500 mb-6">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -318,16 +323,16 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   {selectedPost.author}
                 </div>
               </div>
-              
+
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-6 sm:mb-8 leading-tight">
                 {selectedPost.title}
               </h1>
-              
-              <div 
+
+              <div
                 className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-gray-700 leading-relaxed prose-headings:text-gray-800 prose-a:text-red-800 prose-strong:text-gray-800 prose-blockquote:border-red-800 prose-blockquote:bg-red-50"
                 dangerouslySetInnerHTML={{ __html: selectedPost.content }}
               />
-              
+
               <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 text-center">
                 <Button
                   variant="primary"
@@ -337,7 +342,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                   <ArrowLeft className="h-4 w-4" />
                   Voltar ao Blog
                 </Button>
-                
+
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-4">Compartilhe:</p>
                   <div className="flex justify-center gap-2 sm:gap-3 flex-wrap">
