@@ -38,7 +38,7 @@ Nossa paróquia sempre esteve comprometida com as obras sociais, ajudando famíl
 
 Hoje, olhamos para o futuro com esperança, gratos por tudo que o Senhor nos concedeu e prontos para continuar sendo instrumentos de Sua paz e amor em nossa cidade de Tiradentes.`,
           founded_year: 1984,
-          address: 'Tiradentes, São Paulo',
+          address: 'Cid. Tiradentes, São Paulo',
           phone: '',
           email: '',
           logo_url: null,
