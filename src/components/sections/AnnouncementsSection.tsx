@@ -39,7 +39,7 @@ export const AnnouncementsSection: React.FC = () => {
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
     const isTomorrow = date.toDateString() === new Date(now.getTime() + 24 * 60 * 60 * 1000).toDateString();
-    
+
     if (isToday) {
       return `Hoje às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
     } else if (isTomorrow) {
@@ -108,7 +108,7 @@ export const AnnouncementsSection: React.FC = () => {
               const IconComponent = getIcon(announcement.type);
               const dateTime = formatDateTime(announcement.event_date);
               const isSoon = isEventSoon(announcement.event_date);
-              
+
               return (
                 <motion.div
                   key={announcement.id}
@@ -117,24 +117,24 @@ export const AnnouncementsSection: React.FC = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Card 
+                  <Card
                     className="cursor-pointer group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                     onClick={() => setSelectedAnnouncement(announcement)}
                   >
                     <div className="p-6 flex-1 flex flex-col">
                       <div className="flex items-start gap-3 mb-4">
                         <div className={`p-2 rounded-full flex-shrink-0 ${
-                          announcement.type === 'event' 
-                            ? 'bg-blue-100 text-blue-600' 
+                          announcement.type === 'event'
+                            ? 'bg-blue-100 text-blue-600'
                             : 'bg-green-100 text-green-600'
                         }`}>
                           <IconComponent className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                              announcement.type === 'event' 
-                                ? 'bg-blue-100 text-blue-800' 
+                              announcement.type === 'event'
+                                ? 'bg-blue-100 text-blue-800'
                                 : 'bg-green-100 text-green-800'
                             }`}>
                               {announcement.type === 'event' ? 'Evento' : 'Aviso'}
@@ -156,14 +156,15 @@ export const AnnouncementsSection: React.FC = () => {
                         {announcement.content}
                       </p>
 
+                      {/* Destaque para Data e Hora */}
                       {dateTime && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                          <Clock className="h-4 w-4" />
-                          <span>{dateTime}</span>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-lg">
+                          <Clock className="h-4 w-4 flex-shrink-0 text-red-800" />
+                          <span className="font-medium text-gray-700">{dateTime}</span>
                         </div>
                       )}
 
-                      <div 
+                      <div
                         className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-sm"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -222,17 +223,20 @@ export const AnnouncementsSection: React.FC = () => {
               </div>
 
               <div className="p-6 max-h-[calc(90vh-120px)] overflow-y-auto">
+                {/* Destaque para Data e Hora no Modal */}
                 {selectedAnnouncement.event_date && (
-                  <div className="flex items-center gap-2 text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">
-                    <Clock className="h-5 w-5 text-red-800" />
-                    <span className="font-medium">
-                      {formatDateTime(selectedAnnouncement.event_date)}
-                    </span>
-                    {isEventSoon(selectedAnnouncement.event_date) && (
-                      <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                        Em breve!
-                      </span>
-                    )}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-gray-600 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <Clock className="h-6 w-6 text-red-800 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-lg font-bold text-gray-800 leading-none">
+                        {formatDateTime(selectedAnnouncement.event_date)}
+                      </p>
+                      {isEventSoon(selectedAnnouncement.event_date) && (
+                        <span className="mt-1 inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full animate-pulse">
+                          Em breve!
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 
