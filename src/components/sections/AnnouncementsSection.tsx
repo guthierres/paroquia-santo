@@ -117,72 +117,69 @@ export const AnnouncementsSection: React.FC = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Card
-                    className="cursor-pointer group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    onClick={() => setSelectedAnnouncement(announcement)}
-                  >
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className={`p-2 rounded-full flex-shrink-0 ${
-                          announcement.type === 'event'
-                            ? 'bg-blue-100 text-blue-600'
-                            : 'bg-green-100 text-green-600'
-                        }`}>
-                          <IconComponent className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                              announcement.type === 'event'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {announcement.type === 'event' ? 'Evento' : 'Aviso'}
-                            </span>
-                            {isSoon && (
-                              <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full font-medium animate-pulse">
-                                Em breve!
+                  <Card className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    {/* Elemento que cobre todo o card e é clicável */}
+                    <div
+                      className="cursor-pointer h-full flex flex-col"
+                      onClick={() => setSelectedAnnouncement(announcement)}
+                    >
+                      <div className="p-6 flex-1 flex flex-col">
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className={`p-2 rounded-full flex-shrink-0 ${
+                            announcement.type === 'event'
+                              ? 'bg-blue-100 text-blue-600'
+                              : 'bg-green-100 text-green-600'
+                          }`}>
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                                announcement.type === 'event'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}>
+                                {announcement.type === 'event' ? 'Evento' : 'Aviso'}
                               </span>
-                            )}
+                              {isSoon && (
+                                <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full font-medium animate-pulse">
+                                  Em breve!
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
-                        {announcement.title}
-                      </h3>
+                        <h3 className="text-lg font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
+                          {announcement.title}
+                        </h3>
 
-                      <p className="text-gray-600 mb-4 flex-1 line-clamp-3 text-sm">
-                        {announcement.content}
-                      </p>
+                        <p className="text-gray-600 mb-4 flex-1 line-clamp-3 text-sm">
+                          {announcement.content}
+                        </p>
 
-                      {/* Destaque para Data e Horário no Card */}
-                      {dateTime && (
-                        <div className="flex flex-col gap-2 text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 flex-shrink-0 text-red-800" />
-                            <span className="font-medium text-gray-700">
-                              Data: {dateTime.date}
-                            </span>
+                        {/* Destaque para Data e Horário no Card */}
+                        {dateTime && (
+                          <div className="flex flex-col gap-2 text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 flex-shrink-0 text-red-800" />
+                              <span className="font-medium text-gray-700">
+                                Data: {dateTime.date}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 flex-shrink-0 text-red-800" />
+                              <span className="font-medium text-gray-700">
+                                Horário: {dateTime.time}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 flex-shrink-0 text-red-800" />
-                            <span className="font-medium text-gray-700">
-                              Horário: {dateTime.time}
-                            </span>
-                          </div>
+                        )}
+
+                        <div className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-sm">
+                          <span>Ver detalhes</span>
+                          <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </div>
-                      )}
-
-                      <div
-                        className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedAnnouncement(announcement);
-                        }}
-                      >
-                        <span>Ver detalhes</span>
-                        <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </Card>
