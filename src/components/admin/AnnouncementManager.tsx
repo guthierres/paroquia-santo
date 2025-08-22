@@ -55,6 +55,7 @@ export const AnnouncementManager: React.FC = () => {
         type: editingAnnouncement.type,
         title: editingAnnouncement.title,
         content: editingAnnouncement.content,
+        // O Supabase irá lidar com o fuso horário corretamente se o tipo for 'timestamp with time zone'
         event_date: editingAnnouncement.event_date,
         is_published: editingAnnouncement.is_published,
         updated_at: new Date().toISOString()
@@ -124,6 +125,18 @@ export const AnnouncementManager: React.FC = () => {
     return type === 'event' ? Calendar : Bell;
   };
 
+  // Nova função para formatar a data e hora para o input datetime-local
+  const formatDateTimeForInput = (dateString: string | null) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -174,8 +187,8 @@ export const AnnouncementManager: React.FC = () => {
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="text-lg font-semibold text-gray-800">{announcement.title}</h4>
                         <span className={`px-2 py-1 text-xs rounded-full ${
-                          announcement.type === 'event' 
-                            ? 'bg-blue-100 text-blue-800' 
+                          announcement.type === 'event'
+                            ? 'bg-blue-100 text-blue-800'
                             : 'bg-green-100 text-green-800'
                         }`}>
                           {announcement.type === 'event' ? 'Evento' : 'Aviso'}
@@ -256,9 +269,9 @@ export const AnnouncementManager: React.FC = () => {
                   </label>
                   <select
                     value={editingAnnouncement.type}
-                    onChange={(e) => setEditingAnnouncement(prev => prev ? { 
-                      ...prev, 
-                      type: e.target.value as 'event' | 'announcement' 
+                    onChange={(e) => setEditingAnnouncement(prev => prev ? {
+                      ...prev,
+                      type: e.target.value as 'event' | 'announcement'
                     } : null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
                   >
@@ -286,11 +299,10 @@ export const AnnouncementManager: React.FC = () => {
                   </label>
                   <input
                     type="datetime-local"
-                    value={editingAnnouncement.event_date ? 
-                      new Date(editingAnnouncement.event_date).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setEditingAnnouncement(prev => prev ? { 
-                      ...prev, 
-                      event_date: e.target.value ? new Date(e.target.value).toISOString() : null 
+                    value={formatDateTimeForInput(editingAnnouncement.event_date)}
+                    onChange={(e) => setEditingAnnouncement(prev => prev ? {
+                      ...prev,
+                      event_date: e.target.value ? new Date(e.target.value).toISOString() : null
                     } : null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
                   />
@@ -314,9 +326,9 @@ export const AnnouncementManager: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={editingAnnouncement.is_published}
-                      onChange={(e) => setEditingAnnouncement(prev => prev ? { 
-                        ...prev, 
-                        is_published: e.target.checked 
+                      onChange={(e) => setEditingAnnouncement(prev => prev ? {
+                        ...prev,
+                        is_published: e.target.checked
                       } : null)}
                       className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-2"
                     />
