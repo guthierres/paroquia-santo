@@ -146,7 +146,7 @@ export const SlidesSection: React.FC = () => {
             40 Anos de Fé e Comunhão
           </p>
           <p className="text-sm sm:text-base md:text-lg text-amber-100">
-            Tiradentes, São Paulo
+            Cid. Tiradentes, São Paulo
           </p>
         </div>
       </section>
