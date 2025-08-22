@@ -40,10 +40,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const generateOptimizedUrl = useCallback(async () => {
     if (!src) return '';
 
+    const config = await getCloudinaryConfig();
+    
     // Priority 1: Cloudinary if available
     if (publicId) {
       try {
-        const config = await getCloudinaryConfig();
         if (config.enabled && config.cloudName) {
           return getCloudinaryUrl(publicId, {
             width,
@@ -58,9 +59,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       }
     }
     
-    // Priority 2: Supabase with aggressive caching
-    if (src.includes('supabase')) {
+    // Priority 2: Supabase with aggressive caching (only if enabled)
+    if (src.includes('supabase') && config.supabaseStorageEnabled) {
       return getCachedImageUrl(src, { width, height, quality });
+    } else if (src.includes('supabase') && !config.supabaseStorageEnabled) {
+      // Se Supabase Storage está desabilitado, não carrega imagens do Supabase
+      console.warn('Supabase Storage desabilitado, imagem ignorada:', src);
+      return '';
     }
 
     // Priority 3: External URLs (no optimization)

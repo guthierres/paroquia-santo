@@ -13,7 +13,8 @@ export const CloudinarySettings: React.FC = () => {
     cloudinary_api_key: '',
     cloudinary_api_secret: '',
     cloudinary_upload_preset: 'parish_uploads',
-    cloudinary_enabled: false
+    cloudinary_enabled: false,
+    supabase_storage_enabled: true
   });
   const [showSecret, setShowSecret] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,13 +37,16 @@ export const CloudinarySettings: React.FC = () => {
           'cloudinary_api_key',
           'cloudinary_api_secret',
           'cloudinary_upload_preset',
-          'cloudinary_enabled'
+        'cloudinary_enabled',
+        'supabase_storage_enabled'
         ]);
 
       if (error) throw error;
 
       const settingsMap = data?.reduce((acc, setting) => {
         if (setting.key === 'cloudinary_enabled') {
+          acc[setting.key] = setting.value === 'true';
+        } else if (setting.key === 'supabase_storage_enabled') {
           acc[setting.key] = setting.value === 'true';
         } else {
           acc[setting.key] = setting.value;
@@ -201,6 +205,38 @@ export const CloudinarySettings: React.FC = () => {
               </p>
             </div>
 
+            <div className="border-t pt-4">
+              <label className="flex items-center gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  checked={!settings.supabase_storage_enabled}
+                  onChange={(e) => setSettings(prev => ({ ...prev, supabase_storage_enabled: !e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                  disabled={!settings.cloudinary_enabled}
+                />
+                <span className="font-medium text-gray-700">🚫 Desativar Supabase Storage (Cloudinary Exclusivo)</span>
+              </label>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-yellow-600 mt-1">⚠️</div>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-800 mb-2">
+                      ATENÇÃO: Modo Cloudinary Exclusivo
+                    </p>
+                    <ul className="text-sm text-yellow-700 space-y-1">
+                      <li>• <strong>Storage Egress = ZERO</strong> - Elimina completamente o uso do Supabase Storage</li>
+                      <li>• <strong>Cloudinary obrigatório</strong> - Todas as imagens devem estar no Cloudinary</li>
+                      <li>• <strong>Imagens antigas</strong> - Podem não aparecer se não estiverem no Cloudinary</li>
+                      <li>• <strong>Uploads</strong> - Apenas para Cloudinary (Supabase será ignorado)</li>
+                    </ul>
+                    <p className="text-sm text-yellow-800 mt-2 font-medium">
+                      Só ative se o Cloudinary estiver 100% configurado e funcionando!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Cloud Name *
@@ -321,7 +357,7 @@ export const CloudinarySettings: React.FC = () => {
       </div>
 
       {/* Aviso sobre migração */}
-      {settings.cloudinary_enabled && (
+      {settings.cloudinary_enabled && settings.supabase_storage_enabled && (
         <Card className="p-6 bg-blue-50 border-blue-200">
           <div className="flex items-start gap-3">
             <Cloud className="h-6 w-6 text-blue-600 mt-1" />
@@ -332,6 +368,26 @@ export const CloudinarySettings: React.FC = () => {
                 Novas imagens serão automaticamente enviadas para o Cloudinary, 
                 reduzindo significativamente o uso do banco de dados.
               </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Aviso sobre modo exclusivo */}
+      {settings.cloudinary_enabled && !settings.supabase_storage_enabled && (
+        <Card className="p-6 bg-green-50 border-green-200">
+          <div className="flex items-start gap-3">
+            <div className="text-green-600 text-2xl">🚀</div>
+            <div>
+              <h4 className="font-semibold text-green-800 mb-2">Modo Cloudinary Exclusivo Ativado!</h4>
+              <div className="text-green-700 text-sm space-y-2">
+                <p><strong>✅ Storage Egress = ZERO</strong> - Supabase Storage completamente desabilitado</p>
+                <p><strong>✅ Performance Máxima</strong> - Todas as imagens via CDN Cloudinary</p>
+                <p><strong>✅ Economia Total</strong> - Sem custos de Storage Egress</p>
+                <p className="font-medium text-green-800 mt-3">
+                  Parabéns! Você eliminou completamente o Storage Egress do Supabase! 🎉
+                </p>
+              </div>
             </div>
           </div>
         </Card>

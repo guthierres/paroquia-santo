@@ -68,18 +68,37 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       try {
         const config = await getCloudinaryConfig();
         
-        if (config.enabled && onCloudinaryUpload) {
+        // Se Supabase Storage está desabilitado, força Cloudinary
+        const forceCloudinary = !config.supabaseStorageEnabled;
+        
+        if ((config.enabled || forceCloudinary) && onCloudinaryUpload) {
           // Upload para Cloudinary
           const file = files[0]; // Por enquanto, apenas um arquivo
-          const result = await uploadToCloudinary(file, folder);
-          onCloudinaryUpload(result);
-          toast.success('Imagem enviada para Cloudinary com sucesso!');
-        } else if (onSupabaseUpload) {
+          try {
+            const result = await uploadToCloudinary(file, folder);
+            onCloudinaryUpload(result);
+            toast.success('Imagem enviada para Cloudinary com sucesso!');
+          } catch (cloudinaryError) {
+            if (forceCloudinary) {
+              // Se Cloudinary é obrigatório e falhou, mostra erro
+              console.error('Cloudinary obrigatório falhou:', cloudinaryError);
+              toast.error('Erro: Cloudinary é obrigatório mas falhou. Verifique as configurações.');
+              throw cloudinaryError;
+            } else {
+              // Fallback para Supabase apenas se permitido
+              throw cloudinaryError;
+            }
+          }
+        } else if (onSupabaseUpload && config.supabaseStorageEnabled) {
           // Upload para Supabase quando Cloudinary não está habilitado
           const file = files[0];
           const result = await uploadToSupabase(file);
           onSupabaseUpload(result);
           toast.success('Imagem enviada com sucesso!');
+        } else if (!config.supabaseStorageEnabled) {
+          // Se Supabase está desabilitado mas Cloudinary não está configurado
+          toast.error('Supabase Storage desabilitado. Configure o Cloudinary primeiro!');
+          return;
         } else {
           // Fallback para método tradicional
           if (onFileSelect) {
@@ -88,10 +107,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         }
       } catch (error) {
         console.error('Erro no upload:', error);
-        toast.error('Erro ao enviar imagem.');
         
-        // Fallback para Supabase em caso de erro no Cloudinary
-        if (onSupabaseUpload) {
+        const config = await getCloudinaryConfig();
+        
+        // Fallback para Supabase apenas se permitido
+        if (onSupabaseUpload && config.supabaseStorageEnabled) {
           try {
             const file = files[0];
             const result = await uploadToSupabase(file);
@@ -99,9 +119,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             toast.success('Imagem enviada para Supabase como fallback!');
           } catch (fallbackError) {
             console.error('Erro no fallback:', fallbackError);
+            toast.error('Erro ao enviar imagem.');
             if (onFileSelect) {
               onFileSelect(files);
             }
+          }
+        } else {
+          toast.error('Erro ao enviar imagem.');
+          if (onFileSelect) {
+            onFileSelect(files);
           }
         }
       } finally {

@@ -7,6 +7,7 @@ interface CloudinaryConfig {
   apiSecret: string;
   uploadPreset: string;
   enabled: boolean;
+  supabaseStorageEnabled: boolean;
 }
 
 // Cache das configurações
@@ -30,7 +31,8 @@ export const getCloudinaryConfig = async (): Promise<CloudinaryConfig> => {
         'cloudinary_api_key', 
         'cloudinary_api_secret',
         'cloudinary_upload_preset',
-        'cloudinary_enabled'
+        'cloudinary_enabled',
+        'supabase_storage_enabled'
       ]);
 
     if (error) throw error;
@@ -45,7 +47,8 @@ export const getCloudinaryConfig = async (): Promise<CloudinaryConfig> => {
       apiKey: settings.cloudinary_api_key || '',
       apiSecret: settings.cloudinary_api_secret || '',
       uploadPreset: settings.cloudinary_upload_preset || 'parish_uploads',
-      enabled: settings.cloudinary_enabled === 'true'
+      enabled: settings.cloudinary_enabled === 'true',
+      supabaseStorageEnabled: settings.supabase_storage_enabled === 'true'
     };
 
     configCacheTime = Date.now();
@@ -57,7 +60,8 @@ export const getCloudinaryConfig = async (): Promise<CloudinaryConfig> => {
       apiKey: '',
       apiSecret: '',
       uploadPreset: 'parish_uploads',
-      enabled: false
+      enabled: false,
+      supabaseStorageEnabled: true
     };
   }
 };
