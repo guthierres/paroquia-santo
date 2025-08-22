@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, ArrowRight } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { OptimizedImage } from '../ui/OptimizedImage';
 import { supabase, Photo } from '../../lib/supabase';
 
 interface PhotoGalleryProps {
@@ -15,6 +14,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -43,7 +43,6 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
       if (data && data.length > 0) {
         setPhotos(data);
       } else {
-        // Sample photos using Pexels if no data exists
         const samplePhotos: Photo[] = [
           {
             id: '1',
@@ -103,12 +102,12 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
     }
   };
 
-  const filteredPhotos = selectedCategory === 'all' 
+  const filteredPhotos = selectedCategory === 'all'
     ? photos.slice(0, 6)
     : photos.filter(photo => photo.category === selectedCategory).slice(0, 6);
 
-  const totalPhotosInCategory = selectedCategory === 'all' 
-    ? photos.length 
+  const totalPhotosInCategory = selectedCategory === 'all'
+    ? photos.length
     : photos.filter(photo => photo.category === selectedCategory).length;
 
   const hasMorePhotos = totalPhotosInCategory > 6;
@@ -150,10 +149,41 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   };
 
   const handlePhotoSelect = (photo: Photo) => {
+    const index = filteredPhotos.findIndex(p => p.id === photo.id);
+    setCurrentPhotoIndex(index);
     setSelectedPhoto(photo);
+    // Reinicia os estados de zoom e posição ao abrir uma nova foto
     setZoomLevel(1);
     setImagePosition({ x: 0, y: 0 });
   };
+
+  const handleNextPhoto = () => {
+    const nextIndex = (currentPhotoIndex + 1) % filteredPhotos.length;
+    setCurrentPhotoIndex(nextIndex);
+    setSelectedPhoto(filteredPhotos[nextIndex]);
+    handleResetZoom();
+  };
+
+  const handlePrevPhoto = () => {
+    const prevIndex = (currentPhotoIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+    setCurrentPhotoIndex(prevIndex);
+    setSelectedPhoto(filteredPhotos[prevIndex]);
+    handleResetZoom();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (selectedPhoto) {
+      if (e.key === 'ArrowRight') handleNextPhoto();
+      if (e.key === 'ArrowLeft') handlePrevPhoto();
+      if (e.key === 'Escape') setSelectedPhoto(null);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedPhoto, currentPhotoIndex, filteredPhotos]);
+
   if (isLoading) {
     return (
       <section id="photos" className="py-20 bg-gray-50">
@@ -213,7 +243,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
           </Card>
         ) : (
           <>
-            <motion.div 
+            <motion.div
               layout
               className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
             >
@@ -227,7 +257,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <Card 
+                    <Card
                       className="cursor-pointer group overflow-hidden"
                       onClick={() => handlePhotoSelect(photo)}
                     >
@@ -295,14 +325,47 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+              onMouseDown={() => setSelectedPhoto(null)} // Fechar ao clicar fora da imagem
             >
+              {/* Navigation Arrows */}
+              {filteredPhotos.length > 1 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handlePrevPhoto(); }}
+                    className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
+                  >
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handleNextPhoto(); }}
+                    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
+                  >
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </Button>
+                </>
+              )}
+
+              {/* Close Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); setSelectedPhoto(null); }}
+                className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
+              >
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Button>
+
               {/* Zoom Controls */}
               <div className="absolute top-4 left-4 z-20 flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleZoomIn}
+                  onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
                   className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
                 >
                   <ZoomIn className="h-4 w-4" />
@@ -310,7 +373,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleZoomOut}
+                  onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
                   className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
                 >
                   <ZoomOut className="h-4 w-4" />
@@ -318,74 +381,80 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleResetZoom}
+                  onClick={(e) => { e.stopPropagation(); handleResetZoom(); }}
                   className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>
               </div>
 
-              {/* Close Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedPhoto(null)}
-                className="absolute top-4 right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {/* Photo Counter */}
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm">
+                {currentPhotoIndex + 1} de {filteredPhotos.length}
+              </div>
 
               {/* Image Container */}
-              <div 
-                className="relative w-full h-full flex items-center justify-center overflow-hidden"
+              <div
+                className="relative w-full h-full flex items-center justify-center overflow-hidden p-2 sm:p-4"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 style={{ cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+                onClick={(e) => e.stopPropagation()} // Impede que o clique na imagem feche o modal
               >
-                <img
+                <motion.img
+                  key={selectedPhoto.id}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                   src={selectedPhoto.image_url}
                   alt={selectedPhoto.title}
-                  className="max-w-none transition-transform duration-200 select-none"
+                  className="max-w-full max-h-full object-contain select-none"
                   style={{
                     transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
                     maxHeight: '90vh',
-                    maxWidth: '90vw'
+                    maxWidth: '90vw',
                   }}
                   draggable={false}
                 />
               </div>
 
               {/* Photo Info Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
+              <div
+                className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 sm:p-6 text-white"
+                onClick={(e) => e.stopPropagation()} // Impede que o clique no overlay feche o modal
+              >
                 <div className="max-w-4xl mx-auto">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-2xl font-bold flex-1">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
+                    <h3 className="text-lg sm:text-2xl font-bold flex-1">
                       {selectedPhoto.title}
                     </h3>
-                    <span className="inline-block px-3 py-1 text-sm bg-red-600 rounded-full ml-4">
+                    <span className="inline-block px-2 py-1 sm:px-3 text-xs sm:text-sm bg-red-600 rounded-full ml-2 sm:ml-4">
                       {categories.find(c => c.id === selectedPhoto.category)?.label}
                     </span>
                   </div>
-                  
+
                   {selectedPhoto.description && (
-                    <p className="text-gray-200 leading-relaxed mb-3">
+                    <p className="text-gray-200 leading-relaxed mb-2 sm:mb-3 text-sm sm:text-base">
                       {selectedPhoto.description}
                     </p>
                   )}
-                  
-                  <p className="text-sm text-gray-400">
-                    Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </p>
-                  
-                  <p className="text-xs text-gray-500 mt-2">
-                    Use os controles de zoom ou arraste a imagem para navegar
-                  </p>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p className="text-xs sm:text-sm text-gray-400">
+                      Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+
+                    <p className="text-xs text-gray-500 hidden sm:block">
+                      Use ← → para navegar | ESC para fechar
+                    </p>
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -112,6 +112,17 @@ export interface Schedule {
   created_at: string;
 }
 
+export interface ParishAnnouncement {
+  id: string;
+  type: 'event' | 'announcement';
+  title: string;
+  content: string;
+  event_date: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Priest {
   id: string;
   name: string;

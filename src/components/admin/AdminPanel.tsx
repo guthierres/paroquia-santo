@@ -8,6 +8,7 @@ import { PhotoManager } from './PhotoManager';
 import { TimelineManager } from './TimelineManager';
 import { SlideManager } from './SlideManager';
 import { BlogManager } from './BlogManager';
+import { AnnouncementManager } from './AnnouncementManager';
 import { ScheduleManager } from './ScheduleManager';
 import { PriestManager } from './PriestManager';
 import { CloudinarySettings } from './CloudinarySettings';
@@ -24,6 +25,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const tabs = [
     { id: 'parish', label: 'Informações da Paróquia', icon: FileText },
     { id: 'cloudinary', label: 'Cloudinary', icon: Settings },
+    { id: 'announcements', label: 'Eventos e Avisos', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: FileText },
     { id: 'priests', label: 'Clero', icon: Users },
     { id: 'photos', label: 'Galeria de Fotos', icon: Image },
@@ -48,6 +50,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <ParishManager />;
       case 'cloudinary':
         return <CloudinarySettings />;
+      case 'announcements':
+        return <AnnouncementManager />;
       case 'blog':
         return <BlogManager />;
       case 'priests':

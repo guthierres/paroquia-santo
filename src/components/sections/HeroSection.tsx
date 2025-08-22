@@ -33,7 +33,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             dos Milagres
           </p>
           <p className="text-base sm:text-lg text-amber-100 mb-6 sm:mb-8">
-            Cid. Tiradentes, São Paulo
+            Tiradentes, São Paulo
           </p>
         </motion.div>
 

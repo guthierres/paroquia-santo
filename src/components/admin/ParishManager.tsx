@@ -243,11 +243,11 @@ export const ParishManager: React.FC = () => {
                 <img
                   src={parish.logo_url}
                   alt="Logo da Paróquia"
-                  className="w-32 h-32 object-contain mx-auto rounded-lg border border-gray-200"
+                  className="w-48 h-48 object-contain mx-auto rounded-lg border border-gray-200"
                 />
               </div>
             ) : (
-              <div className="w-32 h-32 mx-auto mb-4 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+              <div className="w-48 h-48 mx-auto mb-4 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 <Church className="h-12 w-12 text-gray-400" />
               </div>
             )}

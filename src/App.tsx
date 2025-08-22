@@ -9,6 +9,7 @@ import { PhotoGallery } from './components/sections/PhotoGallery';
 import { ContactSection } from './components/sections/ContactSection';
 import { TimelineSection } from './components/sections/TimelineSection';
 import { SlidesSection } from './components/sections/SlidesSection';
+import { AnnouncementsSection } from './components/sections/AnnouncementsSection';
 import { BlogSection } from './components/sections/BlogSection';
 import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
@@ -141,6 +142,7 @@ function App() {
           <PriestSection />
           <TimelineSection />
           <PhotoGallery onNavigateToFullGallery={handleShowFullGallery} />
+          <AnnouncementsSection />
           <BlogSection onNavigateHome={() => handleNavigate('home')} />
           <ContactSection />
         </main>
