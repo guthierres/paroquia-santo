@@ -152,7 +152,6 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
     const index = filteredPhotos.findIndex(p => p.id === photo.id);
     setCurrentPhotoIndex(index);
     setSelectedPhoto(photo);
-    // Reinicia os estados de zoom e posição ao abrir uma nova foto
     setZoomLevel(1);
     setImagePosition({ x: 0, y: 0 });
   };
@@ -257,24 +256,14 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <Card
-                      className="cursor-pointer group overflow-hidden"
-                      onClick={() => handlePhotoSelect(photo)}
-                    >
-                      <div className="aspect-square overflow-hidden relative">
+                    <Card className="group overflow-hidden">
+                      <div className="aspect-square overflow-hidden relative cursor-pointer" onClick={() => handlePhotoSelect(photo)}>
                         <img
                           src={photo.image_url}
                           alt={photo.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 rounded-full flex items-center justify-center">
-                              <ZoomIn className="h-5 w-5 sm:h-6 sm:w-6 text-gray-800" />
-                            </div>
-                          </div>
-                        </div>
                       </div>
                       <div className="p-2 sm:p-3 md:p-4">
                         <h3 className="font-semibold text-gray-800 group-hover:text-red-800 transition-colors text-sm sm:text-base line-clamp-1">
@@ -326,137 +315,145 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
-              onMouseDown={() => setSelectedPhoto(null)} // Fechar ao clicar fora da imagem
+              onClick={() => setSelectedPhoto(null)} // Fechar ao clicar fora do conteúdo da imagem
             >
-              {/* Navigation Arrows */}
-              {filteredPhotos.length > 1 && (
-                <>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full h-full flex items-center justify-center p-4 sm:p-8"
+                onClick={(e) => e.stopPropagation()} // Impede que o clique no conteúdo feche o modal
+              >
+
+                {/* Navigation Arrows */}
+                {filteredPhotos.length > 1 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevPhoto}
+                      className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
+                    >
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextPhoto}
+                      className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
+                    >
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </Button>
+                  </>
+                )}
+
+                {/* Close Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedPhoto(null)}
+                  className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
+                >
+                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+
+                {/* Zoom Controls */}
+                <div className="absolute top-4 left-4 z-20 flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={(e) => { e.stopPropagation(); handlePrevPhoto(); }}
-                    className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
+                    onClick={handleZoomIn}
+                    className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
                   >
-                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                    <ZoomIn className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={(e) => { e.stopPropagation(); handleNextPhoto(); }}
-                    className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
+                    onClick={handleZoomOut}
+                    className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
                   >
-                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <ZoomOut className="h-4 w-4" />
                   </Button>
-                </>
-              )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetZoom}
+                    className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
 
-              {/* Close Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); setSelectedPhoto(null); }}
-                className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
-              >
-                <X className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
+                {/* Photo Counter */}
+                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm">
+                  {currentPhotoIndex + 1} de {filteredPhotos.length}
+                </div>
 
-              {/* Zoom Controls */}
-              <div className="absolute top-4 left-4 z-20 flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
-                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                {/* Image Container */}
+                <div
+                  className="relative w-full h-full flex items-center justify-center overflow-hidden"
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  style={{ cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
                 >
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
-                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
+                  <motion.img
+                    key={selectedPhoto.id}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    src={selectedPhoto.image_url}
+                    alt={selectedPhoto.title}
+                    className="max-w-full max-h-full object-contain select-none"
+                    style={{
+                      transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
+                      maxHeight: '90vh',
+                      maxWidth: '90vw',
+                    }}
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Photo Info Overlay */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 sm:p-6 text-white"
+                  onClick={(e) => e.stopPropagation()} // Impede que o clique no overlay feche o modal
                 >
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); handleResetZoom(); }}
-                  className="bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 p-0"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </div>
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-start justify-between mb-2 sm:mb-3">
+                      <h3 className="text-lg sm:text-2xl font-bold flex-1">
+                        {selectedPhoto.title}
+                      </h3>
+                      <span className="inline-block px-2 py-1 sm:px-3 text-xs sm:text-sm bg-red-600 rounded-full ml-2 sm:ml-4">
+                        {categories.find(c => c.id === selectedPhoto.category)?.label}
+                      </span>
+                    </div>
 
-              {/* Photo Counter */}
-              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm">
-                {currentPhotoIndex + 1} de {filteredPhotos.length}
-              </div>
+                    {selectedPhoto.description && (
+                      <p className="text-gray-200 leading-relaxed mb-2 sm:mb-3 text-sm sm:text-base">
+                        {selectedPhoto.description}
+                      </p>
+                    )}
 
-              {/* Image Container */}
-              <div
-                className="relative w-full h-full flex items-center justify-center overflow-hidden p-2 sm:p-4"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                style={{ cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-                onClick={(e) => e.stopPropagation()} // Impede que o clique na imagem feche o modal
-              >
-                <motion.img
-                  key={selectedPhoto.id}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  src={selectedPhoto.image_url}
-                  alt={selectedPhoto.title}
-                  className="max-w-full max-h-full object-contain select-none"
-                  style={{
-                    transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
-                    maxHeight: '90vh',
-                    maxWidth: '90vw',
-                  }}
-                  draggable={false}
-                />
-              </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <p className="text-xs sm:text-sm text-gray-400">
+                        Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </p>
 
-              {/* Photo Info Overlay */}
-              <div
-                className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 sm:p-6 text-white"
-                onClick={(e) => e.stopPropagation()} // Impede que o clique no overlay feche o modal
-              >
-                <div className="max-w-4xl mx-auto">
-                  <div className="flex items-start justify-between mb-2 sm:mb-3">
-                    <h3 className="text-lg sm:text-2xl font-bold flex-1">
-                      {selectedPhoto.title}
-                    </h3>
-                    <span className="inline-block px-2 py-1 sm:px-3 text-xs sm:text-sm bg-red-600 rounded-full ml-2 sm:ml-4">
-                      {categories.find(c => c.id === selectedPhoto.category)?.label}
-                    </span>
-                  </div>
-
-                  {selectedPhoto.description && (
-                    <p className="text-gray-200 leading-relaxed mb-2 sm:mb-3 text-sm sm:text-base">
-                      {selectedPhoto.description}
-                    </p>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <p className="text-xs sm:text-sm text-gray-400">
-                      Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
-
-                    <p className="text-xs text-gray-500 hidden sm:block">
-                      Use ← → para navegar | ESC para fechar
-                    </p>
+                      <p className="text-xs text-gray-500 hidden sm:block">
+                        Use ← → para navegar | ESC para fechar
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
