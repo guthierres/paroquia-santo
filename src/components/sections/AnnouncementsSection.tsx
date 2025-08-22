@@ -39,20 +39,20 @@ export const AnnouncementsSection: React.FC = () => {
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
     const isTomorrow = date.toDateString() === new Date(now.getTime() + 24 * 60 * 60 * 1000).toDateString();
-
+    
+    // Formata a hora no formato HH:MM
+    const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    let datePart;
     if (isToday) {
-      return `Hoje às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      datePart = 'Hoje';
     } else if (isTomorrow) {
-      return `Amanhã às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      datePart = 'Amanhã';
     } else {
-      return date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      datePart = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
+    
+    return { date: datePart, time };
   };
 
   const getIcon = (type: string) => {
@@ -156,11 +156,21 @@ export const AnnouncementsSection: React.FC = () => {
                         {announcement.content}
                       </p>
 
-                      {/* Destaque para Data e Hora */}
+                      {/* Destaque para Data e Horário no Card */}
                       {dateTime && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-lg">
-                          <Clock className="h-4 w-4 flex-shrink-0 text-red-800" />
-                          <span className="font-medium text-gray-700">{dateTime}</span>
+                        <div className="flex flex-col gap-2 text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 flex-shrink-0 text-red-800" />
+                            <span className="font-medium text-gray-700">
+                              Data: {dateTime.date}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 flex-shrink-0 text-red-800" />
+                            <span className="font-medium text-gray-700">
+                              Horário: {dateTime.time}
+                            </span>
+                          </div>
                         </div>
                       )}
 
@@ -223,20 +233,30 @@ export const AnnouncementsSection: React.FC = () => {
               </div>
 
               <div className="p-6 max-h-[calc(90vh-120px)] overflow-y-auto">
-                {/* Destaque para Data e Hora no Modal */}
+                {/* Destaque para Data e Horário no Modal */}
                 {selectedAnnouncement.event_date && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-gray-600 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <Clock className="h-6 w-6 text-red-800 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-lg font-bold text-gray-800 leading-none">
-                        {formatDateTime(selectedAnnouncement.event_date)}
-                      </p>
-                      {isEventSoon(selectedAnnouncement.event_date) && (
-                        <span className="mt-1 inline-block px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full animate-pulse">
-                          Em breve!
-                        </span>
-                      )}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-gray-600 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-6 w-6 text-red-800 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-lg font-bold text-gray-800 leading-none">
+                          Data: {formatDateTime(selectedAnnouncement.event_date).date}
+                        </p>
+                      </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-6 w-6 text-red-800 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-lg font-bold text-gray-800 leading-none">
+                          Horário: {formatDateTime(selectedAnnouncement.event_date).time}
+                        </p>
+                      </div>
+                    </div>
+                    {isEventSoon(selectedAnnouncement.event_date) && (
+                      <span className="mt-1 sm:mt-0 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full animate-pulse">
+                        Em breve!
+                      </span>
+                    )}
                   </div>
                 )}
 
