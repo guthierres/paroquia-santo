@@ -13,6 +13,7 @@ import { AnnouncementsSection } from './components/sections/AnnouncementsSection
 import { BlogSection } from './components/sections/BlogSection';
 import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
+import { CelebrationsPage } from './components/sections/CelebrationsPage';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -21,6 +22,7 @@ import { supabase } from './lib/supabase';
 function App() {
   const [currentSection, setCurrentSection] = useState('home');
   const [showFullGallery, setShowFullGallery] = useState(false);
+  const [showCelebrations, setShowCelebrations] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,8 +65,16 @@ function App() {
   }, []);
 
   const handleNavigate = (section: string) => {
+    if (section === 'celebrations') {
+      setShowCelebrations(true);
+      setShowFullGallery(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
     setCurrentSection(section);
     setShowFullGallery(false);
+    setShowCelebrations(false);
     
     // Close mobile menu if open
     const mobileMenuButton = document.querySelector('[data-mobile-menu]');
@@ -100,6 +110,16 @@ function App() {
     handleNavigate('photos');
   };
 
+  const handleShowCelebrations = () => {
+    setShowCelebrations(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromCelebrations = () => {
+    setShowCelebrations(false);
+    handleNavigate('home');
+  };
+
   // Handle browser navigation for admin routes
   React.useEffect(() => {
     const handlePopState = () => {
@@ -132,7 +152,9 @@ function App() {
       
       <Header onNavigate={handleNavigate} />
 
-      {showFullGallery ? (
+      {showCelebrations ? (
+        <CelebrationsPage onBack={handleBackFromCelebrations} />
+      ) : showFullGallery ? (
         <FullGallery onBack={handleBackFromGallery} />
       ) : (
         <main>
@@ -148,7 +170,7 @@ function App() {
         </main>
       )}
 
-      {!showFullGallery && (
+      {!showFullGallery && !showCelebrations && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div

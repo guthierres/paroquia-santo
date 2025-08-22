@@ -137,3 +137,16 @@ export interface Priest {
   created_at: string;
   updated_at: string;
 }
+
+export interface Celebration {
+  id: string;
+  community_name: string;
+  celebrant_name: string;
+  celebration_type: 'Missa' | 'Celebração';
+  time: string;
+  day_of_week: string;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}

@@ -12,6 +12,7 @@ import { AnnouncementManager } from './AnnouncementManager';
 import { ScheduleManager } from './ScheduleManager';
 import { PriestManager } from './PriestManager';
 import { CloudinarySettings } from './CloudinarySettings';
+import { CelebrationManager } from './CelebrationManager';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -28,6 +29,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     { id: 'announcements', label: 'Eventos e Avisos', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: FileText },
     { id: 'priests', label: 'Clero', icon: Users },
+    { id: 'celebrations', label: 'Celebrações', icon: Calendar },
     { id: 'photos', label: 'Galeria de Fotos', icon: Image },
     { id: 'timeline', label: 'Linha do Tempo', icon: Calendar },
     { id: 'slides', label: 'Slides do Site', icon: Settings },
@@ -56,6 +58,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <BlogManager />;
       case 'priests':
         return <PriestManager />;
+      case 'celebrations':
+        return <CelebrationManager />;
       case 'photos':
         return <PhotoManager />;
       case 'timeline':
@@ -70,55 +74,57 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-2 sm:p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden overscroll-contain"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden overscroll-contain"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-800 to-red-900 text-white p-6">
+        <div className="bg-gradient-to-r from-red-800 to-red-900 text-white p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Painel Administrativo</h2>
-              <p className="text-red-200">Gerenciar conteúdo da paróquia</p>
+              <h2 className="text-xl sm:text-2xl font-bold">Painel Administrativo</h2>
+              <p className="text-red-200 text-sm sm:text-base">Gerenciar conteúdo da paróquia</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4" />
-                Sair
+                <span className="hidden sm:inline">Sair</span>
               </Button>
               <Button variant="outline" onClick={onClose}>
-                Fechar
+                <span className="hidden sm:inline">Fechar</span>
+                <span className="sm:hidden">✕</span>
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="flex h-[calc(90vh-120px)]">
+        <div className="flex flex-col sm:flex-row h-[calc(95vh-80px)] sm:h-[calc(95vh-120px)]">
           {/* Sidebar */}
-          <div className="w-64 bg-gray-50 border-r border-gray-200 p-4">
-            <nav className="space-y-2">
+          <div className="w-full sm:w-64 bg-gray-50 border-b sm:border-b-0 sm:border-r border-gray-200 p-2 sm:p-4 overflow-y-auto max-h-32 sm:max-h-none">
+            <nav className="flex sm:flex-col gap-1 sm:gap-2 pb-2 sm:pb-4 overflow-x-auto sm:overflow-x-visible">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                  className={`flex-shrink-0 sm:w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg text-left transition-colors text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-red-800 text-white'
                       : 'text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <tab.icon className="h-5 w-5" />
-                  {tab.label}
+                  <tab.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="truncate hidden sm:inline">{tab.label}</span>
+                  <span className="truncate sm:hidden">{tab.label.split(' ')[0]}</span>
                 </button>
               ))}
             </nav>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 min-w-0">
             {renderContent()}
           </div>
         </div>
