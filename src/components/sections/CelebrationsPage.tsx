@@ -84,7 +84,7 @@ export const CelebrationsPage: React.FC<CelebrationsPageProps> = ({ onBack }) =>
   return (
     <div className="min-h-screen bg-gray-50 overflow-y-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-900 to-red-800 text-white shadow-lg sticky top-0 z-40">
+      <div className="bg-gradient-to-r from-red-900 to-red-800 text-white shadow-lg sticky top-0 z-50 safe-area-inset-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
