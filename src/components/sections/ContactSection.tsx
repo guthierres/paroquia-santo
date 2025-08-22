@@ -224,7 +224,7 @@ export const ContactSection: React.FC = () => {
               Localização
             </h3>
             <p className="text-gray-600 mb-6">
-              Estamos localizados no coração de Tiradentes, São Paulo. 
+              Estamos localizados no coração da Cidade Tiradentes, São Paulo. 
               Venha nos visitar e participar das nossas celebrações.
             </p>
             <p className="text-lg font-semibold text-red-800 mb-2">
