@@ -189,9 +189,28 @@ function App() {
               <p className="text-sm text-red-200 mb-2">
                 © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Cid. Tiradentes, SP.
               </p>
+              <div className="flex items-center justify-center mb-3">
+                <img 
+                  src="/footer.webp" 
+                  alt="Logo Paróquia" 
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
               <p className="text-xs text-red-300">
                 "Que o Senhor abençoe a todos que visitam nossa casa".
               </p>
+              <div className="mt-4 pt-3 border-t border-red-700/30">
+                <p className="text-xs text-red-300/80">
+                  Desenvolvido por: <a 
+                    href="https://instagram.com/guthierresc" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-red-200 transition-colors duration-200"
+                  >
+                    Sem. Guthierres
+                  </a>
+                </p>
+              </div>
             </motion.div>
           </div>
         </footer>
