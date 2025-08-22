@@ -190,7 +190,7 @@ function App() {
                 © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Cid. Tiradentes, SP.
               </p>
               <p className="text-xs text-red-300">
-                "Que o Senhor abençoe a todos que visitam nossa casa"
+                "Que o Senhor abençoe a todos que visitam nossa casa".
               </p>
             </motion.div>
           </div>
