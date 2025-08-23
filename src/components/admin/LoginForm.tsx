@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LogIn, Church } from 'lucide-react';
+import { LogIn, Church, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { supabase } from '../../lib/supabase';
@@ -59,6 +59,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     }
   };
 
+  const handleClose = () => {
+    // Redirecionar para a página inicial
+    window.location.href = '/';
+  };
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <motion.div
@@ -67,6 +71,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         className="w-full max-w-md"
       >
         <Card className="p-8">
+          {/* Botão de fechar */}
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClose}
+              className="text-gray-500 hover:text-gray-700"
+              title="Fechar e voltar à página inicial"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
           <div className="text-center mb-8">
             <Church className="h-12 w-12 text-red-800 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
