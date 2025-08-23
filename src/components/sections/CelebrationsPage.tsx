@@ -132,9 +132,19 @@ export const CelebrationsPage: React.FC<CelebrationsPageProps> = ({ onBack }) =>
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <p className="text-amber-200 text-sm">
-  {dayCelebrations.length} celebraç{dayCelebrations.length !== 1 ? 'ões' : 'ão'}
-</p>
+                  <Card className="overflow-hidden">
+                    {/* Day Header */}
+                    <div className="bg-gradient-to-r from-red-800 to-red-900 text-white p-4 sm:p-6">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-6 w-6 text-amber-400" />
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-bold">{day.label}</h2>
+                          <p className="text-amber-200 text-sm">
+                            {dayCelebrations.length} celebração{dayCelebrations.length !== 1 ? 'ões' : ''}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* Celebrations List */}
                     <div className="p-4 sm:p-6">
