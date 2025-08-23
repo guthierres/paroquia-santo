@@ -140,7 +140,8 @@ export const CelebrationsPage: React.FC<CelebrationsPageProps> = ({ onBack }) =>
                         <div>
                           <h2 className="text-xl sm:text-2xl font-bold">{day.label}</h2>
                           <p className="text-amber-200 text-sm">
-                            {dayCelebrations.length} celebração{dayCelebrations.length !== 1 ? 'ões' : ''}
+                            {/* AQUI ESTÁ O AJUSTE! */}
+                            {dayCelebrations.length} celebraç{dayCelebrations.length !== 1 ? 'ões' : 'ão'}
                           </p>
                         </div>
                       </div>
@@ -238,8 +239,8 @@ export const CelebrationsPage: React.FC<CelebrationsPageProps> = ({ onBack }) =>
                 Informações Importantes
               </h3>
               <p className="text-gray-700 text-sm leading-relaxed">
-                Em caso de alterações na escala ou horários especiais, 
-                consulte os avisos paroquiais ou entre em contato conosco. 
+                Em caso de alterações na escala ou horários especiais,
+                consulte os avisos paroquiais ou entre em contato conosco.
                 Que Deus abençoe a todos!
               </p>
             </div>
