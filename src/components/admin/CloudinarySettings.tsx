@@ -216,21 +216,60 @@ export const CloudinarySettings: React.FC = () => {
                 />
                 <span className="font-medium text-gray-700">🚫 Desativar Supabase Storage (Cloudinary Exclusivo)</span>
               </label>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className={`border rounded-lg p-4 ${
+                !settings.supabase_storage_enabled && settings.cloudinary_enabled
+                  ? 'bg-green-50 border-green-200'
+                  : 'bg-yellow-50 border-yellow-200'
+              }`}>
                 <div className="flex items-start gap-3">
-                  <div className="text-yellow-600 mt-1">⚠️</div>
+                  <div className={`mt-1 ${
+                    !settings.supabase_storage_enabled && settings.cloudinary_enabled
+                      ? 'text-green-600'
+                      : 'text-yellow-600'
+                  }`}>
+                    {!settings.supabase_storage_enabled && settings.cloudinary_enabled ? '🚀' : '⚠️'}
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-yellow-800 mb-2">
-                      ATENÇÃO: Modo Cloudinary Exclusivo
+                    <p className={`text-sm font-medium mb-2 ${
+                      !settings.supabase_storage_enabled && settings.cloudinary_enabled
+                        ? 'text-green-800'
+                        : 'text-yellow-800'
+                    }`}>
+                      {!settings.supabase_storage_enabled && settings.cloudinary_enabled
+                        ? '✅ MODO CLOUDINARY EXCLUSIVO ATIVO!'
+                        : 'ATENÇÃO: Modo Cloudinary Exclusivo'
+                      }
                     </p>
-                    <ul className="text-sm text-yellow-700 space-y-1">
-                      <li>• <strong>Storage Egress = ZERO</strong> - Elimina completamente o uso do Supabase Storage</li>
-                      <li>• <strong>Cloudinary obrigatório</strong> - Todas as imagens devem estar no Cloudinary</li>
-                      <li>• <strong>Imagens antigas</strong> - Podem não aparecer se não estiverem no Cloudinary</li>
-                      <li>• <strong>Uploads</strong> - Apenas para Cloudinary (Supabase será ignorado)</li>
+                    <ul className={`text-sm space-y-1 ${
+                      !settings.supabase_storage_enabled && settings.cloudinary_enabled
+                        ? 'text-green-700'
+                        : 'text-yellow-700'
+                    }`}>
+                      {!settings.supabase_storage_enabled && settings.cloudinary_enabled ? (
+                        <>
+                          <li>• <strong>✅ Storage Egress = ZERO</strong> - Supabase Storage completamente desabilitado</li>
+                          <li>• <strong>✅ Performance Máxima</strong> - Todas as imagens via CDN Cloudinary</li>
+                          <li>• <strong>✅ Economia Total</strong> - Sem custos de Storage Egress</li>
+                          <li>• <strong>✅ Otimização Automática</strong> - WebP, qualidade e dimensões otimizadas</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>• <strong>Storage Egress = ZERO</strong> - Elimina completamente o uso do Supabase Storage</li>
+                          <li>• <strong>Cloudinary obrigatório</strong> - Todas as imagens devem estar no Cloudinary</li>
+                          <li>• <strong>Imagens antigas</strong> - Podem não aparecer se não estiverem no Cloudinary</li>
+                          <li>• <strong>Uploads</strong> - Apenas para Cloudinary (Supabase será ignorado)</li>
+                        </>
+                      )}
                     </ul>
-                    <p className="text-sm text-yellow-800 mt-2 font-medium">
-                      Só ative se o Cloudinary estiver 100% configurado e funcionando!
+                    <p className={`text-sm mt-2 font-medium ${
+                      !settings.supabase_storage_enabled && settings.cloudinary_enabled
+                        ? 'text-green-800'
+                        : 'text-yellow-800'
+                    }`}>
+                      {!settings.supabase_storage_enabled && settings.cloudinary_enabled
+                        ? 'Parabéns! Você eliminou completamente o Storage Egress do Supabase! 🎉'
+                        : 'Só ative se o Cloudinary estiver 100% configurado e funcionando!'
+                      }
                     </p>
                   </div>
                 </div>

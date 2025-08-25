@@ -94,17 +94,36 @@ function App() {
       mobileMenuButton.click();
     }
     
-    const element = document.getElementById(section);
-    if (element) {
-      const headerHeight = window.innerWidth < 1024 ? 56 : 64; // Mobile vs desktop header height
-      const elementPosition = element.offsetTop - headerHeight;
-      window.scrollTo({ 
-        top: elementPosition, 
-        behavior: 'smooth' 
-      });
-    } else if (section === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    // Navegação melhorada para Android
+    setTimeout(() => {
+      const element = document.getElementById(section);
+      if (element) {
+        const headerHeight = window.innerWidth < 1024 ? 56 : 64;
+        const elementPosition = element.offsetTop - headerHeight;
+        
+        // Força scroll para Android
+        if (window.navigator.userAgent.includes('Android')) {
+          window.scrollTo({ 
+            top: elementPosition, 
+            behavior: 'auto' // Usa auto no Android para garantir funcionamento
+          });
+          // Depois aplica smooth se suportado
+          setTimeout(() => {
+            window.scrollTo({ 
+              top: elementPosition, 
+              behavior: 'smooth' 
+            });
+          }, 50);
+        } else {
+          window.scrollTo({ 
+            top: elementPosition, 
+            behavior: 'smooth' 
+          });
+        }
+      } else if (section === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 150); // Delay maior para garantir que o menu mobile feche
   };
 
   const handleLoginSuccess = () => {

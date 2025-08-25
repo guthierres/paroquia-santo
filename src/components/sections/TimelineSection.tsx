@@ -38,7 +38,7 @@ export const TimelineSection: React.FC = () => {
         const defaultEvents: TimelineEvent[] = [
           {
             id: '1',
-            year: 1984,
+            year: 1985,
             title: 'Fundação da Paróquia',
             description: 'Início das atividades religiosas na comunidade de Tiradentes, marcando o começo de uma jornada de fé que perdura até hoje.',
             created_at: new Date().toISOString()

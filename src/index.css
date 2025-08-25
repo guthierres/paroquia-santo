@@ -32,6 +32,22 @@ body {
   overflow-y: auto;
 }
 
+/* Android navigation fixes */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Prevent double-tap zoom on buttons */
+button {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+}
+
 /* Mobile viewport fix */
 @media screen and (max-width: 768px) {
   /* Fix viewport and zoom issues on Android */
@@ -57,6 +73,25 @@ body {
     font-size: 16px !important; /* Prevents zoom on iOS and Android */
     transform-origin: left top;
     zoom: 1;
+  }
+  
+  /* Better touch targets for Android */
+  button, a {
+    min-height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Mobile menu specific fixes */
+  .mobile-menu-item {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    user-select: none;
   }
   
   .min-h-screen {

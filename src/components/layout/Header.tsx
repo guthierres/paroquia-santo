@@ -24,6 +24,20 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     setIsMenuOpen(false);
   };
 
+  // Função específica para Android com preventDefault e stopPropagation
+  const handleMobileNavigate = (e: React.MouseEvent, section: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Força o fechamento do menu primeiro
+    setIsMenuOpen(false);
+    
+    // Pequeno delay para garantir que o menu feche antes da navegação
+    setTimeout(() => {
+      onNavigate(section);
+    }, 100);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-900/95 to-red-800/95 backdrop-blur-md shadow-lg safe-area-inset-top will-change-transform">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             <Church className="h-6 w-6 sm:h-8 sm:w-8 text-amber-400" />
             <div className="hidden sm:block">
               <h1 className="text-white font-bold text-sm sm:text-lg">Paróquia Senhor Santo Cristo</h1>
-              <p className="text-amber-200 text-xs sm:text-sm">40 Anos de Fé</p>
+              <p className="text-amber-200 text-xs sm:text-sm">39 Anos de Fé</p>
             </div>
             <div className="block sm:hidden">
               <h1 className="text-white font-bold text-sm">Paróquia Santo Cristo</h1>
@@ -61,6 +75,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
           <button
             className="lg:hidden text-white hover:text-amber-300 p-2 -mr-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={{ touchAction: 'manipulation' }}
           >
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -76,14 +91,23 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               className="lg:hidden py-4 border-t border-red-700/50 bg-red-900/98 backdrop-blur-md"
             >
               {menuItems.map((item) => (
-                <motion.button
+                <motion.div
                   key={item.id}
-                  onClick={() => handleNavigate(item.id)}
-                  className="block w-full text-left px-4 py-3 text-white hover:text-amber-300 font-medium transition-colors duration-200 hover:bg-red-800/50 rounded-lg mx-2"
+                  className="mx-2"
                   whileHover={{ x: 10 }}
                 >
-                  {item.label}
-                </motion.button>
+                  <button
+                    onClick={(e) => handleMobileNavigate(e, item.id)}
+                    className="block w-full text-left px-4 py-3 text-white hover:text-amber-300 font-medium transition-colors duration-200 hover:bg-red-800/50 rounded-lg touch-manipulation"
+                    style={{ 
+                      touchAction: 'manipulation',
+                      WebkitTapHighlightColor: 'transparent',
+                      minHeight: '48px'
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                </motion.div>
               ))}
             </motion.nav>
           )}

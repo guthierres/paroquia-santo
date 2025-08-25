@@ -38,6 +38,7 @@ Nossa paróquia sempre esteve comprometida com as obras sociais, ajudando famíl
 
 Hoje, olhamos para o futuro com esperança, gratos por tudo que o Senhor nos concedeu e prontos para continuar sendo instrumentos de Sua paz e amor em nossa cidade de Tiradentes.`,
           founded_year: 1984,
+          founded_year: 1985,
           address: 'Cid. Tiradentes, São Paulo',
           phone: '',
           email: '',
@@ -55,7 +56,7 @@ Hoje, olhamos para o futuro com esperança, gratos por tudo que o Senhor nos con
 
   const milestones = [
     {
-      year: '1984',
+      year: '1985',
       title: 'Fundação da Paróquia',
       description: 'Início das atividades religiosas na comunidade',
       icon: Calendar

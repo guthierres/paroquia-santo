@@ -44,17 +44,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           className="bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 border border-white/20"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-amber-300 mb-4">
-            40 Anos de Fé e Comunhão
+            39 Anos de Fé e Comunhão
           </h2>
           <p className="text-base sm:text-lg text-white leading-relaxed mb-6">
-            Celebrando quatro décadas de fé, esperança e amor em nossa comunidade. 
+            Celebrando quase quatro décadas de fé, esperança e amor em nossa comunidade. 
             Uma jornada de milagres, bênçãos e união entre irmãos em Cristo.
           </p>
           
           <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 text-white/90 mb-6">
             <div className="flex items-center gap-3">
               <Calendar className="h-5 w-5 text-amber-400" />
-              <span className="text-sm sm:text-base">Fundada em 1984</span>
+              <span className="text-sm sm:text-base">Fundada em 1985</span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="h-5 w-5 text-amber-400" />
