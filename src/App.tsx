@@ -273,9 +273,6 @@ function App() {
                   className="h-8 w-auto object-contain"
                 />
               </div>
-              <p className="text-xs text-red-300">
-                "Que o Senhor abençoe a todos que visitam nossa casa".
-              </p>
               <div className="mt-4 pt-3 border-t border-red-700/30">
                 <p className="text-xs text-red-300/80">
                   Desenvolvido por: <a 
