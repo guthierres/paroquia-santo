@@ -231,3 +231,15 @@ export interface Celebration {
   created_at: string;
   updated_at: string;
 }
+
+export interface Pastoral {
+  id: string;
+  name: string;
+  coordinator: string;
+  description: string;
+  contact_phone: string;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}

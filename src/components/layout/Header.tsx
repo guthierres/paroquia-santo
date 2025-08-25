@@ -11,21 +11,16 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
 
   const menuItems = [
     { id: 'home', label: 'Início' },
-    { id: 'blog', label: 'Blog' },
-    { id: 'celebrations', label: 'Celebrações' },
-    { id: 'timeline', label: 'Linha do Tempo' },
     { id: 'history', label: 'História' },
+    { id: 'pastorals', label: 'Pastorais' },
+    { id: 'celebrations', label: 'Celebrações' },
+    { id: 'blog', label: 'Blog' },
     { id: 'photos', label: 'Fotos' },
     { id: 'contact', label: 'Contato' }
   ];
 
   const handleNavigate = (section: string) => {
-    if (section === 'celebrations') {
-      // Navigate to celebrations page
-      onNavigate('celebrations');
-    } else {
-      onNavigate(section);
-    }
+    onNavigate(section);
     setIsMenuOpen(false);
   };
 

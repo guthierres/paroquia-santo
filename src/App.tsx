@@ -14,6 +14,7 @@ import { BlogSection } from './components/sections/BlogSection';
 import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
 import { CelebrationsPage } from './components/sections/CelebrationsPage';
+import { PastoralsPage } from './components/sections/PastoralsPage';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -23,6 +24,7 @@ function App() {
   const [currentSection, setCurrentSection] = useState('home');
   const [showFullGallery, setShowFullGallery] = useState(false);
   const [showCelebrations, setShowCelebrations] = useState(false);
+  const [showPastorals, setShowPastorals] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -68,6 +70,15 @@ function App() {
     if (section === 'celebrations') {
       setShowCelebrations(true);
       setShowFullGallery(false);
+      setShowPastorals(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    if (section === 'pastorals') {
+      setShowPastorals(true);
+      setShowFullGallery(false);
+      setShowCelebrations(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -75,6 +86,7 @@ function App() {
     setCurrentSection(section);
     setShowFullGallery(false);
     setShowCelebrations(false);
+    setShowPastorals(false);
     
     // Close mobile menu if open
     const mobileMenuButton = document.querySelector('[data-mobile-menu]');
@@ -120,6 +132,11 @@ function App() {
     handleNavigate('home');
   };
 
+  const handleBackFromPastorals = () => {
+    setShowPastorals(false);
+    handleNavigate('home');
+  };
+
   // Handle browser navigation for admin routes
   React.useEffect(() => {
     const handlePopState = () => {
@@ -154,6 +171,8 @@ function App() {
 
       {showCelebrations ? (
         <CelebrationsPage onBack={handleBackFromCelebrations} />
+      ) : showPastorals ? (
+        <PastoralsPage onBack={handleBackFromPastorals} />
       ) : showFullGallery ? (
         <FullGallery onBack={handleBackFromGallery} />
       ) : (
@@ -170,7 +189,7 @@ function App() {
         </main>
       )}
 
-      {!showFullGallery && !showCelebrations && (
+      {!showFullGallery && !showCelebrations && !showPastorals && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div

@@ -13,6 +13,7 @@ import { ScheduleManager } from './ScheduleManager';
 import { PriestManager } from './PriestManager';
 import { CloudinarySettings } from './CloudinarySettings';
 import { CelebrationManager } from './CelebrationManager';
+import { PastoralManager } from './PastoralManager';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -26,6 +27,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const tabs = [
     { id: 'parish', label: 'Informações da Paróquia', icon: FileText },
     { id: 'cloudinary', label: 'Cloudinary', icon: Settings },
+    { id: 'pastorals', label: 'Pastorais', icon: Users },
     { id: 'announcements', label: 'Eventos e Avisos', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: FileText },
     { id: 'priests', label: 'Clero', icon: Users },
@@ -52,6 +54,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <ParishManager />;
       case 'cloudinary':
         return <CloudinarySettings />;
+      case 'pastorals':
+        return <PastoralManager />;
       case 'announcements':
         return <AnnouncementManager />;
       case 'blog':

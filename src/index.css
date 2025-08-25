@@ -34,6 +34,31 @@ body {
 
 /* Mobile viewport fix */
 @media screen and (max-width: 768px) {
+  /* Fix viewport and zoom issues on Android */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    zoom: 1;
+    -webkit-user-zoom: fixed;
+    -moz-user-zoom: fixed;
+    -ms-user-zoom: fixed;
+    user-zoom: fixed;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important; /* Prevents zoom on iOS and Android */
+    transform-origin: left top;
+    zoom: 1;
+  }
+  
   .min-h-screen {
     min-height: 100vh;
     min-height: -webkit-fill-available;
