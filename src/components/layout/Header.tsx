@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             <Church className="h-6 w-6 sm:h-8 sm:w-8 text-amber-400" />
             <div className="hidden sm:block">
               <h1 className="text-white font-bold text-sm sm:text-lg">Paróquia Senhor Santo Cristo</h1>
-              <p className="text-amber-200 text-xs sm:text-sm">39 Anos de Fé</p>
+              <p className="text-amber-200 text-xs sm:text-sm">40 Anos de Fé</p>
             </div>
             <div className="block sm:hidden">
               <h1 className="text-white font-bold text-sm">Paróquia Santo Cristo</h1>
