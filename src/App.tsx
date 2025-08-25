@@ -274,7 +274,7 @@ function App() {
               </p>
               <div className="mt-4 pt-3 border-t border-red-700/30">
                 <p className="text-xs text-red-300/80">
-                  Desenvolvido por: <a 
+                  Dev. por: <a 
                     href="https://instagram.com/guthierresc" 
                     target="_blank" 
                     rel="noopener noreferrer"
