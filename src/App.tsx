@@ -224,7 +224,7 @@ function App() {
                 <div className="flex items-center justify-center gap-6">
                   {/* Facebook */}
                   <a
-                    href="https://www.facebook.com/paroquiasantocristo"
+                    href="https://www.facebook.com/paroquiasenhorsantocristo"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-blue-600 rounded-full transition-all duration-300 hover:scale-110"
@@ -237,7 +237,7 @@ function App() {
 
                   {/* Instagram */}
                   <a
-                    href="https://www.instagram.com/paroquiasantocristo"
+                    href="https://www.instagram.com/paroquiasenhorsantocristo"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 rounded-full transition-all duration-300 hover:scale-110"
