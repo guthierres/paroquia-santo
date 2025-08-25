@@ -44,7 +44,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
           className="bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 border border-white/20"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-amber-300 mb-4">
-            39 Anos de Fé e Comunhão
+            40 Anos de Fé e Comunhão
           </h2>
           <p className="text-base sm:text-lg text-white leading-relaxed mb-6">
             Celebrando quase quatro décadas de fé, esperança e amor em nossa comunidade. 
