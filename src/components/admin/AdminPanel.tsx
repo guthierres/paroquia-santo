@@ -14,6 +14,7 @@ import { PriestManager } from './PriestManager';
 import { CloudinarySettings } from './CloudinarySettings';
 import { CelebrationManager } from './CelebrationManager';
 import { PastoralManager } from './PastoralManager';
+import { UrgentPopupManager } from './UrgentPopupManager';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -27,6 +28,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const tabs = [
     { id: 'parish', label: 'Informações da Paróquia', icon: FileText },
     { id: 'cloudinary', label: 'Cloudinary', icon: Settings },
+    { id: 'popups', label: 'Pop-ups Urgentes', icon: Calendar },
     { id: 'pastorals', label: 'Pastorais', icon: Users },
     { id: 'announcements', label: 'Eventos e Avisos', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: FileText },
@@ -54,6 +56,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <ParishManager />;
       case 'cloudinary':
         return <CloudinarySettings />;
+      case 'popups':
+        return <UrgentPopupManager />;
       case 'pastorals':
         return <PastoralManager />;
       case 'announcements':
@@ -113,15 +117,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-shrink-0 sm:w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg text-left transition-colors text-xs sm:text-sm whitespace-nowrap ${
+                  className={`flex-shrink-0 sm:w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-left transition-colors text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-red-800 text-white'
                       : 'text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <tab.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                  <span className="truncate hidden sm:inline">{tab.label}</span>
-                  <span className="truncate sm:hidden">{tab.label.split(' ')[0]}</span>
+                  <span className="truncate hidden sm:inline text-xs">{tab.label}</span>
+                  <span className="truncate sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
                 </button>
               ))}
             </nav>

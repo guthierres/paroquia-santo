@@ -232,6 +232,20 @@ export interface Celebration {
   updated_at: string;
 }
 
+export interface UrgentPopup {
+  id: string;
+  title: string;
+  content: string;
+  image_url: string | null;
+  cloudinary_public_id: string | null;
+  link_url: string | null;
+  link_text: string;
+  is_active: boolean;
+  priority: number;
+  auto_close_seconds: number;
+  created_at: string;
+  updated_at: string;
+}
 export interface Pastoral {
   id: string;
   name: string;

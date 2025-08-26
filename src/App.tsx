@@ -15,6 +15,7 @@ import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
 import { CelebrationsPage } from './components/sections/CelebrationsPage';
 import { PastoralsPage } from './components/sections/PastoralsPage';
+import { UrgentPopup } from './components/ui/UrgentPopup';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -175,6 +176,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
+      <UrgentPopup />
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -274,7 +276,7 @@ function App() {
               </p>
               <div className="mt-4 pt-3 border-t border-red-700/30">
                 <p className="text-xs text-red-300/80">
-                  Dev. por: <a 
+                  Dev. por <a 
                     href="https://instagram.com/guthierresc" 
                     target="_blank" 
                     rel="noopener noreferrer"

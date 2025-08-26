@@ -1,0 +1,1 @@
+INSERT INTO "public"."urgent_popups" ("id", "title", "content", "image_url", "cloudinary_public_id", "link_url", "link_text", "is_active", "priority", "auto_close_seconds", "created_at", "updated_at") VALUES ('687676df-57a2-4274-bfd2-9642b773f78b', 'teste', 'teste', null, null, null, 'Saiba mais', 'false', '1', '10', '2025-08-26 19:15:25+00', '2025-08-27 19:15:29+00');
