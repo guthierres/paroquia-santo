@@ -230,20 +230,26 @@ export const SlidesSection: React.FC = () => {
       {slides.length > 1 && (
         <>
           {/* Mobile Navigation - Bottom indicators */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 md:hidden">
-            <div className="flex gap-2 bg-black/40 backdrop-blur-md rounded-full px-4 py-2">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
-                  }`}
-                  aria-label={`Ir para slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
+          {/* Mobile Navigation - Apenas setas laterais */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={prevSlide}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 md:hidden bg-black/40 border-white/20 text-white hover:bg-black/60 rounded-full w-10 h-10 p-0 backdrop-blur-sm"
+            aria-label="Slide anterior"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={nextSlide}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 md:hidden bg-black/40 border-white/20 text-white hover:bg-black/60 rounded-full w-10 h-10 p-0 backdrop-blur-sm"
+            aria-label="Próximo slide"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
           
           {/* Desktop Navigation */}
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 hidden md:block">
@@ -292,27 +298,6 @@ export const SlidesSection: React.FC = () => {
               </Button>
             </div>
           </div>
-          
-          {/* Mobile Side Navigation */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={prevSlide}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 md:hidden bg-black/40 border-white/20 text-white hover:bg-black/60 rounded-full w-10 h-10 p-0 backdrop-blur-sm"
-            aria-label="Slide anterior"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={nextSlide}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 md:hidden bg-black/40 border-white/20 text-white hover:bg-black/60 rounded-full w-10 h-10 p-0 backdrop-blur-sm"
-            aria-label="Próximo slide"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </>
       )}
 
