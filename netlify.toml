@@ -3,7 +3,7 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18.20.4"
+  NODE_VERSION = "20.18.0"
   NPM_FLAGS = "--prefix=/dev/null"
 
 [[redirects]]
