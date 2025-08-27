@@ -2,87 +2,121 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink } from 'lucide-react';
 import { Button } from './Button';
-import { Card } from './Card';
-import { OptimizedImage } from './OptimizedImage';
 import { supabase, UrgentPopup as UrgentPopupType } from '../../lib/supabase';
 
 export const UrgentPopup: React.FC = () => {
-  const [popups, setPopups] = useState<UrgentPopupType[]>([]);
-  const [currentPopup, setCurrentPopup] = useState<UrgentPopupType | null>(null);
+  const [popup, setPopup] = useState<UrgentPopupType | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [dismissedPopups, setDismissedPopups] = useState<Set<string>>(new Set());
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    fetchActivePopups();
+    fetchActivePopup();
   }, []);
 
   useEffect(() => {
-    if (popups.length > 0 && !currentPopup) {
-      // Encontrar o próximo popup que não foi dispensado
-      const nextPopup = popups.find(popup => !dismissedPopups.has(popup.id));
-      if (nextPopup) {
-        setCurrentPopup(nextPopup);
-        setIsVisible(true);
-        setTimeLeft(nextPopup.auto_close_seconds);
-      }
-    }
-  }, [popups, dismissedPopups, currentPopup]);
-
-  useEffect(() => {
-    if (isVisible && timeLeft > 0) {
+    if (popup && timeLeft > 0) {
       const timer = setTimeout(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
 
       return () => clearTimeout(timer);
-    } else if (isVisible && timeLeft === 0) {
-      handleClose();
+    } else if (popup && timeLeft === 0) {
+      handleAutoClose();
     }
-  }, [isVisible, timeLeft]);
+  }, [popup, timeLeft]);
 
-  const fetchActivePopups = async () => {
+  const fetchActivePopup = async () => {
     try {
       const { data, error } = await supabase
         .from('urgent_popups')
         .select('*')
         .eq('is_active', true)
         .order('priority', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1);
 
       if (error) throw error;
-      if (data) setPopups(data);
+
+      if (data && data.length > 0) {
+        const activePopup = data[0];
+        
+        // Verificar se o usuário já viu este pop-up
+        const seenKey = `popup_seen_${activePopup.id}`;
+        const hasSeenPermanently = localStorage.getItem(seenKey) === 'true';
+        const hasSeenThisSession = sessionStorage.getItem(seenKey) === 'true';
+
+        if (!hasSeenPermanently && !hasSeenThisSession) {
+          setPopup(activePopup);
+          setTimeLeft(activePopup.auto_close_seconds);
+          setIsVisible(true);
+        }
+      }
     } catch (error) {
-      console.error('Error fetching popups:', error);
+      console.error('Error fetching popup:', error);
     }
   };
 
-  const handleClose = () => {
-    if (currentPopup) {
-      setDismissedPopups(prev => new Set([...prev, currentPopup.id]));
-    }
-    setIsVisible(false);
-    setCurrentPopup(null);
+  const handleClose = (permanent: boolean = false) => {
+    if (!popup) return;
     
-    // Verificar se há mais popups para mostrar após um pequeno delay
+    setIsClosing(true);
+    
+    const seenKey = `popup_seen_${popup.id}`;
+    
+    if (permanent) {
+      // Não mostrar novamente (permanente)
+      localStorage.setItem(seenKey, 'true');
+    } else {
+      // Não mostrar apenas nesta sessão
+      sessionStorage.setItem(seenKey, 'true');
+    }
+
     setTimeout(() => {
-      const nextPopup = popups.find(popup => !dismissedPopups.has(popup.id) && popup.id !== currentPopup?.id);
-      if (nextPopup) {
-        setCurrentPopup(nextPopup);
-        setIsVisible(true);
-        setTimeLeft(nextPopup.auto_close_seconds);
-      }
-    }, 1000);
+      setIsVisible(false);
+      setPopup(null);
+      setIsClosing(false);
+    }, 300);
+  };
+
+  const handleAutoClose = () => {
+    handleClose(false); // Auto-close apenas para esta sessão
   };
 
   const handleLinkClick = () => {
-    if (currentPopup?.link_url) {
-      window.open(currentPopup.link_url, '_blank', 'noopener,noreferrer');
+    if (popup?.link_url) {
+      window.open(popup.link_url, '_blank', 'noopener,noreferrer');
     }
-    handleClose();
+    handleClose(false);
   };
 
-  if (!currentPopup || !isVisible) return null;
+  // Limpar dados antigos do localStorage (mais de 30 dias)
+  useEffect(() => {
+    const cleanOldData = () => {
+      try {
+        const keys = Object.keys(localStorage);
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        
+        keys.forEach(key => {
+          if (key.startsWith('popup_seen_')) {
+            const timestamp = localStorage.getItem(`${key}_timestamp`);
+            if (timestamp && parseInt(timestamp) < thirtyDaysAgo) {
+              localStorage.removeItem(key);
+              localStorage.removeItem(`${key}_timestamp`);
+            }
+          }
+        });
+      } catch (error) {
+        console.warn('Error cleaning old popup data:', error);
+      }
+    };
+
+    cleanOldData();
+  }, []);
+
+  if (!popup || !isVisible) return null;
+
+  const progressPercentage = ((popup.auto_close_seconds - timeLeft) / popup.auto_close_seconds) * 100;
 
   return (
     <AnimatePresence>
@@ -93,96 +127,102 @@ export const UrgentPopup: React.FC = () => {
         className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
       >
         <motion.div
-          initial={{ scale: 0.8, opacity: 0, y: 50 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.8, opacity: 0, y: 50 }}
-          className="relative w-full max-w-md"
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ 
+            scale: isClosing ? 0.9 : 1, 
+            opacity: isClosing ? 0 : 1, 
+            y: isClosing ? 20 : 0 
+          }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
         >
-          <Card className="overflow-hidden shadow-2xl">
-            {/* Header com timer */}
-            <div className="bg-gradient-to-r from-red-800 to-red-900 text-white p-4 relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">Aviso Importante</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                    {timeLeft}s
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClose}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-8 h-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Barra de progresso */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                <motion.div
-                  className="h-full bg-amber-400"
-                  initial={{ width: '100%' }}
-                  animate={{ width: '0%' }}
-                  transition={{ duration: currentPopup.auto_close_seconds, ease: 'linear' }}
-                />
-              </div>
-            </div>
+          {/* Progress Bar */}
+          <div className="h-1 bg-gray-200">
+            <motion.div
+              className="h-full bg-gradient-to-r from-red-600 to-red-800"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
 
-            {/* Imagem se houver */}
-            {currentPopup.image_url && (
-              <div className="aspect-video overflow-hidden">
-                <OptimizedImage
-                  src={currentPopup.image_url}
-                  alt={currentPopup.title}
-                  width={600}
-                  height={338}
-                  quality={85}
-                  publicId={currentPopup.cloudinary_public_id || undefined}
-                  className="w-full h-full object-cover"
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-gray-600">Aviso Importante</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">{timeLeft}s</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleClose(false)}
+                className="w-8 h-8 p-0 rounded-full"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            {popup.image_url && (
+              <div className="mb-4 rounded-lg overflow-hidden">
+                <img
+                  src={popup.image_url}
+                  alt={popup.title}
+                  className="w-full h-48 object-cover"
+                  loading="eager"
                 />
               </div>
             )}
 
-            {/* Conteúdo */}
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-3">
-                {currentPopup.title}
-              </h3>
-              
-              <div className="text-gray-600 mb-6 leading-relaxed">
-                {currentPopup.content.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-2">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-3">
+              {popup.title}
+            </h3>
 
-              {/* Botões de ação */}
-              <div className="flex gap-3">
-                {currentPopup.link_url && (
-                  <Button
-                    variant="primary"
-                    onClick={handleLinkClick}
-                    className="flex-1 flex items-center justify-center gap-2"
-                  >
-                    {currentPopup.link_text}
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
+            <div className="prose prose-sm max-w-none mb-6">
+              {popup.content.split('\n').map((paragraph, index) => (
+                <p key={index} className="text-gray-600 mb-2 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-3">
+              {popup.link_url && (
+                <Button
+                  variant="primary"
+                  onClick={handleLinkClick}
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  {popup.link_text}
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              )}
+
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={handleClose}
-                  className={currentPopup.link_url ? 'flex-1' : 'w-full'}
+                  onClick={() => handleClose(true)}
+                  className="flex-1 text-sm"
+                >
+                  Não mostrar novamente
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleClose(false)}
+                  className="flex-1 text-sm"
                 >
                   Fechar
                 </Button>
               </div>
             </div>
-          </Card>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
