@@ -303,7 +303,7 @@ export const BlogManager: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                <h4 className="text-lg font-semibold">
+                <h4 className="text-lg font-semibold flex-1 pr-4">
                   {isCreating ? 'Novo Post' : 'Editar Post'}
                 </h4>
                 <Button
@@ -313,6 +313,7 @@ export const BlogManager: React.FC = () => {
                     setEditingPost(null);
                     setIsCreating(false);
                   }}
+                  className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>

@@ -3,6 +3,13 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      maxWidth: {
+        'screen': '100vw',
+        'full': '100%',
+      },
+      width: {
+        'screen': '100vw',
+      },
       screens: {
         'xs': '475px',
       },
@@ -22,6 +29,8 @@ export default {
             maxWidth: 'none',
             color: '#374151',
             lineHeight: '1.75',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
           },
         },
       },

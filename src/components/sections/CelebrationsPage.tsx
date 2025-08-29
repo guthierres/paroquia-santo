@@ -86,24 +86,24 @@ export const CelebrationsPage: React.FC<CelebrationsPageProps> = ({ onBack }) =>
       {/* Header */}
       <div className="bg-gradient-to-r from-red-900 to-red-800 text-white shadow-lg sticky top-0 z-50 safe-area-inset-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
               <Button
                 variant="outline"
                 onClick={onBack}
-                className="bg-white/20 border-white/30 text-white hover:bg-white/30 flex items-center gap-2"
+                className="bg-white/20 border-white/30 text-white hover:bg-white/30 flex items-center gap-1 sm:gap-2 flex-shrink-0"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar
+                <span className="hidden sm:inline">Voltar</span>
               </Button>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold">Celebrações Dominicais</h1>
-                <p className="text-amber-200 text-sm sm:text-base">
+                <p className="text-amber-200 text-sm sm:text-base truncate">
                   Escala de celebrações da paróquia e comunidades
                 </p>
               </div>
             </div>
-            <Church className="h-12 w-12 text-amber-400 hidden sm:block" />
+            <Church className="h-8 w-8 sm:h-12 sm:w-12 text-amber-400 flex-shrink-0" />
           </div>
         </div>
       </div>

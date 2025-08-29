@@ -228,27 +228,27 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
               <Button
                 variant="outline"
                 onClick={onBack}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Voltar
+                <span className="hidden sm:inline">Voltar</span>
               </Button>
-              <div>
+              <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-bold text-gray-800">Galeria Completa</h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 truncate">
                   {filteredPhotos.length} foto{filteredPhotos.length !== 1 ? 's' : ''} 
                   {selectedCategory !== 'all' && ` em ${categories.find(c => c.id === selectedCategory)?.label}`}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               <Filter className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-500">Filtrar:</span>
+              <span className="text-sm text-gray-500 hidden sm:inline">Filtrar:</span>
             </div>
           </div>
         </div>

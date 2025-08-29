@@ -2,253 +2,169 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile optimizations */
-@supports (padding: max(0px)) {
-  .safe-area-inset-top {
-    padding-top: max(env(safe-area-inset-top), 0px);
-  }
-  
-  .safe-area-inset-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-  }
-  
-  .safe-area-inset {
-    padding-top: max(env(safe-area-inset-top), 0px);
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-    padding-left: max(env(safe-area-inset-left), 0px);
-    padding-right: max(env(safe-area-inset-right), 0px);
-  }
-}
-
-/* Smooth scrolling for mobile */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Fix for iOS momentum scrolling */
-body {
-  -webkit-overflow-scrolling: touch;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-/* Android navigation fixes */
-button, a {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Prevent double-tap zoom on buttons */
-button {
-  touch-action: manipulation;
-  -ms-touch-action: manipulation;
-}
-
-/* Mobile viewport fix */
-@media screen and (max-width: 768px) {
-  /* Fix viewport and zoom issues on Android */
+/* Custom styles for better mobile experience */
+@layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
-  
+
   body {
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    zoom: 1;
-    -webkit-user-zoom: fixed;
-    -moz-user-zoom: fixed;
-    -ms-user-zoom: fixed;
-    user-zoom: fixed;
-  }
-  
-  /* Prevent zoom on input focus */
-  input, textarea, select {
-    font-size: 16px !important; /* Prevents zoom on iOS and Android */
-    transform-origin: left top;
-    zoom: 1;
-  }
-  
-  /* Better touch targets for Android */
-  button, a {
-    min-height: 48px;
-    min-width: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  /* Mobile menu specific fixes */
-  .mobile-menu-item {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    cursor: pointer;
-    user-select: none;
-  }
-  
-  .min-h-screen {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-  }
-  
-  /* Full height for slides on mobile */
-  .h-screen {
-    height: 100vh;
-    height: -webkit-fill-available;
-  }
-  
-  /* Ensure smooth scrolling on mobile */
-  html, body {
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Fix for iOS Safari bounce */
-  body {
-    position: relative;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
     overflow-x: hidden;
-    overflow-y: scroll;
   }
-  
-  /* Prevent zoom on double tap for slides */
-  .slide-container {
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Safe area insets for mobile devices */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Touch optimization */
+  button, a, [role="button"] {
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-/* Rich Text Editor Styles */
+@layer components {
+  /* Card mobile optimization */
+  .card-mobile {
+    min-height: 44px;
+  }
+
+  /* Better focus states */
+  .focus-visible {
+    outline: 2px solid #991b1b;
+    outline-offset: 2px;
+  }
+
+  /* Improved text rendering */
+  .text-rendering-optimized {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  /* Custom utilities for better mobile experience */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  /* Better line clamping */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Word wrapping */
+  .word-wrap {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Viewport units that work better on mobile */
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
+
+/* Rich text editor styles */
+.ql-toolbar {
+  border-top: 1px solid #d1d5db !important;
+  border-left: 1px solid #d1d5db !important;
+  border-right: 1px solid #d1d5db !important;
+  border-bottom: none !important;
+}
+
+.ql-container {
+  border-bottom: 1px solid #d1d5db !important;
+  border-left: 1px solid #d1d5db !important;
+  border-right: 1px solid #d1d5db !important;
+  border-top: none !important;
+}
+
 .ql-editor {
   font-family: inherit;
+  line-height: 1.6;
 }
 
-.ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4, .ql-editor h5, .ql-editor h6 {
-  font-weight: bold;
-  margin: 1em 0 0.5em 0;
-}
-
-.ql-editor h1 { font-size: 2em; }
-.ql-editor h2 { font-size: 1.5em; }
-.ql-editor h3 { font-size: 1.25em; }
-
-.ql-editor p {
-  margin: 0.5em 0;
-}
-
-.ql-editor blockquote {
-  border-left: 4px solid #dc2626;
-  padding-left: 1em;
-  margin: 1em 0;
-  font-style: italic;
-  background: #fef2f2;
-  padding: 1em;
-  border-radius: 0.5em;
-}
-
-/* Responsive improvements */
+/* Mobile optimizations */
 @media (max-width: 768px) {
-  .ql-toolbar {
-    border: 1px solid #ccc;
+  /* Reduce motion on mobile for better performance */
+  .motion-reduce {
+    animation: none !important;
+    transition: none !important;
   }
-  
-  .ql-toolbar .ql-formats {
-    margin-right: 8px;
-  }
-}
 
-/* Line clamp utilities */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Mobile responsive improvements */
-@media (max-width: 640px) {
-  /* Better text sizing for mobile */
-  .prose {
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
-  
-  .prose h1 {
-    font-size: 1.75rem;
-    line-height: 1.2;
-    margin-bottom: 1rem;
-  }
-  
-  .prose h2 {
-    font-size: 1.5rem;
-    line-height: 1.3;
-    margin-bottom: 0.75rem;
-  }
-  
-  .prose h3 {
-    font-size: 1.25rem;
-    line-height: 1.4;
-    margin-bottom: 0.5rem;
-  }
-  
-  /* Better spacing for mobile */
-  .prose p {
-    margin-bottom: 1rem;
-  }
-  
-  /* Modal improvements for mobile */
-  .fixed.inset-0 {
-    padding: 0.75rem;
-  }
-  
-  .fixed .max-h-\[95vh\] {
-    max-height: 95vh;
-  }
-  
-  /* Better button sizing for touch */
-  button {
+  /* Better touch targets */
+  button, a, [role="button"] {
     min-height: 44px;
     min-width: 44px;
   }
-  
-  /* Improved card spacing */
-  .card-mobile {
-    margin-bottom: 1rem;
-    padding: 1rem;
-  }
-  
-  /* Better form inputs for mobile */
-  input, textarea, select {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 0.75rem;
-  }
-}
 
-/* Tablet optimizations */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .prose {
-    font-size: 1rem;
-  }
-  
-  .prose h1 {
-    font-size: 2rem;
-  }
-  
-  .prose h2 {
-    font-size: 1.75rem;
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px;
   }
 }
 
@@ -258,109 +174,4 @@ button {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
   }
-}
-
-/* Improved button styles */
-.btn-publish {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  color: white;
-  border: none;
-  transition: all 0.3s ease;
-}
-
-.btn-publish:hover {
-  background: linear-gradient(135deg, #047857 0%, #059669 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
-}
-
-.btn-draft {
-  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
-  color: white;
-  border: none;
-}
-
-/* Enhanced card hover effects */
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* Mobile-specific improvements */
-@media (max-width: 640px) {
-  .card-hover:hover {
-    transform: none; /* Disable hover effects on mobile */
-  }
-  
-  /* Better spacing for mobile cards */
-  .grid {
-    gap: 1rem;
-  }
-  
-  /* Improved mobile navigation */
-  .mobile-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(127, 29, 29, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 0.5rem;
-    z-index: 50;
-  }
-}
-
-/* Loading states */
-.loading-skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Image optimization */
-img {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-}
-
-/* Prevent layout shift */
-img[width][height] {
-  height: auto;
-}
-
-/* Optimize font loading */
-@font-face {
-  font-display: swap;
-}
-
-/* Focus styles for better accessibility */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid #7F1D1D;
-  outline-offset: 2px;
 }

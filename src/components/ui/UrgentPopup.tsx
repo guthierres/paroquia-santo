@@ -154,13 +154,13 @@ export const UrgentPopup: React.FC = () => {
               <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-gray-600">Aviso Importante</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span className="text-xs text-gray-500">{timeLeft}s</span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleClose(false)}
-                className="w-8 h-8 p-0 rounded-full"
+                className="w-8 h-8 p-0 rounded-full flex-shrink-0"
               >
                 <X className="h-4 w-4" />
               </Button>

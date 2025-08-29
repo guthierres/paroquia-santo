@@ -71,13 +71,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         className="w-full max-w-md"
       >
         <Card className="p-8">
-          {/* Botão de fechar */}
-          <div className="flex justify-end mb-4">
+          {/* Botão de fechar no canto superior direito */}
+          <div className="absolute top-4 right-4">
             <Button
               variant="outline"
               size="sm"
               onClick={handleClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 w-8 h-8 p-0 rounded-full"
               title="Fechar e voltar à página inicial"
             >
               <X className="h-4 w-4" />

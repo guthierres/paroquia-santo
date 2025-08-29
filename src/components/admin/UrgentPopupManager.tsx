@@ -359,7 +359,7 @@ export const UrgentPopupManager: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                <h4 className="text-lg font-semibold">
+                <h4 className="text-lg font-semibold flex-1 pr-4">
                   {isCreating ? 'Novo Pop-up' : 'Editar Pop-up'}
                 </h4>
                 <Button
@@ -369,6 +369,7 @@ export const UrgentPopupManager: React.FC = () => {
                     setEditingPopup(null);
                     setIsCreating(false);
                   }}
+                  className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -575,7 +576,7 @@ export const UrgentPopupManager: React.FC = () => {
             >
               {/* Preview Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-yellow-50">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 pr-4">
                   <Eye className="h-4 w-4 text-yellow-600" />
                   <span className="text-sm font-medium text-yellow-800">Preview do Pop-up</span>
                 </div>
@@ -583,7 +584,7 @@ export const UrgentPopupManager: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setPreviewPopup(null)}
-                  className="w-8 h-8 p-0 rounded-full"
+                  className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>

@@ -39,9 +39,9 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-900/95 to-red-800/95 backdrop-blur-md shadow-lg safe-area-inset-top will-change-transform">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-900/95 to-red-800/95 backdrop-blur-md shadow-lg safe-area-inset-top will-change-transform w-full max-w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+        <div className="flex items-center justify-between h-14 sm:h-16 w-full">
           <motion.div 
             className="flex items-center gap-2 sm:gap-3 cursor-pointer"
             onClick={() => handleNavigate('home')}
@@ -88,17 +88,17 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden py-4 border-t border-red-700/50 bg-red-900/98 backdrop-blur-md"
+              className="lg:hidden py-4 border-t border-red-700/50 bg-red-900/98 backdrop-blur-md w-full max-w-full overflow-hidden"
             >
               {menuItems.map((item) => (
                 <motion.div
                   key={item.id}
-                  className="mx-2"
+                  className="mx-2 w-auto max-w-full"
                   whileHover={{ x: 10 }}
                 >
                   <button
                     onClick={(e) => handleMobileNavigate(e, item.id)}
-                    className="block w-full text-left px-4 py-3 text-white hover:text-amber-300 font-medium transition-colors duration-200 hover:bg-red-800/50 rounded-lg touch-manipulation"
+                    className="block w-full text-left px-4 py-3 text-white hover:text-amber-300 font-medium transition-colors duration-200 hover:bg-red-800/50 rounded-lg touch-manipulation max-w-full overflow-hidden"
                     style={{ 
                       touchAction: 'manipulation',
                       WebkitTapHighlightColor: 'transparent',

@@ -281,11 +281,12 @@ export const PhotoManager: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold">Editar Foto</h4>
+                <h4 className="text-lg font-semibold flex-1 pr-4">Editar Foto</h4>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setEditingPhoto(null)}
+                  className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>

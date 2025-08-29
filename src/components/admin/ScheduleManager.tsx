@@ -210,7 +210,7 @@ export const ScheduleManager: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold">
+                <h4 className="text-lg font-semibold flex-1 pr-4">
                   {isCreating ? 'Novo Horário' : 'Editar Horário'}
                 </h4>
                 <Button
@@ -220,6 +220,7 @@ export const ScheduleManager: React.FC = () => {
                     setEditingSchedule(null);
                     setIsCreating(false);
                   }}
+                  className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>

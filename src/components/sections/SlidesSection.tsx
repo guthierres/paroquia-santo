@@ -167,7 +167,7 @@ export const SlidesSection: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full overflow-hidden" style={{ height: '100vh', minHeight: '100vh' }}>
+    <section className="relative w-full max-w-full overflow-hidden" style={{ height: '100vh', minHeight: '100vh', width: '100vw', maxWidth: '100vw' }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -175,18 +175,19 @@ export const SlidesSection: React.FC = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full max-w-full overflow-hidden"
         >
           {/* Background Image Container */}
-          <div className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 w-full h-full max-w-full overflow-hidden">
             <img
               src={slides[currentSlide].image_url}
               alt={slides[currentSlide].title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover max-w-full"
               style={{
                 objectPosition: 'center center',
                 width: '100%',
-                height: '100%'
+                height: '100%',
+                maxWidth: '100vw'
               }}
               loading={currentSlide === 0 ? 'eager' : 'lazy'}
               onLoad={() => setImageLoaded(prev => ({ ...prev, [currentSlide]: true }))}
@@ -202,13 +203,13 @@ export const SlidesSection: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/30" />
           
           {/* Content */}
-          <div className="relative z-10 h-full flex items-center justify-center px-4 py-8">
-            <div className="text-center text-white max-w-4xl mx-auto w-full">
+          <div className="relative z-10 h-full flex items-center justify-center px-4 py-8 w-full max-w-full">
+            <div className="text-center text-white max-w-4xl mx-auto w-full max-w-full px-2">
               <motion.h1
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight drop-shadow-2xl px-2"
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight drop-shadow-2xl px-2 w-full max-w-full word-wrap break-words"
               >
                 {slides[currentSlide].title}
               </motion.h1>
@@ -217,7 +218,7 @@ export const SlidesSection: React.FC = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-100 leading-relaxed drop-shadow-lg px-4 max-w-3xl mx-auto"
+                className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-100 leading-relaxed drop-shadow-lg px-4 max-w-3xl mx-auto w-full max-w-full word-wrap break-words"
               >
                 {slides[currentSlide].description}
               </motion.p>

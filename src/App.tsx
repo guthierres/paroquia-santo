@@ -175,7 +175,7 @@ function App() {
   }, [isAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white w-full max-w-full overflow-x-hidden">
       <UrgentPopup />
       <Toaster 
         position="top-right"
@@ -197,7 +197,7 @@ function App() {
       ) : showFullGallery ? (
         <FullGallery onBack={handleBackFromGallery} />
       ) : (
-        <main>
+        <main className="w-full max-w-full overflow-x-hidden">
           <SlidesSection />
           <HeroSection onNavigate={handleNavigate} />
           <HistorySection />
@@ -211,7 +211,7 @@ function App() {
       )}
 
       {!showFullGallery && !showCelebrations && !showPastorals && (
-        <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom">
+        <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -276,7 +276,7 @@ function App() {
               </p>
               <div className="mt-4 pt-3 border-t border-red-700/30">
                 <p className="text-xs text-red-300/80">
-                  Dev por <a 
+                  Desenvolvido por <a 
                     href="https://instagram.com/guthierresc" 
                     target="_blank" 
                     rel="noopener noreferrer"
