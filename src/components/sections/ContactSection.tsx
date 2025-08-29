@@ -227,12 +227,23 @@ export const ContactSection: React.FC = () => {
               Estamos localizados no coração da Cidade Tiradentes, São Paulo. 
               Venha nos visitar e participar das nossas celebrações.
             </p>
-            <p className="text-lg font-semibold text-red-800 mb-2">
-              R. dos Têxteis, 653 - Chacara Santa Etelvina
-            </p>
-            <p className="text-base text-gray-700">
-              São Paulo - SP, 08490-582 - Cidade Tiradentes
-            </p>
+            <a
+              href="https://maps.app.goo.gl/i7CEYTHvX4pAKrmR8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block hover:bg-red-50 transition-colors duration-200 rounded-lg p-3 group"
+            >
+              <p className="text-lg font-semibold text-red-800 mb-2 group-hover:text-red-900 transition-colors">
+                R. dos Têxteis, 653 - Chacara Santa Etelvina
+              </p>
+              <p className="text-base text-gray-700 group-hover:text-gray-800 transition-colors">
+                São Paulo - SP, 08490-582 - Cidade Tiradentes
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-2 text-sm text-red-600 group-hover:text-red-700 transition-colors">
+                <MapPin className="h-4 w-4" />
+                <span>Abrir no Google Maps</span>
+              </div>
+            </a>
           </Card>
         </motion.div>
       </div>
