@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, ChevronRight, Megaphone, X, MapPin, User } from 'lucide-react';
+import { Calendar, Clock, ChevronRight, Megaphone, X, User } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
@@ -145,88 +145,94 @@ export function AnnouncementsSection() {
                       transition={{ duration: 0.6, delay: index * 0.1 }}
                       layout
                     >
-                      <Card 
-                        className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-l-4 border-red-800"
+                      {/* Envolver o Card em um botão para torná-lo clicável por inteiro */}
+                      <button
+                        onClick={() => setSelectedAnnouncement(announcement)}
+                        className="w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
                       >
-                        {/* Header com tipo e data */}
-                        <div className={`p-3 ${
-                          announcement.type === 'event' 
-                            ? 'bg-gradient-to-r from-blue-50 to-blue-100' 
-                            : 'bg-gradient-to-r from-amber-50 to-amber-100'
-                        }`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              {announcement.type === 'event' ? (
-                                <Calendar className="h-4 w-4 text-blue-600" />
-                              ) : (
-                                <Megaphone className="h-4 w-4 text-amber-600" />
+                        <Card
+                          className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-l-4 border-red-800"
+                        >
+                          {/* Header com tipo e data */}
+                          <div className={`p-3 ${
+                            announcement.type === 'event'
+                              ? 'bg-gradient-to-r from-blue-50 to-blue-100'
+                              : 'bg-gradient-to-r from-amber-50 to-amber-100'
+                          }`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                {announcement.type === 'event' ? (
+                                  <Calendar className="h-4 w-4 text-blue-600" />
+                                ) : (
+                                  <Megaphone className="h-4 w-4 text-amber-600" />
+                                )}
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  announcement.type === 'event'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-amber-600 text-white'
+                                }`}>
+                                  {announcement.type === 'event' ? 'Evento' : 'Aviso'}
+                                </span>
+                              </div>
+                              
+                              {announcement.event_date && (
+                                <div className={`text-right ${
+                                  isUpcoming(announcement.event_date)
+                                    ? 'text-green-700'
+                                    : 'text-gray-600'
+                                }`}>
+                                  <div className="text-xs font-medium">
+                                    {formatDate(announcement.event_date)}
+                                  </div>
+                                  <div className="text-sm font-bold">
+                                    {formatTime(announcement.event_date)}
+                                  </div>
+                                </div>
                               )}
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                announcement.type === 'event' 
-                                  ? 'bg-blue-600 text-white' 
-                                  : 'bg-amber-600 text-white'
-                              }`}>
-                                {announcement.type === 'event' ? 'Evento' : 'Aviso'}
-                              </span>
                             </div>
                             
-                            {announcement.event_date && (
-                              <div className={`text-right ${
-                                isUpcoming(announcement.event_date) 
-                                  ? 'text-green-700' 
-                                  : 'text-gray-600'
-                              }`}>
-                                <div className="text-xs font-medium">
-                                  {formatDate(announcement.event_date)}
-                                </div>
-                                <div className="text-sm font-bold">
-                                  {formatTime(announcement.event_date)}
-                                </div>
+                            {/* Indicador de evento próximo */}
+                            {announcement.event_date && isUpcoming(announcement.event_date) && (
+                              <div className="flex items-center gap-1 text-xs text-green-700 font-medium">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                Próximo evento
                               </div>
                             )}
                           </div>
-                          
-                          {/* Indicador de evento próximo */}
-                          {announcement.event_date && isUpcoming(announcement.event_date) && (
-                            <div className="flex items-center gap-1 text-xs text-green-700 font-medium">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              Próximo evento
-                            </div>
-                          )}
-                        </div>
 
-                        {/* Conteúdo principal */}
-                        <div className="p-4 flex-1 flex flex-col">
-                          <h3 className="font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2 line-clamp-2 text-sm sm:text-base">
-                            {announcement.title}
-                          </h3>
-                          
-                          <p className="text-gray-600 text-xs sm:text-sm mb-3 flex-1 line-clamp-3 leading-relaxed">
-                            {announcement.content}
-                          </p>
+                          {/* Conteúdo principal */}
+                          <div className="p-4 flex-1 flex flex-col">
+                            <h3 className="font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2 line-clamp-2 text-sm sm:text-base">
+                              {announcement.title}
+                            </h3>
+                            
+                            <p className="text-gray-600 text-xs sm:text-sm mb-3 flex-1 line-clamp-3 leading-relaxed">
+                              {announcement.content}
+                            </p>
 
-                          {/* Footer com data de criação e botão */}
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Clock className="h-3 w-3" />
-                              <span>
-                                {new Date(announcement.created_at).toLocaleDateString('pt-BR', {
-                                  day: '2-digit',
-                                  month: '2-digit'
-                                })}
+                            {/* Footer com data de criação e "Ver mais" como span */}
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Clock className="h-3 w-3" />
+                                <span>
+                                  {new Date(announcement.created_at).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                              
+                              {/* Alterado para <span> pois o Card já é um botão */}
+                              <span
+                                className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-xs"
+                              >
+                                <span>Ver mais</span>
+                                <ChevronRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
                               </span>
                             </div>
-                            
-                            <button
-                              onClick={() => setSelectedAnnouncement(announcement)}
-                              className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-xs hover:bg-red-50 px-2 py-1 rounded"
-                            >
-                              <span>Ver mais</span>
-                              <ChevronRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
-                            </button>
                           </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      </button>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -306,9 +312,10 @@ export function AnnouncementsSection() {
                   <Button
                     variant="outline"
                     onClick={() => setSelectedAnnouncement(null)}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-8 h-8 p-0 rounded-full flex-shrink-0"
+                    className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                   >
-                    <X className="h-4 w-4" />
+                    {/* Alterado para que o ícone do X seja branco */}
+                    <X className="h-4 w-4 text-white" />
                   </Button>
                 </div>
 
