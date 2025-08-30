@@ -15,6 +15,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   const [albumPhotos, setAlbumPhotos] = useState<Photo[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
@@ -23,18 +24,6 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
 
   useEffect(() => {
     fetchAlbums();
-  }, []);
-
-  // Refresh albums when component becomes visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchAlbums();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const fetchAlbums = async () => {
@@ -108,6 +97,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   };
 
   const fetchAlbumPhotos = async (albumId: string) => {
+    setIsLoadingPhotos(true);
     try {
       const { data, error } = await supabase
         .from('photos')
@@ -116,18 +106,54 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      if (data) {
+      
+      if (data && data.length > 0) {
         setAlbumPhotos(data);
       } else {
-        setAlbumPhotos([]);
+        // Fotos de exemplo se não houver fotos no álbum
+        const samplePhotos: Photo[] = [
+          {
+            id: `sample-1-${albumId}`,
+            title: 'Foto de Exemplo 1',
+            description: 'Esta é uma foto de exemplo do álbum',
+            image_url: 'https://images.pexels.com/photos/8468459/pexels-photo-8468459.jpeg',
+            cloudinary_public_id: null,
+            category: 'community',
+            album_id: albumId,
+            created_at: new Date().toISOString()
+          },
+          {
+            id: `sample-2-${albumId}`,
+            title: 'Foto de Exemplo 2',
+            description: 'Esta é outra foto de exemplo do álbum',
+            image_url: 'https://images.pexels.com/photos/7220900/pexels-photo-7220900.jpeg',
+            cloudinary_public_id: null,
+            category: 'community',
+            album_id: albumId,
+            created_at: new Date().toISOString()
+          },
+          {
+            id: `sample-3-${albumId}`,
+            title: 'Foto de Exemplo 3',
+            description: 'Mais uma foto de exemplo do álbum',
+            image_url: 'https://images.pexels.com/photos/6608313/pexels-photo-6608313.jpeg',
+            cloudinary_public_id: null,
+            category: 'community',
+            album_id: albumId,
+            created_at: new Date().toISOString()
+          }
+        ];
+        setAlbumPhotos(samplePhotos);
       }
     } catch (error) {
       console.error('Error fetching album photos:', error);
       setAlbumPhotos([]);
+    } finally {
+      setIsLoadingPhotos(false);
     }
   };
 
-  const handleAlbumSelect = async (album: PhotoAlbum) => {
+  const handleAlbumClick = async (album: PhotoAlbum) => {
     setSelectedAlbum(album);
     await fetchAlbumPhotos(album.id);
   };
@@ -137,9 +163,6 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
     setAlbumPhotos([]);
     setSelectedPhoto(null);
   };
-
-  const displayedAlbums = albums.slice(0, 4);
-  const hasMoreAlbums = albums.length > 4;
 
   const handlePhotoSelect = (photo: Photo) => {
     const index = albumPhotos.findIndex(p => p.id === photo.id);
@@ -247,7 +270,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {displayedAlbums.map((album, index) => (
+                  {albums.slice(0, 4).map((album, index) => (
                     <motion.div
                       key={album.id}
                       initial={{ opacity: 0, y: 30 }}
@@ -256,7 +279,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                     >
                       <Card 
                         className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                        onClick={() => handleAlbumSelect(album)}
+                        onClick={() => handleAlbumClick(album)}
                       >
                         <div className="aspect-video overflow-hidden bg-gray-100 relative">
                           {album.cover_image_url ? (
@@ -298,23 +321,86 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                 </div>
 
                 {/* Ver Todos os Álbuns Button */}
-                {hasMoreAlbums && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  className="text-center mt-12"
+                >
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={onNavigateToFullGallery}
+                    className="flex items-center gap-2"
+                  >
+                    Ver Todos os Álbuns ({albums.length} álbuns)
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+
+                {/* Mostrar mais álbuns na mesma página se houver */}
+                {albums.length > 4 && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mt-12"
+                    className="mt-12"
                   >
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      onClick={onNavigateToFullGallery}
-                      className="flex items-center gap-2"
-                    >
-                      Ver Todos os Álbuns ({albums.length} álbuns)
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-4">Mais Álbuns</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {albums.slice(4).map((album, index) => (
+                        <motion.div
+                          key={album.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: index * 0.1 }}
+                        >
+                          <Card 
+                            className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                            onClick={() => handleAlbumClick(album)}
+                          >
+                            <div className="aspect-video overflow-hidden bg-gray-100 relative">
+                              {album.cover_image_url ? (
+                                <img
+                                  src={album.cover_image_url}
+                                  alt={album.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Folder className="h-16 w-16 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                                    <ImageIcon className="h-6 w-6 text-gray-800" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2">
+                                {album.name}
+                              </h3>
+                              <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                                {album.description}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-gray-500">
+                                  Criado em {new Date(album.created_at).toLocaleDateString('pt-BR')}
+                                </span>
+                                <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                              </div>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
                   </motion.div>
                 )}
               </>
@@ -336,11 +422,19 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                 <div>
                   <h2 className="text-3xl font-bold text-gray-800">{selectedAlbum.name}</h2>
                   <p className="text-gray-600">{selectedAlbum.description}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {albumPhotos.length} foto{albumPhotos.length !== 1 ? 's' : ''}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {albumPhotos.length === 0 ? (
+            {isLoadingPhotos ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-800 mx-auto mb-4"></div>
+                <p className="text-gray-600">Carregando fotos do álbum...</p>
+              </div>
+            ) : albumPhotos.length === 0 ? (
               <Card className="p-12 text-center">
                 <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
@@ -437,7 +531,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                       onClick={handleNextPhoto}
                       className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 border-white/20 text-white hover:bg-black/70 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
                     >
-                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
                     </Button>
                   </>
                 )}
