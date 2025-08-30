@@ -147,7 +147,6 @@ export function AnnouncementsSection() {
                     >
                       <Card 
                         className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-l-4 border-red-800"
-                        onClick={() => setSelectedAnnouncement(announcement)}
                       >
                         {/* Header com tipo e data */}
                         <div className={`p-3 ${
@@ -218,10 +217,13 @@ export function AnnouncementsSection() {
                               </span>
                             </div>
                             
-                            <div className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-xs">
+                            <button
+                              onClick={() => setSelectedAnnouncement(announcement)}
+                              className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-xs hover:bg-red-50 px-2 py-1 rounded"
+                            >
                               <span>Ver mais</span>
                               <ChevronRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
-                            </div>
+                            </button>
                           </div>
                         </div>
                       </Card>
