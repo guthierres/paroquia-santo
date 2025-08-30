@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
-import { Settings } from 'lucide-react';
+import { Settings as AdminSettingsIcon } from 'lucide-react';
 import { Header } from './components/layout/Header';
 import { HeroSection } from './components/sections/HeroSection';
 import { HistorySection } from './components/sections/HistorySection';
@@ -15,6 +15,7 @@ import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
 import { CelebrationsPage } from './components/sections/CelebrationsPage';
 import { PastoralsPage } from './components/sections/PastoralsPage';
+import { AlbumGallery } from './components/sections/AlbumGallery';
 import { UrgentPopup } from './components/ui/UrgentPopup';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
@@ -26,6 +27,7 @@ function App() {
   const [showFullGallery, setShowFullGallery] = useState(false);
   const [showCelebrations, setShowCelebrations] = useState(false);
   const [showPastorals, setShowPastorals] = useState(false);
+  const [showAlbumGallery, setShowAlbumGallery] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -72,6 +74,7 @@ function App() {
       setShowCelebrations(true);
       setShowFullGallery(false);
       setShowPastorals(false);
+      setShowAlbumGallery(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -80,6 +83,7 @@ function App() {
       setShowPastorals(true);
       setShowFullGallery(false);
       setShowCelebrations(false);
+      setShowAlbumGallery(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -88,6 +92,7 @@ function App() {
     setShowFullGallery(false);
     setShowCelebrations(false);
     setShowPastorals(false);
+    setShowAlbumGallery(false);
     
     // Close mobile menu if open
     const mobileMenuButton = document.querySelector('[data-mobile-menu]');
@@ -133,12 +138,12 @@ function App() {
   };
 
   const handleShowFullGallery = () => {
-    setShowFullGallery(true);
+    setShowAlbumGallery(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackFromGallery = () => {
-    setShowFullGallery(false);
+    setShowAlbumGallery(false);
     handleNavigate('photos');
   };
 
@@ -194,8 +199,8 @@ function App() {
         <CelebrationsPage onBack={handleBackFromCelebrations} />
       ) : showPastorals ? (
         <PastoralsPage onBack={handleBackFromPastorals} />
-      ) : showFullGallery ? (
-        <FullGallery onBack={handleBackFromGallery} />
+      ) : showAlbumGallery ? (
+        <AlbumGallery onBack={handleBackFromGallery} />
       ) : (
         <main className="w-full max-w-full overflow-x-hidden">
           <SlidesSection />
@@ -210,7 +215,7 @@ function App() {
         </main>
       )}
 
-      {!showFullGallery && !showCelebrations && !showPastorals && (
+      {!showAlbumGallery && !showCelebrations && !showPastorals && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -289,6 +294,25 @@ function App() {
             </motion.div>
           </div>
         </footer>
+      )}
+
+      {/* Admin Access Button */}
+      {!showAdmin && !showLogin && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 2, duration: 0.5 }}
+          className="fixed bottom-8 right-8 z-40"
+        >
+          <Button
+            variant="primary"
+            onClick={() => setShowLogin(true)}
+            className="rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl"
+            title="Acesso Administrativo"
+          >
+            <AdminSettingsIcon className="h-5 w-5" />
+          </Button>
+        </motion.div>
       )}
 
       {/* Admin Modals */}

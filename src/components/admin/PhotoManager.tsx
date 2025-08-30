@@ -4,11 +4,12 @@ import { Trash2, Edit, Save, X, Image as ImageIcon, Upload } from 'lucide-react'
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { FileUpload } from '../ui/FileUpload';
-import { supabase, Photo } from '../../lib/supabase';
+import { supabase, Photo, PhotoAlbum } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
 export const PhotoManager: React.FC = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
 
@@ -21,6 +22,7 @@ export const PhotoManager: React.FC = () => {
 
   useEffect(() => {
     fetchPhotos();
+    fetchAlbums();
   }, []);
 
   const fetchPhotos = async () => {
@@ -38,6 +40,20 @@ export const PhotoManager: React.FC = () => {
     }
   };
 
+  const fetchAlbums = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('photo_albums')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      if (data) setAlbums(data);
+    } catch (error) {
+      console.error('Error fetching albums:', error);
+    }
+  };
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     await processFiles(files);
@@ -58,7 +74,8 @@ export const PhotoManager: React.FC = () => {
             description: '',
             image_url: result.secureUrl,
             cloudinary_public_id: result.publicId,
-            category: 'community'
+            category: 'community',
+            album_id: null
           }
         ])
         .select()
@@ -83,7 +100,8 @@ export const PhotoManager: React.FC = () => {
             title: 'Nova Foto',
             description: '',
             image_url: result.url,
-            category: 'community'
+            category: 'community',
+            album_id: null
           }
         ])
         .select()
@@ -155,7 +173,8 @@ export const PhotoManager: React.FC = () => {
         .update({
           title: editingPhoto.title,
           description: editingPhoto.description,
-          category: editingPhoto.category
+          category: editingPhoto.category,
+          album_id: editingPhoto.album_id
         })
         .eq('id', editingPhoto.id);
 
@@ -201,20 +220,18 @@ export const PhotoManager: React.FC = () => {
           <p className="text-gray-500 mb-4">
             Comece adicionando algumas fotos da paróquia
           </p>
-          <input
-            id="photo-upload-empty"
-            type="file"
+          <FileUpload
+            onCloudinaryUpload={handleCloudinaryUpload}
+            onSupabaseUpload={handleSupabaseUpload}
             accept="image/*"
             multiple
-            onChange={(e) => processFiles(e.target.files)}
-            className="hidden"
-          />
-          <label htmlFor="photo-upload-empty" className="cursor-pointer">
+            disabled={isUploading}
+          >
             <Button variant="primary">
-              <Upload className="h-4 w-4" />
+              <ImageIcon className="h-4 w-4" />
               Adicionar Primeira Foto
             </Button>
-          </label>
+          </FileUpload>
         </Card>
       )}
 
@@ -344,6 +361,26 @@ export const PhotoManager: React.FC = () => {
                   </select>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Álbum
+                  </label>
+                  <select
+                    value={editingPhoto.album_id || ''}
+                    onChange={(e) => setEditingPhoto(prev => prev ? { 
+                      ...prev, 
+                      album_id: e.target.value || null 
+                    } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                  >
+                    <option value="">Sem álbum</option>
+                    {albums.map(album => (
+                      <option key={album.id} value={album.id}>
+                        {album.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex gap-2 pt-4">
                   <Button
                     variant="outline"

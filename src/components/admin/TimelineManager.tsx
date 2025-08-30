@@ -93,8 +93,7 @@ export function TimelineManager() {
   const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
     setFormData(prev => ({ 
       ...prev, 
-      image_url: result.secureUrl,
-      cloudinary_public_id: result.publicId 
+      image_url: result.secureUrl
     }));
     toast.success('Imagem carregada com sucesso!');
   };

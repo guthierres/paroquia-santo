@@ -15,6 +15,7 @@ import { CloudinarySettings } from './CloudinarySettings';
 import { CelebrationManager } from './CelebrationManager';
 import { PastoralManager } from './PastoralManager';
 import { UrgentPopupManager } from './UrgentPopupManager';
+import { AlbumManager } from './AlbumManager';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -34,6 +35,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     { id: 'blog', label: 'Blog', icon: FileText },
     { id: 'priests', label: 'Clero', icon: Users },
     { id: 'celebrations', label: 'Celebrações', icon: Calendar },
+    { id: 'albums', label: 'Álbuns de Fotos', icon: Image },
     { id: 'photos', label: 'Galeria de Fotos', icon: Image },
     { id: 'timeline', label: 'Linha do Tempo', icon: Calendar },
     { id: 'slides', label: 'Slides do Site', icon: Settings },
@@ -68,6 +70,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <PriestManager />;
       case 'celebrations':
         return <CelebrationManager />;
+      case 'albums':
+        return <AlbumManager />;
       case 'photos':
         return <PhotoManager />;
       case 'timeline':

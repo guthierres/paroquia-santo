@@ -238,10 +238,6 @@ export const SlideManager: React.FC = () => {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingSlide(null);
-    setIsCreating(false);
-  };
 
   return (
     <div className="space-y-6">
@@ -370,7 +366,10 @@ export const SlideManager: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleCancelEdit}
+                  onClick={() => {
+                    setEditingSlide(null);
+                    setIsCreating(false);
+                  }}
                   className="w-8 h-8 p-0 rounded-full flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
@@ -467,7 +466,10 @@ export const SlideManager: React.FC = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={handleCancelEdit}
+                    onClick={() => {
+                      setEditingSlide(null);
+                      setIsCreating(false);
+                    }}
                     className="flex-1"
                   >
                     Cancelar

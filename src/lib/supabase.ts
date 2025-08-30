@@ -257,3 +257,26 @@ export interface Pastoral {
   created_at: string;
   updated_at: string;
 }
+
+export interface PhotoAlbum {
+  id: string;
+  name: string;
+  description: string;
+  cover_image_url: string | null;
+  cloudinary_public_id: string | null;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Photo {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  cloudinary_public_id: string | null;
+  category: 'history' | 'events' | 'celebrations' | 'community';
+  album_id: string | null;
+  created_at: string;
+}

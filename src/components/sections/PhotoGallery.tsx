@@ -3,16 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Users, Heart, Sparkles, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, ArrowRight } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { supabase, Photo } from '../../lib/supabase';
+import { supabase, Photo, PhotoAlbum } from '../../lib/supabase';
 
 interface PhotoGalleryProps {
   onNavigateToFullGallery: () => void;
 }
 
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGallery }) => {
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<PhotoAlbum | null>(null);
+  const [albumPhotos, setAlbumPhotos] = useState<Photo[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -20,63 +21,108 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const categories = [
-    { id: 'all', label: 'Todas', icon: Sparkles },
-    { id: 'history', label: 'História', icon: Calendar },
-    { id: 'events', label: 'Eventos', icon: Users },
-    { id: 'celebrations', label: 'Celebrações', icon: Heart },
-    { id: 'community', label: 'Comunidade', icon: Users }
-  ];
 
   useEffect(() => {
-    fetchPhotos();
+    fetchAlbums();
   }, []);
 
   // Preload first 3 images for better UX
   useEffect(() => {
-    if (photos.length > 0) {
-      const preloadUrls = photos.slice(0, 3).map(photo => photo.image_url);
+    if (albumPhotos.length > 0) {
+      const preloadUrls = albumPhotos.slice(0, 3).map(photo => photo.image_url);
       preloadUrls.forEach(url => {
         const img = new Image();
         img.src = url;
       });
     }
-  }, [photos]);
+  }, [albumPhotos]);
 
-  const fetchPhotos = async () => {
+  const fetchAlbums = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('photos')
+      const { data: albumsData, error: albumsError } = await supabase
+        .from('photo_albums')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('is_active', true)
+        .order('order_index', { ascending: true });
 
-      if (data && data.length > 0) {
-        setPhotos(data);
+      if (albumsError) throw albumsError;
+      
+      if (albumsData && albumsData.length > 0) {
+        setAlbums(albumsData);
+        // Selecionar o primeiro álbum automaticamente
+        setSelectedAlbum(albumsData[0]);
+        await fetchAlbumPhotos(albumsData[0].id);
       } else {
+        // Criar álbuns padrão se não existirem
+        const defaultAlbums: PhotoAlbum[] = [
+          {
+            id: '1',
+            name: '40 Anos de História',
+            description: 'Fotos históricas da paróquia desde sua fundação',
+            cover_image_url: 'https://images.pexels.com/photos/6608313/pexels-photo-6608313.jpeg',
+            cloudinary_public_id: null,
+            is_active: true,
+            order_index: 1,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            id: '2',
+            name: 'Celebrações Especiais',
+            description: 'Momentos marcantes das principais celebrações',
+            cover_image_url: 'https://images.pexels.com/photos/8468459/pexels-photo-8468459.jpeg',
+            cloudinary_public_id: null,
+            is_active: true,
+            order_index: 2,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            id: '3',
+            name: 'Vida Comunitária',
+            description: 'O dia a dia da nossa comunidade paroquial',
+            cover_image_url: 'https://images.pexels.com/photos/7220900/pexels-photo-7220900.jpeg',
+            cloudinary_public_id: null,
+            is_active: true,
+            order_index: 3,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ];
+        setAlbums(defaultAlbums);
+        setSelectedAlbum(defaultAlbums[0]);
+        
+        // Criar fotos de exemplo para o primeiro álbum
         const samplePhotos: Photo[] = [
           {
             id: '1',
-            title: 'Celebração dos 40 Anos',
-            description: 'Missa especial comemorativa dos 40 anos da paróquia',
+            title: 'Interior da Igreja',
+            description: 'Nosso belo altar e espaço sagrado',
             image_url: 'https://images.pexels.com/photos/8468459/pexels-photo-8468459.jpeg',
-            category: 'celebrations',
+            cloudinary_public_id: null,
+            category: 'history',
+            album_id: '1',
             created_at: new Date().toISOString()
           },
           {
             id: '2',
-            title: 'Comunidade Unida',
-            description: 'Fiéis reunidos em oração e comunhão',
+            title: 'Fachada da Paróquia',
+            description: 'Vista externa do nosso templo',
             image_url: 'https://images.pexels.com/photos/7220900/pexels-photo-7220900.jpeg',
-            category: 'community',
+            cloudinary_public_id: null,
+            category: 'history',
+            album_id: '1',
             created_at: new Date().toISOString()
           },
           {
             id: '3',
-            title: 'Interior da Igreja',
-            description: 'Nosso belo altar e espaço sagrado',
+            title: 'Altar Principal',
+            description: 'Nosso altar dedicado ao Senhor Santo Cristo',
             image_url: 'https://images.pexels.com/photos/6608313/pexels-photo-6608313.jpeg',
+            cloudinary_public_id: null,
             category: 'history',
+            album_id: '1',
             created_at: new Date().toISOString()
           },
           {
@@ -84,7 +130,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
             title: 'Primeira Comunhão',
             description: 'Crianças recebendo o sacramento da Eucaristia',
             image_url: 'https://images.pexels.com/photos/8468498/pexels-photo-8468498.jpeg',
+            cloudinary_public_id: null,
             category: 'events',
+            album_id: null,
             created_at: new Date().toISOString()
           },
           {
@@ -92,7 +140,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
             title: 'Fachada da Paróquia',
             description: 'Vista externa do nosso templo',
             image_url: 'https://images.pexels.com/photos/14751274/pexels-photo-14751274.jpeg',
+            cloudinary_public_id: null,
             category: 'history',
+            album_id: null,
             created_at: new Date().toISOString()
           },
           {
@@ -100,28 +150,48 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
             title: 'Coro Paroquial',
             description: 'Grupo de canto da nossa comunidade',
             image_url: 'https://images.pexels.com/photos/8468456/pexels-photo-8468456.jpeg',
+            cloudinary_public_id: null,
             category: 'community',
+            album_id: null,
             created_at: new Date().toISOString()
           }
         ];
-        setPhotos(samplePhotos);
+        setAlbumPhotos(samplePhotos);
       }
     } catch (error) {
-      console.error('Error fetching photos:', error);
+      console.error('Error fetching albums:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredPhotos = selectedCategory === 'all'
-    ? photos.slice(0, 6)
-    : photos.filter(photo => photo.category === selectedCategory).slice(0, 6);
+  const fetchAlbumPhotos = async (albumId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('photos')
+        .select('*')
+        .eq('album_id', albumId)
+        .order('created_at', { ascending: false });
 
-  const totalPhotosInCategory = selectedCategory === 'all'
-    ? photos.length
-    : photos.filter(photo => photo.category === selectedCategory).length;
+      if (error) throw error;
+      if (data) {
+        setAlbumPhotos(data);
+      } else {
+        setAlbumPhotos([]);
+      }
+    } catch (error) {
+      console.error('Error fetching album photos:', error);
+      setAlbumPhotos([]);
+    }
+  };
 
-  const hasMorePhotos = totalPhotosInCategory > 6;
+  const handleAlbumSelect = async (album: PhotoAlbum) => {
+    setSelectedAlbum(album);
+    await fetchAlbumPhotos(album.id);
+  };
+
+  const displayedPhotos = albumPhotos.slice(0, 6);
+  const hasMorePhotos = albumPhotos.length > 6;
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.5, 3));
@@ -160,7 +230,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   };
 
   const handlePhotoSelect = (photo: Photo) => {
-    const index = filteredPhotos.findIndex(p => p.id === photo.id);
+    const index = displayedPhotos.findIndex(p => p.id === photo.id);
     setCurrentPhotoIndex(index);
     setSelectedPhoto(photo);
     setZoomLevel(1);
@@ -168,16 +238,16 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   };
 
   const handleNextPhoto = () => {
-    const nextIndex = (currentPhotoIndex + 1) % filteredPhotos.length;
+    const nextIndex = (currentPhotoIndex + 1) % displayedPhotos.length;
     setCurrentPhotoIndex(nextIndex);
-    setSelectedPhoto(filteredPhotos[nextIndex]);
+    setSelectedPhoto(displayedPhotos[nextIndex]);
     handleResetZoom();
   };
 
   const handlePrevPhoto = () => {
-    const prevIndex = (currentPhotoIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+    const prevIndex = (currentPhotoIndex - 1 + displayedPhotos.length) % displayedPhotos.length;
     setCurrentPhotoIndex(prevIndex);
-    setSelectedPhoto(filteredPhotos[prevIndex]);
+    setSelectedPhoto(displayedPhotos[prevIndex]);
     handleResetZoom();
   };
 
@@ -192,7 +262,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPhoto, currentPhotoIndex, filteredPhotos]);
+  }, [selectedPhoto, currentPhotoIndex, displayedPhotos]);
 
   if (isLoading) {
     return (
@@ -221,44 +291,54 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
             Galeria de Fotos
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Momentos especiais e memórias preciosas da nossa comunidade
+            Explore nossos álbuns com momentos especiais e memórias preciosas
           </p>
         </motion.div>
 
-        {/* Category Filter */}
+        {/* Album Filter */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {categories.map((category) => (
+          {albums.map((album) => (
             <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? 'primary' : 'outline'}
-              onClick={() => setSelectedCategory(category.id)}
+              key={album.id}
+              variant={selectedAlbum?.id === album.id ? 'primary' : 'outline'}
+              onClick={() => handleAlbumSelect(album)}
               className="flex items-center gap-2"
             >
-              <category.icon className="h-4 w-4" />
-              {category.label}
+              <Sparkles className="h-4 w-4" />
+              {album.name}
             </Button>
           ))}
         </div>
 
         {/* Photo Grid */}
-        {filteredPhotos.length === 0 ? (
+        {!selectedAlbum ? (
           <Card className="p-12 text-center">
             <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              {selectedCategory === 'all' ? 'Nenhuma foto encontrada' : 'Nenhuma foto nesta categoria'}
+              Selecione um álbum
             </h3>
             <p className="text-gray-500">
-              Use o painel administrativo para adicionar fotos da paróquia
+              Escolha um álbum acima para ver as fotos
+            </p>
+          </Card>
+        ) : displayedPhotos.length === 0 ? (
+          <Card className="p-12 text-center">
+            <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              Nenhuma foto neste álbum
+            </h3>
+            <p className="text-gray-500">
+              Use o painel administrativo para adicionar fotos a este álbum
             </p>
           </Card>
         ) : (
           <>
             <motion.div
               layout
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
             >
               <AnimatePresence>
-                {filteredPhotos.map((photo) => (
+                {displayedPhotos.map((photo) => (
                   <motion.div
                     key={photo.id}
                     layout
@@ -283,11 +363,6 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                         {photo.description && (
                           <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2 hidden sm:block">{photo.description}</p>
                         )}
-                        <div className="mt-1 sm:mt-2">
-                          <span className="inline-block px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                            {categories.find(c => c.id === photo.category)?.label}
-                          </span>
-                        </div>
                       </div>
                     </Card>
                   </motion.div>
@@ -310,7 +385,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                   onClick={onNavigateToFullGallery}
                   className="flex items-center gap-2"
                 >
-                  Ver Galeria Completa ({totalPhotosInCategory} fotos)
+                  Ver Galeria Completa ({albumPhotos.length} fotos)
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </motion.div>
@@ -337,7 +412,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
               >
 
                 {/* Navigation Arrows */}
-                {filteredPhotos.length > 1 && (
+                {displayedPhotos.length > 1 && (
                   <>
                     <Button
                       variant="outline"
@@ -398,7 +473,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
 
                 {/* Photo Counter */}
                 <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm">
-                  {currentPhotoIndex + 1} de {filteredPhotos.length}
+                  {currentPhotoIndex + 1} de {displayedPhotos.length}
                 </div>
 
                 {/* Image Container */}
@@ -439,7 +514,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                         {selectedPhoto.title}
                       </h3>
                       <span className="inline-block px-2 py-1 sm:px-3 text-xs sm:text-sm bg-red-600 rounded-full ml-2 sm:ml-4">
-                        {categories.find(c => c.id === selectedPhoto.category)?.label}
+                        {selectedAlbum?.name}
                       </span>
                     </div>
 
