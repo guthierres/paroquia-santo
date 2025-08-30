@@ -156,6 +156,7 @@ export interface Photo {
   image_url: string;
   cloudinary_public_id: string | null;
   category: 'history' | 'events' | 'celebrations' | 'community';
+  album_id: string | null;
   created_at: string;
 }
 

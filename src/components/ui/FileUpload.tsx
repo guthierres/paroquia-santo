@@ -62,6 +62,35 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     
     if (!files || files.length === 0) return;
 
+    // Validar arquivos antes do upload
+    const fileArray = Array.from(files);
+    const validFiles: File[] = [];
+    
+    fileArray.forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name}: Não é uma imagem válida`);
+        return;
+      }
+      
+      if (file.size > 1024 * 1024) { // 1MB limit
+        toast.error(`${file.name}: Arquivo muito grande (máximo 1MB)`);
+        return;
+      }
+      
+      validFiles.push(file);
+    });
+
+    if (validFiles.length === 0) {
+      toast.error('Nenhum arquivo válido selecionado');
+      return;
+    }
+
+    // Limitar a 10 arquivos por vez
+    const limitedFiles = validFiles.slice(0, 10);
+    if (validFiles.length > 10) {
+      toast.error(`Máximo 10 arquivos por vez. ${validFiles.length - 10} arquivos foram ignorados.`);
+    }
+
     // Verificar se deve usar Cloudinary
     if (useCloudinary && (onCloudinaryUpload || onSupabaseUpload)) {
       setIsUploading(true);
@@ -72,29 +101,41 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         const forceCloudinary = !config.supabaseStorageEnabled;
         
         if ((config.enabled || forceCloudinary) && onCloudinaryUpload) {
-          // Upload para Cloudinary
-          const file = files[0]; // Por enquanto, apenas um arquivo
-          try {
-            const result = await uploadToCloudinary(file, folder);
-            onCloudinaryUpload(result);
-            toast.success('Imagem enviada para Cloudinary com sucesso!');
-          } catch (cloudinaryError) {
-            if (forceCloudinary) {
-              // Se Cloudinary é obrigatório e falhou, mostra erro
-              console.error('Cloudinary obrigatório falhou:', cloudinaryError);
-              toast.error('Erro: Cloudinary é obrigatório mas falhou. Verifique as configurações.');
-              throw cloudinaryError;
-            } else {
-              // Fallback para Supabase apenas se permitido
-              throw cloudinaryError;
+          // Upload para Cloudinary - processar múltiplos arquivos
+          for (let i = 0; i < limitedFiles.length; i++) {
+            const file = limitedFiles[i];
+            try {
+              const result = await uploadToCloudinary(file, folder);
+              onCloudinaryUpload(result);
+              
+              if (limitedFiles.length === 1) {
+                toast.success('Imagem enviada para Cloudinary com sucesso!');
+              } else if (i === limitedFiles.length - 1) {
+                toast.success(`${limitedFiles.length} imagens enviadas para Cloudinary com sucesso!`);
+              }
+            } catch (cloudinaryError) {
+              if (forceCloudinary) {
+                console.error('Cloudinary obrigatório falhou:', cloudinaryError);
+                toast.error(`Erro no Cloudinary para ${file.name}. Verifique as configurações.`);
+                throw cloudinaryError;
+              } else {
+                throw cloudinaryError;
+              }
             }
           }
         } else if (onSupabaseUpload && config.supabaseStorageEnabled) {
-          // Upload para Supabase quando Cloudinary não está habilitado
-          const file = files[0];
-          const result = await uploadToSupabase(file);
-          onSupabaseUpload(result);
-          toast.success('Imagem enviada com sucesso!');
+          // Upload para Supabase quando Cloudinary não está habilitado - processar múltiplos arquivos
+          for (let i = 0; i < limitedFiles.length; i++) {
+            const file = limitedFiles[i];
+            const result = await uploadToSupabase(file);
+            onSupabaseUpload(result);
+            
+            if (limitedFiles.length === 1) {
+              toast.success('Imagem enviada com sucesso!');
+            } else if (i === limitedFiles.length - 1) {
+              toast.success(`${limitedFiles.length} imagens enviadas com sucesso!`);
+            }
+          }
         } else if (!config.supabaseStorageEnabled) {
           // Se Supabase está desabilitado mas Cloudinary não está configurado
           toast.error('Supabase Storage desabilitado. Configure o Cloudinary primeiro!');
@@ -102,7 +143,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         } else {
           // Fallback para método tradicional
           if (onFileSelect) {
-            onFileSelect(files);
+            onFileSelect(files); // Manter compatibilidade
           }
         }
       } catch (error) {
@@ -113,7 +154,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         // Fallback para Supabase apenas se permitido
         if (onSupabaseUpload && config.supabaseStorageEnabled) {
           try {
-            const file = files[0];
+            const file = limitedFiles[0]; // Usar arquivo validado
             const result = await uploadToSupabase(file);
             onSupabaseUpload(result);
             toast.success('Imagem enviada para Supabase como fallback!');
@@ -121,13 +162,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             console.error('Erro no fallback:', fallbackError);
             toast.error('Erro ao enviar imagem.');
             if (onFileSelect) {
-              onFileSelect(files);
+              onFileSelect(files); // Manter compatibilidade
             }
           }
         } else {
           toast.error('Erro ao enviar imagem.');
           if (onFileSelect) {
-            onFileSelect(files);
+            onFileSelect(files); // Manter compatibilidade
           }
         }
       } finally {
@@ -135,7 +176,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       }
     } else if (onFileSelect) {
       // Método tradicional
-      onFileSelect(files);
+      onFileSelect(files); // Manter compatibilidade
     }
 
     // Reset input to allow selecting the same file again

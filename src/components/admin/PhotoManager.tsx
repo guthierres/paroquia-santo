@@ -115,35 +115,6 @@ export const PhotoManager: React.FC = () => {
       toast.error('Erro ao salvar foto no banco de dados');
     }
   };
-  const processFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    setIsUploading(true);
-    try {
-      for (const file of Array.from(files)) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          toast.error(`${file.name} não é uma imagem válida`);
-          continue;
-        }
-
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error(`${file.name} é muito grande (máximo 10MB)`);
-          continue;
-        }
-
-        // Este processamento agora será feito pelos callbacks do FileUpload
-        // Mantemos apenas para compatibilidade com uploads diretos
-      }
-
-    } catch (error) {
-      console.error('Error uploading photos:', error);
-      toast.error('Erro ao carregar fotos');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleDeletePhoto = async (photo: Photo) => {
     if (!confirm('Tem certeza que deseja excluir esta foto?')) return;
@@ -199,6 +170,7 @@ export const PhotoManager: React.FC = () => {
           <FileUpload
             onCloudinaryUpload={handleCloudinaryUpload}
             onSupabaseUpload={handleSupabaseUpload}
+            onFileSelect={() => {}} // Não usado mais para upload direto
             accept="image/*"
             multiple
             disabled={isUploading}
@@ -223,6 +195,7 @@ export const PhotoManager: React.FC = () => {
           <FileUpload
             onCloudinaryUpload={handleCloudinaryUpload}
             onSupabaseUpload={handleSupabaseUpload}
+            onFileSelect={() => {}} // Não usado mais para upload direto
             accept="image/*"
             multiple
             disabled={isUploading}

@@ -25,9 +25,22 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
     fetchAlbums();
   }, []);
 
+  // Refresh albums when component becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchAlbums();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const fetchAlbums = async () => {
     setIsLoading(true);
     try {
+      // Sempre buscar álbuns atualizados do banco
       const { data: albumsData, error: albumsError } = await supabase
         .from('photo_albums')
         .select('*')
@@ -96,20 +109,7 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
       if (data) {
         setAlbumPhotos(data);
       } else {
-        // Fotos de exemplo se não existirem
-        const samplePhotos: Photo[] = [
-          {
-            id: `${albumId}-1`,
-            title: 'Foto do Álbum',
-            description: 'Descrição da foto',
-            image_url: 'https://images.pexels.com/photos/8468459/pexels-photo-8468459.jpeg',
-            cloudinary_public_id: null,
-            category: 'history',
-            album_id: albumId,
-            created_at: new Date().toISOString()
-          }
-        ];
-        setAlbumPhotos(samplePhotos);
+        setAlbumPhotos([]);
       }
     } catch (error) {
       console.error('Error fetching album photos:', error);

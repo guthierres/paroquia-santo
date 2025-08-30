@@ -26,6 +26,18 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
     fetchAlbums();
   }, []);
 
+  // Refresh albums when component becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchAlbums();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   // Preload first 3 images for better UX
   useEffect(() => {
     if (albumPhotos.length > 0) {
@@ -40,6 +52,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   const fetchAlbums = async () => {
     setIsLoading(true);
     try {
+      // Sempre buscar álbuns do banco primeiro
       const { data: albumsData, error: albumsError } = await supabase
         .from('photo_albums')
         .select('*')
@@ -50,9 +63,15 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
       
       if (albumsData && albumsData.length > 0) {
         setAlbums(albumsData);
-        // Selecionar o primeiro álbum automaticamente
-        setSelectedAlbum(albumsData[0]);
-        await fetchAlbumPhotos(albumsData[0].id);
+        
+        // Manter álbum selecionado se ainda existir, senão selecionar o primeiro
+        const currentAlbumStillExists = selectedAlbum && albumsData.find(a => a.id === selectedAlbum.id);
+        if (currentAlbumStillExists) {
+          await fetchAlbumPhotos(selectedAlbum.id);
+        } else {
+          setSelectedAlbum(albumsData[0]);
+          await fetchAlbumPhotos(albumsData[0].id);
+        }
       } else {
         // Criar álbuns padrão se não existirem
         const defaultAlbums: PhotoAlbum[] = [
