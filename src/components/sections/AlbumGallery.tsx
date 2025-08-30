@@ -40,7 +40,6 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
   const fetchAlbums = async () => {
     setIsLoading(true);
     try {
-      // Sempre buscar álbuns atualizados do banco
       const { data: albumsData, error: albumsError } = await supabase
         .from('photo_albums')
         .select('*')
@@ -84,6 +83,17 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
             cloudinary_public_id: null,
             is_active: true,
             order_index: 3,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            id: '4',
+            name: 'Eventos Especiais',
+            description: 'Festividades e eventos marcantes da paróquia',
+            cover_image_url: 'https://images.pexels.com/photos/8468456/pexels-photo-8468456.jpeg',
+            cloudinary_public_id: null,
+            is_active: true,
+            order_index: 4,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }
@@ -152,14 +162,8 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
     setImagePosition({ x: 0, y: 0 });
   };
 
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.5, 3));
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
-  };
-
+  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.5, 3));
+  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
   const handleResetZoom = () => {
     setZoomLevel(1);
     setImagePosition({ x: 0, y: 0 });
@@ -184,9 +188,7 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const handleMouseUp = () => setIsDragging(false);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (selectedPhoto) {
@@ -265,7 +267,7 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
                 </p>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {albums.map((album, index) => (
                   <motion.div
                     key={album.id}

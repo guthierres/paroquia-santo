@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { uploadToCloudinary, getCloudinaryConfig } from '../../lib/cloudinary';
-import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
 interface FileUploadProps {
@@ -37,26 +36,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
-  const uploadToSupabase = async (file: File): Promise<{ url: string; path: string }> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${folder}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('parish-photos')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data: urlData } = supabase.storage
-      .from('parish-photos')
-      .getPublicUrl(filePath);
-
-    return {
-      url: urlData.publicUrl,
-      path: filePath
-    };
-  };
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     
@@ -91,92 +70,43 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       toast.error(`Máximo 10 arquivos por vez. ${validFiles.length - 10} arquivos foram ignorados.`);
     }
 
-    // Verificar se deve usar Cloudinary
-    if (useCloudinary && (onCloudinaryUpload || onSupabaseUpload)) {
+    // SEMPRE usar Cloudinary para uploads de fotos
+    if (useCloudinary && onCloudinaryUpload) {
       setIsUploading(true);
       try {
         const config = await getCloudinaryConfig();
         
-        // Se Supabase Storage está desabilitado, força Cloudinary
-        const forceCloudinary = !config.supabaseStorageEnabled;
-        
-        if ((config.enabled || forceCloudinary) && onCloudinaryUpload) {
-          // Upload para Cloudinary - processar múltiplos arquivos
-          for (let i = 0; i < limitedFiles.length; i++) {
-            const file = limitedFiles[i];
-            try {
-              const result = await uploadToCloudinary(file, folder);
-              onCloudinaryUpload(result);
-              
-              if (limitedFiles.length === 1) {
-                toast.success('Imagem enviada para Cloudinary com sucesso!');
-              } else if (i === limitedFiles.length - 1) {
-                toast.success(`${limitedFiles.length} imagens enviadas para Cloudinary com sucesso!`);
-              }
-            } catch (cloudinaryError) {
-              if (forceCloudinary) {
-                console.error('Cloudinary obrigatório falhou:', cloudinaryError);
-                toast.error(`Erro no Cloudinary para ${file.name}. Verifique as configurações.`);
-                throw cloudinaryError;
-              } else {
-                throw cloudinaryError;
-              }
-            }
-          }
-        } else if (onSupabaseUpload && config.supabaseStorageEnabled) {
-          // Upload para Supabase quando Cloudinary não está habilitado - processar múltiplos arquivos
-          for (let i = 0; i < limitedFiles.length; i++) {
-            const file = limitedFiles[i];
-            const result = await uploadToSupabase(file);
-            onSupabaseUpload(result);
+        if (!config.enabled || !config.cloudName) {
+          toast.error('Configure o Cloudinary primeiro para fazer upload de fotos!');
+          return;
+        }
+
+        // Upload para Cloudinary - processar múltiplos arquivos
+        for (let i = 0; i < limitedFiles.length; i++) {
+          const file = limitedFiles[i];
+          try {
+            const result = await uploadToCloudinary(file, folder);
+            onCloudinaryUpload(result);
             
             if (limitedFiles.length === 1) {
-              toast.success('Imagem enviada com sucesso!');
+              toast.success('Imagem enviada para Cloudinary com sucesso!');
             } else if (i === limitedFiles.length - 1) {
-              toast.success(`${limitedFiles.length} imagens enviadas com sucesso!`);
+              toast.success(`${limitedFiles.length} imagens enviadas para Cloudinary com sucesso!`);
             }
-          }
-        } else if (!config.supabaseStorageEnabled) {
-          // Se Supabase está desabilitado mas Cloudinary não está configurado
-          toast.error('Supabase Storage desabilitado. Configure o Cloudinary primeiro!');
-          return;
-        } else {
-          // Fallback para método tradicional
-          if (onFileSelect) {
-            onFileSelect(files); // Manter compatibilidade
+          } catch (cloudinaryError) {
+            console.error('Cloudinary upload failed:', cloudinaryError);
+            toast.error(`Erro no Cloudinary para ${file.name}: ${cloudinaryError instanceof Error ? cloudinaryError.message : 'Erro desconhecido'}`);
           }
         }
       } catch (error) {
         console.error('Erro no upload:', error);
-        
-        const config = await getCloudinaryConfig();
-        
-        // Fallback para Supabase apenas se permitido
-        if (onSupabaseUpload && config.supabaseStorageEnabled) {
-          try {
-            const file = limitedFiles[0]; // Usar arquivo validado
-            const result = await uploadToSupabase(file);
-            onSupabaseUpload(result);
-            toast.success('Imagem enviada para Supabase como fallback!');
-          } catch (fallbackError) {
-            console.error('Erro no fallback:', fallbackError);
-            toast.error('Erro ao enviar imagem.');
-            if (onFileSelect) {
-              onFileSelect(files); // Manter compatibilidade
-            }
-          }
-        } else {
-          toast.error('Erro ao enviar imagem.');
-          if (onFileSelect) {
-            onFileSelect(files); // Manter compatibilidade
-          }
-        }
+        toast.error('Erro ao enviar imagens para Cloudinary.');
       } finally {
         setIsUploading(false);
       }
     } else if (onFileSelect) {
-      // Método tradicional
-      onFileSelect(files); // Manter compatibilidade
+      // Método tradicional apenas se não for para Cloudinary
+      onFileSelect(files);
     }
 
     // Reset input to allow selecting the same file again

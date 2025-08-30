@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, Save, X, Image as ImageIcon, ArrowUp, ArrowDown, Eye, EyeOff, Folder, Upload, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Image as ImageIcon, ArrowUp, ArrowDown, Eye, EyeOff, Folder, Upload, AlertCircle, Cloud } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { FileUpload } from '../ui/FileUpload';
 import { supabase, PhotoAlbum, Photo } from '../../lib/supabase';
+import { uploadToCloudinary, getCloudinaryConfig } from '../../lib/cloudinary';
 import toast from 'react-hot-toast';
 
 export const AlbumManager: React.FC = () => {
@@ -120,9 +121,15 @@ export const AlbumManager: React.FC = () => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const uploadPhotosToStorage = async (files: File[], albumId: string): Promise<Photo[]> => {
+  const uploadPhotosToCloudinary = async (files: File[], albumId: string): Promise<Photo[]> => {
     const uploadedPhotos: Photo[] = [];
     setUploadProgress({ current: 0, total: files.length });
+
+    // Verificar se Cloudinary está configurado
+    const config = await getCloudinaryConfig();
+    if (!config.enabled || !config.cloudName) {
+      throw new Error('Cloudinary não está configurado. Configure primeiro nas configurações.');
+    }
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -131,27 +138,17 @@ export const AlbumManager: React.FC = () => {
       try {
         setUploadProgress({ current: i + 1, total: files.length });
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `album-${albumId}-${Date.now()}-${i}.${fileExt}`;
-        const filePath = `albums/${fileName}`;
+        // Upload para Cloudinary
+        const cloudinaryResult = await uploadToCloudinary(file, `albums/${albumId}`);
 
-        const { error: uploadError } = await supabase.storage
-          .from('parish-photos')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from('parish-photos')
-          .getPublicUrl(filePath);
-
-        // Salvar foto no banco
+        // Salvar foto no banco com dados do Cloudinary
         const { data: photoRecord, error: photoError } = await supabase
           .from('photos')
           .insert([{
             title: photoData?.title || file.name.replace(/\.[^/.]+$/, ''),
             description: photoData?.description || '',
-            image_url: urlData.publicUrl,
+            image_url: cloudinaryResult.secureUrl,
+            cloudinary_public_id: cloudinaryResult.publicId,
             category: photoData?.category || 'community',
             album_id: albumId
           }])
@@ -163,7 +160,7 @@ export const AlbumManager: React.FC = () => {
 
       } catch (error) {
         console.error(`Error uploading ${file.name}:`, error);
-        toast.error(`Erro ao enviar ${file.name}`);
+        toast.error(`Erro ao enviar ${file.name}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
       }
     }
 
@@ -174,6 +171,15 @@ export const AlbumManager: React.FC = () => {
     if (!editingAlbum || !editingAlbum.name) {
       toast.error('Preencha o nome do álbum');
       return;
+    }
+
+    // Verificar se Cloudinary está configurado quando há fotos para upload
+    if (selectedFiles.length > 0) {
+      const config = await getCloudinaryConfig();
+      if (!config.enabled || !config.cloudName) {
+        toast.error('Configure o Cloudinary primeiro para fazer upload de fotos!');
+        return;
+      }
     }
 
     setIsUploading(true);
@@ -219,11 +225,11 @@ export const AlbumManager: React.FC = () => {
 
       // Upload das fotos se houver
       if (selectedFiles.length > 0) {
-        toast.success('Álbum criado! Enviando fotos...');
-        const uploadedPhotos = await uploadPhotosToStorage(selectedFiles, albumId);
+        toast.success('Álbum criado! Enviando fotos para Cloudinary...');
+        const uploadedPhotos = await uploadPhotosToCloudinary(selectedFiles, albumId);
         
         if (uploadedPhotos.length > 0) {
-          toast.success(`${uploadedPhotos.length} fotos adicionadas ao álbum!`);
+          toast.success(`${uploadedPhotos.length} fotos adicionadas ao álbum via Cloudinary!`);
           
           // Se não há capa definida, usar a primeira foto como capa
           if (!editingAlbum.cover_image_url && uploadedPhotos[0]) {
@@ -231,13 +237,18 @@ export const AlbumManager: React.FC = () => {
               .from('photo_albums')
               .update({ 
                 cover_image_url: uploadedPhotos[0].image_url,
+                cloudinary_public_id: uploadedPhotos[0].cloudinary_public_id,
                 updated_at: new Date().toISOString()
               })
               .eq('id', albumId);
 
             if (!updateError) {
               setAlbums(prev => prev.map(a =>
-                a.id === albumId ? { ...a, cover_image_url: uploadedPhotos[0].image_url } : a
+                a.id === albumId ? { 
+                  ...a, 
+                  cover_image_url: uploadedPhotos[0].image_url,
+                  cloudinary_public_id: uploadedPhotos[0].cloudinary_public_id 
+                } : a
               ));
             }
           }
@@ -251,7 +262,7 @@ export const AlbumManager: React.FC = () => {
       toast.success('Álbum salvo com sucesso!');
     } catch (error) {
       console.error('Error saving album:', error);
-      toast.error('Erro ao salvar álbum');
+      toast.error('Erro ao salvar álbum: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
     } finally {
       setIsUploading(false);
       setUploadProgress({ current: 0, total: 0 });
@@ -332,46 +343,6 @@ export const AlbumManager: React.FC = () => {
     }
   };
 
-  const handleImageUpload = async (files: FileList | null) => {
-    const file = files?.[0];
-    if (!file || !editingAlbum) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecione uma imagem válida');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Imagem muito grande (máximo 10MB)');
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `album-cover-${Date.now()}.${fileExt}`;
-      const filePath = `albums/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('parish-photos')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('parish-photos')
-        .getPublicUrl(filePath);
-
-      setEditingAlbum(prev => prev ? { ...prev, cover_image_url: urlData.publicUrl } : null);
-      toast.success('Imagem carregada com sucesso!');
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Erro ao carregar imagem');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleCloudinaryUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
     if (!editingAlbum) return;
     setEditingAlbum(prev => prev ? { 
@@ -379,24 +350,29 @@ export const AlbumManager: React.FC = () => {
       cover_image_url: result.secureUrl,
       cloudinary_public_id: result.publicId 
     } : null);
-    toast.success('Imagem carregada com sucesso!');
-  };
-
-  const handleSupabaseUpload = async (result: { url: string; path: string }) => {
-    if (!editingAlbum) return;
-    setEditingAlbum(prev => prev ? { ...prev, cover_image_url: result.url } : null);
-    toast.success('Imagem carregada com sucesso!');
+    toast.success('Imagem de capa carregada com sucesso!');
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold text-gray-800">Gerenciar Álbuns</h3>
+        <h3 className="text-2xl font-bold text-gray-800">Gerenciar Álbuns de Fotos</h3>
         <Button onClick={handleCreateAlbum}>
           <Plus className="h-4 w-4" />
           Novo Álbum
         </Button>
       </div>
+
+      {/* Aviso sobre Cloudinary */}
+      <Card className="p-4 bg-blue-50 border-blue-200">
+        <div className="flex items-start gap-3">
+          <Cloud className="h-5 w-5 text-blue-600 mt-0.5" />
+          <div className="text-sm text-blue-800">
+            <p className="font-medium mb-1">📸 Sistema Unificado de Álbuns</p>
+            <p>Todas as fotos são enviadas exclusivamente para o Cloudinary. Configure o Cloudinary nas configurações antes de criar álbuns com fotos.</p>
+          </div>
+        </div>
+      </Card>
 
       {albums.length === 0 && (
         <Card className="p-8 text-center">
@@ -440,6 +416,12 @@ export const AlbumManager: React.FC = () => {
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <span>Ordem: {album.order_index}</span>
                       <span>{album.is_active ? 'Ativo' : 'Inativo'}</span>
+                      {album.cloudinary_public_id && (
+                        <span className="flex items-center gap-1 text-blue-600">
+                          <Cloud className="h-3 w-3" />
+                          Cloudinary
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -578,7 +560,7 @@ export const AlbumManager: React.FC = () => {
                 {/* Capa do álbum */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Imagem de Capa
+                    Imagem de Capa (Cloudinary)
                   </label>
                   {editingAlbum.cover_image_url && (
                     <div className="mb-3">
@@ -587,16 +569,22 @@ export const AlbumManager: React.FC = () => {
                         alt="Preview"
                         className="w-full h-32 object-cover rounded-lg"
                       />
+                      {editingAlbum.cloudinary_public_id && (
+                        <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                          <Cloud className="h-3 w-3" />
+                          Cloudinary: {editingAlbum.cloudinary_public_id}
+                        </p>
+                      )}
                     </div>
                   )}
                   <div className="flex gap-2">
                     <FileUpload
                       onCloudinaryUpload={handleCloudinaryUpload}
-                      onSupabaseUpload={handleSupabaseUpload}
-                      onFileSelect={handleImageUpload}
+                      onSupabaseUpload={() => {}} // Desabilitado
                       disabled={isUploading}
                       className="flex-1"
                       folder="albums"
+                      useCloudinary={true}
                     >
                       <Button
                         variant="outline"
@@ -604,8 +592,8 @@ export const AlbumManager: React.FC = () => {
                         disabled={isUploading}
                         className="w-full"
                       >
-                        <ImageIcon className="h-4 w-4" />
-                        {isUploading ? 'Carregando...' : 'Carregar Capa'}
+                        <Cloud className="h-4 w-4" />
+                        {isUploading ? 'Carregando...' : 'Carregar Capa (Cloudinary)'}
                       </Button>
                     </FileUpload>
                     {editingAlbum.cover_image_url && (
@@ -629,13 +617,19 @@ export const AlbumManager: React.FC = () => {
                 {isCreating && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fotos do Álbum (opcional)
+                      Fotos do Álbum (opcional) - Cloudinary Exclusivo
                     </label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                       <div className="text-center mb-4">
-                        <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Cloud className="h-8 w-8 text-blue-600" />
+                          <Upload className="h-8 w-8 text-gray-400" />
+                        </div>
                         <p className="text-sm text-gray-600 mb-1">
                           Selecione até 10 fotos para adicionar ao álbum
+                        </p>
+                        <p className="text-xs text-blue-600 font-medium">
+                          ☁️ Todas as fotos serão enviadas para o Cloudinary
                         </p>
                         <p className="text-xs text-gray-500">
                           Máximo 1MB por foto • JPG, PNG, WebP
@@ -662,17 +656,18 @@ export const AlbumManager: React.FC = () => {
                         Selecionar Fotos
                       </Button>
 
-                      {/* Aviso sobre limites */}
+                      {/* Aviso sobre Cloudinary */}
                       <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <div className="flex items-start gap-2">
-                          <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <Cloud className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="text-xs text-blue-700">
-                            <p className="font-medium mb-1">Limites importantes:</p>
+                            <p className="font-medium mb-1">Sistema Cloudinary Exclusivo:</p>
                             <ul className="space-y-1">
-                              <li>• Máximo 1MB por foto</li>
-                              <li>• Até 10 fotos por vez</li>
-                              <li>• Formatos: JPG, PNG, WebP</li>
-                              <li>• Você pode adicionar mais fotos depois</li>
+                              <li>• ☁️ Todas as fotos vão para o Cloudinary</li>
+                              <li>• 🚀 CDN global para carregamento rápido</li>
+                              <li>• 📱 Otimização automática para mobile</li>
+                              <li>• 💰 Zero Storage Egress no Supabase</li>
+                              <li>• ⚙️ Configure o Cloudinary primeiro!</li>
                             </ul>
                           </div>
                         </div>
@@ -682,8 +677,9 @@ export const AlbumManager: React.FC = () => {
                     {/* Preview das fotos selecionadas */}
                     {albumPhotos.length > 0 && (
                       <div className="mt-4">
-                        <h5 className="text-sm font-medium text-gray-700 mb-3">
-                          Fotos Selecionadas ({albumPhotos.length})
+                        <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                          <Cloud className="h-4 w-4 text-blue-600" />
+                          Fotos Selecionadas ({albumPhotos.length}) - Cloudinary
                         </h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
                           {albumPhotos.map((photo, index) => (
@@ -741,8 +737,9 @@ export const AlbumManager: React.FC = () => {
                 {isUploading && uploadProgress.total > 0 && (
                   <div className="mt-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        Enviando fotos...
+                      <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <Cloud className="h-4 w-4 text-blue-600" />
+                        Enviando para Cloudinary...
                       </span>
                       <span className="text-sm text-gray-500">
                         {uploadProgress.current} de {uploadProgress.total}
@@ -750,7 +747,7 @@ export const AlbumManager: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
                       />
                     </div>
