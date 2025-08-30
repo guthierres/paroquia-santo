@@ -166,17 +166,41 @@ function App() {
   React.useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname;
-      if (path === '/admin' || path === '/login') {
+      const hash = window.location.hash;
+      
+      if (path === '/admin' || path === '/login' || hash === '#admin' || hash === '#login') {
         if (isAuthenticated) {
           setShowAdmin(true);
+          setShowLogin(false);
         } else {
           setShowLogin(true);
+          setShowAdmin(false);
         }
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
+  }, [isAuthenticated]);
+
+  // Handle direct admin access via URL hash
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      
+      if (hash === '#admin' || hash === '#login') {
+        if (isAuthenticated) {
+          setShowAdmin(true);
+          setShowLogin(false);
+        } else {
+          setShowLogin(true);
+          setShowAdmin(false);
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [isAuthenticated]);
 
   return (
@@ -215,6 +239,8 @@ function App() {
         </main>
       )}
 
+      {/* Admin Access Button - Removed from main page */}
+      
       {!showAlbumGallery && !showCelebrations && !showPastorals && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -294,25 +320,6 @@ function App() {
             </motion.div>
           </div>
         </footer>
-      )}
-
-      {/* Admin Access Button */}
-      {!showAdmin && !showLogin && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 2, duration: 0.5 }}
-          className="fixed bottom-8 right-8 z-40"
-        >
-          <Button
-            variant="primary"
-            onClick={() => setShowLogin(true)}
-            className="rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl"
-            title="Acesso Administrativo"
-          >
-            <AdminSettingsIcon className="h-5 w-5" />
-          </Button>
-        </motion.div>
       )}
 
       {/* Admin Modals */}
