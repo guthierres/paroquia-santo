@@ -139,11 +139,15 @@ function App() {
 
   const handleShowFullGallery = () => {
     setShowAlbumGallery(true);
+    setShowFullGallery(false);
+    setShowCelebrations(false);
+    setShowPastorals(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackFromGallery = () => {
     setShowAlbumGallery(false);
+    setShowFullGallery(false);
     handleNavigate('photos');
   };
 
