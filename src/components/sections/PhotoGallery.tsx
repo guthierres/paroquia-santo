@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Folder, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, X, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Folder, Image as ImageIcon, ZoomIn, ZoomOut, RotateCcw, X, ArrowLeft, Eye } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase, PhotoAlbum, Photo } from '../../lib/supabase';
@@ -21,6 +21,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Estado para controlar se estamos visualizando um álbum específico
+  const [isViewingAlbum, setIsViewingAlbum] = useState(false);
 
   useEffect(() => {
     fetchAlbums();
@@ -155,11 +158,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
 
   const handleAlbumClick = async (album: PhotoAlbum) => {
     setSelectedAlbum(album);
+    setIsViewingAlbum(true);
     await fetchAlbumPhotos(album.id);
   };
 
   const handleBackToAlbums = () => {
     setSelectedAlbum(null);
+    setIsViewingAlbum(false);
     setAlbumPhotos([]);
     setSelectedPhoto(null);
   };
@@ -237,8 +242,37 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
   }
 
   return (
-    <section id="photos" className="py-20 bg-gray-50">
+    <section id="photos" className={`${isViewingAlbum ? 'pt-20 pb-8' : 'py-20'} bg-gray-50 min-h-screen`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header fixo quando visualizando álbum */}
+        {isViewingAlbum && selectedAlbum && (
+          <div className="fixed top-14 sm:top-16 left-0 right-0 z-40 bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                  <Button
+                    variant="outline"
+                    onClick={handleBackToAlbums}
+                    className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Voltar aos Álbuns</span>
+                    <span className="sm:hidden">Voltar</span>
+                  </Button>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-800 truncate">
+                      {selectedAlbum.name}
+                    </h1>
+                    <p className="text-sm text-gray-600 truncate">
+                      {albumPhotos.length} foto{albumPhotos.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {!selectedAlbum ? (
           /* Albums Grid - Página Principal */
           <>
@@ -277,45 +311,47 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
                     >
-                      <Card 
-                        className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                      <button
                         onClick={() => handleAlbumClick(album)}
+                        className="w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
                       >
-                        <div className="aspect-video overflow-hidden bg-gray-100 relative">
-                          {album.cover_image_url ? (
-                            <img
-                              src={album.cover_image_url}
-                              alt={album.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Folder className="h-16 w-16 text-gray-400" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                                <ImageIcon className="h-6 w-6 text-gray-800" />
+                        <Card className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
+                          <div className="aspect-video overflow-hidden bg-gray-100 relative">
+                            {album.cover_image_url ? (
+                              <img
+                                src={album.cover_image_url}
+                                alt={album.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Folder className="h-16 w-16 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                                  <Eye className="h-6 w-6 text-gray-800" />
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="p-6">
-                          <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2">
-                            {album.name}
-                          </h3>
-                          <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-                            {album.description}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500">
-                              Criado em {new Date(album.created_at).toLocaleDateString('pt-BR')}
-                            </span>
-                            <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                          <div className="p-6">
+                            <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2">
+                              {album.name}
+                            </h3>
+                            <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                              {album.description}
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">
+                                Criado em {new Date(album.created_at).toLocaleDateString('pt-BR')}
+                              </span>
+                              <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                            </div>
                           </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      </button>
                     </motion.div>
                   ))}
                 </div>
@@ -359,45 +395,47 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.6, delay: index * 0.1 }}
                         >
-                          <Card 
-                            className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                          <button
                             onClick={() => handleAlbumClick(album)}
+                            className="w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
                           >
-                            <div className="aspect-video overflow-hidden bg-gray-100 relative">
-                              {album.cover_image_url ? (
-                                <img
-                                  src={album.cover_image_url}
-                                  alt={album.name}
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Folder className="h-16 w-16 text-gray-400" />
-                                </div>
-                              )}
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                  <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                                    <ImageIcon className="h-6 w-6 text-gray-800" />
+                            <Card className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
+                              <div className="aspect-video overflow-hidden bg-gray-100 relative">
+                                {album.cover_image_url ? (
+                                  <img
+                                    src={album.cover_image_url}
+                                    alt={album.name}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Folder className="h-16 w-16 text-gray-400" />
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                                      <Eye className="h-6 w-6 text-gray-800" />
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="p-6">
-                              <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2">
-                                {album.name}
-                              </h3>
-                              <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-                                {album.description}
-                              </p>
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-gray-500">
-                                  Criado em {new Date(album.created_at).toLocaleDateString('pt-BR')}
-                                </span>
-                                <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                              <div className="p-6">
+                                <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2">
+                                  {album.name}
+                                </h3>
+                                <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                                  {album.description}
+                                </p>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-500">
+                                    Criado em {new Date(album.created_at).toLocaleDateString('pt-BR')}
+                                  </span>
+                                  <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                                </div>
                               </div>
-                            </div>
-                          </Card>
+                            </Card>
+                          </button>
                         </motion.div>
                       ))}
                     </div>
@@ -409,25 +447,16 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
         ) : (
           /* Album Photos View - Visualização de Fotos do Álbum */
           <>
-            <div className="mb-8">
-              <div className="flex items-center gap-4 mb-6">
-                <Button
-                  variant="outline"
-                  onClick={handleBackToAlbums}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Voltar aos Álbuns
-                </Button>
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800">{selectedAlbum.name}</h2>
-                  <p className="text-gray-600">{selectedAlbum.description}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {albumPhotos.length} foto{albumPhotos.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
+            {/* Espaçamento para o header fixo */}
+            <div className="h-20 sm:h-24"></div>
+            
+            {selectedAlbum.description && (
+              <div className="mb-8 text-center">
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  {selectedAlbum.description}
+                </p>
               </div>
-            </div>
+            )}
 
             {isLoadingPhotos ? (
               <div className="text-center py-12">
@@ -459,36 +488,38 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Card 
-                        className="cursor-pointer group overflow-hidden hover:shadow-lg transition-all duration-300"
+                      <button
                         onClick={() => handlePhotoSelect(photo)}
+                        className="w-full h-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
                       >
-                        <div className="aspect-square overflow-hidden relative bg-gray-100">
-                          <img
-                            src={photo.image_url}
-                            alt={photo.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/90 rounded-full flex items-center justify-center">
-                                <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-800" />
+                        <Card className="cursor-pointer group overflow-hidden hover:shadow-lg transition-all duration-300 h-full">
+                          <div className="aspect-square overflow-hidden relative bg-gray-100">
+                            <img
+                              src={photo.image_url}
+                              alt={photo.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/90 rounded-full flex items-center justify-center">
+                                  <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-800" />
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="p-2 sm:p-3">
-                          <h3 className="font-medium text-gray-800 text-xs sm:text-sm group-hover:text-red-800 transition-colors line-clamp-1">
-                            {photo.title}
-                          </h3>
-                          <div className="flex items-center justify-between mt-1 sm:mt-2">
-                            <span className="text-xs text-gray-500">
-                              #{index + 1}
-                            </span>
+                          <div className="p-2 sm:p-3">
+                            <h3 className="font-medium text-gray-800 text-xs sm:text-sm group-hover:text-red-800 transition-colors line-clamp-1">
+                              {photo.title}
+                            </h3>
+                            <div className="flex items-center justify-between mt-1 sm:mt-2">
+                              <span className="text-xs text-gray-500">
+                                #{index + 1}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      </button>
                     </motion.div>
                   ))}
                 </AnimatePresence>
