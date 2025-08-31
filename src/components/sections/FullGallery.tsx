@@ -135,46 +135,11 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
     }
   };
 
-  const filteredPhotos = selectedCategory === 'all' 
+  const filteredPhotos = selectedCategory === 'all'
     ? photos
     : photos.filter(photo => photo.category === selectedCategory);
 
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.5, 3));
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
-  };
-
-  const handleResetZoom = () => {
-    setZoomLevel(1);
-    setImagePosition({ x: 0, y: 0 });
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoomLevel > 1) {
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX - imagePosition.x,
-        y: e.clientY - imagePosition.y
-      });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && zoomLevel > 1) {
-      setImagePosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
+  // Lógica do Modal (copiada da lógica de AlbumGallery)
   const handlePhotoSelect = (photo: Photo) => {
     const index = filteredPhotos.findIndex(p => p.id === photo.id);
     setCurrentPhotoIndex(index);
@@ -199,6 +164,34 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
     setImagePosition({ x: 0, y: 0 });
   };
 
+  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.5, 3));
+  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - imagePosition.x,
+        y: e.clientY - imagePosition.y
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setImagePosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (selectedPhoto) {
       if (e.key === 'ArrowRight') handleNextPhoto();
@@ -210,7 +203,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPhoto, currentPhotoIndex]);
+  }, [selectedPhoto, currentPhotoIndex, filteredPhotos]); // Adicionado filteredPhotos como dependência
 
   if (isLoading) {
     return (
@@ -241,7 +234,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-bold text-gray-800">Galeria Completa</h1>
                 <p className="text-sm text-gray-600 truncate">
-                  {filteredPhotos.length} foto{filteredPhotos.length !== 1 ? 's' : ''} 
+                  {filteredPhotos.length} foto{filteredPhotos.length !== 1 ? 's' : ''}
                   {selectedCategory !== 'all' && ` em ${categories.find(c => c.id === selectedCategory)?.label}`}
                 </p>
               </div>
@@ -286,7 +279,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
             </p>
           </Card>
         ) : (
-          <motion.div 
+          <motion.div
             layout
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
           >
@@ -300,7 +293,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card 
+                  <Card
                     className="cursor-pointer group overflow-hidden hover:shadow-lg transition-all duration-300"
                     onClick={() => handlePhotoSelect(photo)}
                   >
@@ -414,7 +407,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
               </div>
 
               {/* Image Container */}
-              <div 
+              <div
                 className="relative w-full h-full flex items-center justify-center overflow-hidden p-2 sm:p-4"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -446,13 +439,13 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                       {categories.find(c => c.id === selectedPhoto.category)?.label}
                     </span>
                   </div>
-                  
+
                   {selectedPhoto.description && (
                     <p className="text-gray-200 leading-relaxed mb-2 sm:mb-3 text-sm sm:text-base">
                       {selectedPhoto.description}
                     </p>
                   )}
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-xs sm:text-sm text-gray-400">
                       Adicionada em: {new Date(selectedPhoto.created_at).toLocaleDateString('pt-BR', {
@@ -461,7 +454,7 @@ export const FullGallery: React.FC<FullGalleryProps> = ({ onBack }) => {
                         year: 'numeric'
                       })}
                     </p>
-                    
+
                     <p className="text-xs text-gray-500 hidden sm:block">
                       Use ← → para navegar | ESC para fechar
                     </p>
