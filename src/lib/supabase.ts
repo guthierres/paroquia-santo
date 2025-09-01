@@ -200,6 +200,7 @@ export interface ParishAnnouncement {
   title: string;
   content: string;
   event_date: string | null;
+  whatsapp_contact: string | null;
   is_published: boolean;
   created_at: string;
   updated_at: string;
