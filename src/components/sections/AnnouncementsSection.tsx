@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, ChevronRight, Megaphone, X, User } from 'lucide-react';
+import { Calendar, Clock, ChevronRight, Megaphone, X, User, MessageCircle } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
@@ -11,6 +11,7 @@ interface ParishAnnouncement {
   title: string;
   content: string;
   event_date?: string;
+  whatsapp_contact?: string;
   is_published: boolean;
   created_at: string;
   updated_at: string;
@@ -71,6 +72,12 @@ export function AnnouncementsSection() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleWhatsAppClick = (whatsappContact: string, title: string) => {
+    const cleanPhone = whatsappContact.replace(/\D/g, '');
+    const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${title}`);
+    window.open(`https://wa.me/55${cleanPhone}?text=${message}`, '_blank');
   };
 
   const isUpcoming = (dateString?: string) => {
@@ -312,10 +319,9 @@ export function AnnouncementsSection() {
                   <Button
                     variant="outline"
                     onClick={() => setSelectedAnnouncement(null)}
-                    className="w-8 h-8 p-0 rounded-full flex-shrink-0"
+                    className="w-8 h-8 p-0 rounded-full flex-shrink-0 bg-white/20 border-white/30 text-white hover:bg-white/30"
                   >
-                    {/* Alterado para que o ícone do X seja branco */}
-                    <X className="h-4 w-4 text-white" />
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
 
@@ -360,6 +366,20 @@ export function AnnouncementsSection() {
 
                 {/* Informações adicionais */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
+                  {/* Botão WhatsApp se disponível */}
+                  {selectedAnnouncement.whatsapp_contact && (
+                    <div className="mb-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleWhatsAppClick(selectedAnnouncement.whatsapp_contact!, selectedAnnouncement.title)}
+                        className="w-full flex items-center justify-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-300"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Entrar em Contato via WhatsApp
+                      </Button>
+                    </div>
+                  )}
+                  
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <User className="h-4 w-4" />
