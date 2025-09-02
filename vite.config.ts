@@ -7,14 +7,17 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    assetsInlineLimit: 0, // Don't inline assets to reduce bundle size
+    assetsInlineLimit: 1024, // Inline pequenos assets para reduzir requests
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           ui: ['framer-motion', 'lucide-react'],
           supabase: ['@supabase/supabase-js']
-        }
+        },
+        // Otimizar nomes de arquivos para cache
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js'
       }
     }
   },
@@ -23,7 +26,7 @@ export default defineConfig({
   },
   server: {
     headers: {
-      'Cache-Control': 'public, max-age=31536000'
+      'Cache-Control': 'public, max-age=31536000, immutable' // Cache mais agressivo
     }
   }
 });
