@@ -17,6 +17,9 @@ import { CelebrationsPage } from './components/sections/CelebrationsPage';
 import { PastoralsPage } from './components/sections/PastoralsPage';
 import { AlbumGallery } from './components/sections/AlbumGallery';
 import { UrgentPopup } from './components/ui/UrgentPopup';
+import { ScrollToTopButton } from './components/ui/ScrollToTopButton';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -28,6 +31,8 @@ function App() {
   const [showCelebrations, setShowCelebrations] = useState(false);
   const [showPastorals, setShowPastorals] = useState(false);
   const [showAlbumGallery, setShowAlbumGallery] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTermsOfUse, setShowTermsOfUse] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,6 +80,8 @@ function App() {
       setShowFullGallery(false);
       setShowPastorals(false);
       setShowAlbumGallery(false);
+      setShowPrivacyPolicy(false);
+      setShowTermsOfUse(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -84,6 +91,30 @@ function App() {
       setShowFullGallery(false);
       setShowCelebrations(false);
       setShowAlbumGallery(false);
+      setShowPrivacyPolicy(false);
+      setShowTermsOfUse(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (section === 'privacy') {
+      setShowPrivacyPolicy(true);
+      setShowFullGallery(false);
+      setShowCelebrations(false);
+      setShowPastorals(false);
+      setShowAlbumGallery(false);
+      setShowTermsOfUse(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (section === 'terms') {
+      setShowTermsOfUse(true);
+      setShowFullGallery(false);
+      setShowCelebrations(false);
+      setShowPastorals(false);
+      setShowAlbumGallery(false);
+      setShowPrivacyPolicy(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -93,6 +124,8 @@ function App() {
     setShowCelebrations(false);
     setShowPastorals(false);
     setShowAlbumGallery(false);
+    setShowPrivacyPolicy(false);
+    setShowTermsOfUse(false);
     
     // Close mobile menu if open
     const mobileMenuButton = document.querySelector('[data-mobile-menu]');
@@ -229,6 +262,10 @@ function App() {
         <PastoralsPage onBack={handleBackFromPastorals} />
       ) : showAlbumGallery ? (
         <AlbumGallery onBack={handleBackFromGallery} />
+      ) : showPrivacyPolicy ? (
+        <PrivacyPolicyPage onBack={() => setShowPrivacyPolicy(false)} />
+      ) : showTermsOfUse ? (
+        <TermsOfUsePage onBack={() => setShowTermsOfUse(false)} />
       ) : (
         <main className="w-full max-w-full overflow-x-hidden">
           <SlidesSection />
@@ -245,7 +282,7 @@ function App() {
 
       {/* Admin Access Button - Removed from main page */}
       
-      {!showAlbumGallery && !showCelebrations && !showPastorals && (
+      {!showAlbumGallery && !showCelebrations && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -309,6 +346,21 @@ function App() {
                             <p className="text-sm text-red-200 mb-2">
                 © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Cid. Tiradentes, SP.
               </p>
+              <div className="flex items-center justify-center gap-4 text-xs text-red-300/80 mb-2">
+                <button
+                  onClick={() => handleNavigate('privacy')}
+                  className="hover:text-red-200 transition-colors duration-200 underline"
+                >
+                  Política de Privacidade
+                </button>
+                <span>•</span>
+                <button
+                  onClick={() => handleNavigate('terms')}
+                  className="hover:text-red-200 transition-colors duration-200 underline"
+                >
+                  Termos de Uso
+                </button>
+              </div>
               <div className="mt-4 pt-3 border-t border-red-700/30">
                 <p className="text-xs text-red-300/80">
                   Desenvolvido por <a 
@@ -325,6 +377,9 @@ function App() {
           </div>
         </footer>
       )}
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
 
       {/* Admin Modals */}
       <AnimatePresence>

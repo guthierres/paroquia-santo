@@ -108,9 +108,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
               <Button 
                 variant="outline" 
                 onClick={onClose}
-                className="hover:bg-red-100 hover:text-red-800 transition-colors"
+                className="hover:bg-red-100 hover:text-red-800 transition-colors border-white/30 text-white hover:bg-white/20"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 text-current" />
                 <span className="hidden sm:inline ml-1">Fechar</span>
               </Button>
             </div>

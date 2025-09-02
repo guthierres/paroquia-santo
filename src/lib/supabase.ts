@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'your-supabase-url';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables. Please check your .env file or deployment settings.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
@@ -14,7 +18,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'Cache-Control': 'public, max-age=31536000, stale-while-revalidate=604800'
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=60'
     }
   }
 });

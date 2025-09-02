@@ -160,9 +160,9 @@ export const UrgentPopup: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => handleClose(false)}
-                className="w-8 h-8 p-0 rounded-full flex-shrink-0"
+                className="w-8 h-8 p-0 rounded-full flex-shrink-0 border-gray-300 text-gray-600 hover:text-gray-800 hover:border-gray-400"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 text-current" />
               </Button>
             </div>
           </div>

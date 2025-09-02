@@ -193,8 +193,13 @@ export const SlidesSection: React.FC = () => {
               onLoad={() => setImageLoaded(prev => ({ ...prev, [currentSlide]: true }))}
               onError={(e) => {
                 console.error('Error loading slide image:', e);
-                // Fallback to a solid background if image fails
-                e.currentTarget.style.display = 'none';
+                // Fallback to a gradient background if image fails
+                const target = e.currentTarget as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.style.background = 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)';
+                }
               }}
             />
           </div>
