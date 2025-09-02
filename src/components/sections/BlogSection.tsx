@@ -196,9 +196,10 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                           <OptimizedImage
                             src={post.featured_image}
                             alt={post.title}
-                            width={600}
-                            height={338}
-                            quality={75}
+                            width={400}
+                            height={225}
+                            quality={35}
+                            ultraCompress={true}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
@@ -302,6 +303,12 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                     src={selectedPost.featured_image}
                     alt={selectedPost.title}
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    style={{ 
+                      maxWidth: '100%',
+                      height: 'auto',
+                      imageRendering: 'auto'
+                    }}
                     onError={(e) => {
                       e.currentTarget.parentElement!.style.display = 'none';
                     }}

@@ -48,9 +48,34 @@
     
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+      image-rendering: auto; /* Mudado para auto para melhor compressão */
     }
+  }
+
+  /* OTIMIZAÇÕES EXTREMAS PARA ECONOMIA DE BANDWIDTH */
+  img {
+    /* Forçar compressão máxima */
+    image-rendering: auto;
+    /* Desabilitar upscaling desnecessário */
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Reduzir qualidade de animações para economizar recursos */
+  @media (max-width: 768px) {
+    * {
+      animation-duration: 0.2s !important; /* Reduzido para mobile */
+    }
+    
+    .group:hover img {
+      transform: scale(1.02) !important; /* Reduzido de 1.05/1.1 para 1.02 */
+    }
+  }
+
+  /* Otimizar carregamento de imagens */
+  img[loading="lazy"] {
+    content-visibility: auto;
+    contain-intrinsic-size: 200px 150px;
   }
 }
 

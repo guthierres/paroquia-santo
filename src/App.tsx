@@ -18,6 +18,7 @@ import { PastoralsPage } from './components/sections/PastoralsPage';
 import { AlbumGallery } from './components/sections/AlbumGallery';
 import { UrgentPopup } from './components/ui/UrgentPopup';
 import { ScrollToTopButton } from './components/ui/ScrollToTopButton';
+import { ImagePreloader } from './components/ui/ImagePreloader';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { AdminPanel } from './components/admin/AdminPanel';
@@ -243,6 +244,11 @@ function App() {
   return (
     <div className="min-h-screen bg-white w-full max-w-full overflow-x-hidden">
       <UrgentPopup />
+      {/* Preload apenas imagens críticas */}
+      <ImagePreloader 
+        publicIds={[]} // Será populado dinamicamente conforme necessário
+        priority={true}
+      />
       <Toaster 
         position="top-right"
         toastOptions={{

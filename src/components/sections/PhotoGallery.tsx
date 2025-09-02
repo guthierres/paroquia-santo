@@ -321,7 +321,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                               <img
                                 src={album.cover_image_url}
                                 alt={album.name}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                                style={{ 
+                                  maxWidth: '100%',
+                                  height: 'auto',
+                                  imageRendering: 'auto'
+                                }}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
@@ -405,7 +411,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                                   <img
                                     src={album.cover_image_url}
                                     alt={album.name}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy"
+                                    style={{ 
+                                      maxWidth: '100%',
+                                      height: 'auto',
+                                      imageRendering: 'auto'
+                                    }}
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -497,8 +509,13 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ onNavigateToFullGall
                             <img
                               src={photo.image_url}
                               alt={photo.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               loading="lazy"
+                              style={{ 
+                                maxWidth: '100%',
+                                height: 'auto',
+                                imageRendering: 'auto'
+                              }}
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">

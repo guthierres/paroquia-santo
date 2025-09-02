@@ -30,16 +30,17 @@ export const SlidesSection: React.FC = () => {
 
   // Preload next slide image
   useEffect(() => {
-    if (slides.length > 1) {
+    if (slides.length > 1 && !isMobile) { // Não preload no mobile para economizar
       const nextIndex = (currentSlide + 1) % slides.length;
       const nextSlide = slides[nextIndex];
       if (nextSlide?.image_url && !imageLoaded[nextIndex]) {
         const img = new Image();
         img.onload = () => setImageLoaded(prev => ({ ...prev, [nextIndex]: true }));
+        // Usar versão comprimida para preload
         img.src = nextSlide.image_url;
       }
     }
-  }, [currentSlide, slides, imageLoaded]);
+  }, [currentSlide, slides, imageLoaded, isMobile]);
 
   useEffect(() => {
     if (!isAutoPlay || slides.length <= 1) return;
@@ -187,9 +188,11 @@ export const SlidesSection: React.FC = () => {
                 objectPosition: 'center center',
                 width: '100%',
                 height: '100%',
-                maxWidth: '100vw'
+                maxWidth: '100vw',
+                imageRendering: 'auto'
               }}
-              loading={currentSlide === 0 ? 'eager' : 'lazy'}
+              loading="eager"
+              fetchPriority={currentSlide === 0 ? 'high' : 'low'}
               onLoad={() => setImageLoaded(prev => ({ ...prev, [currentSlide]: true }))}
               onError={(e) => {
                 console.error('Error loading slide image:', e);

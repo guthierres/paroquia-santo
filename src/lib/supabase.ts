@@ -27,7 +27,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 class ImageCacheManager {
   private memoryCache = new Map<string, string>();
   private cachePrefix = 'parish_img_cache_';
-  private maxCacheAge = 7 * 24 * 60 * 60 * 1000; // 7 days
 
   constructor() {
     this.cleanExpiredCache();
@@ -98,9 +97,9 @@ class ImageCacheManager {
     if (!url.includes('supabase') || url.includes('?')) return url;
     
     const params = new URLSearchParams();
-    if (width) params.append('width', Math.min(width, 1920).toString()); // Max width 1920px
-    if (height) params.append('height', Math.min(height, 1080).toString()); // Max height 1080px
-    params.append('quality', Math.min(quality, 85).toString()); // Max quality 85%
+    if (width) params.append('width', Math.min(width, 800).toString()); // REDUZIDO: Max width 800px
+    if (height) params.append('height', Math.min(height, 600).toString()); // REDUZIDO: Max height 600px
+    params.append('quality', Math.min(quality, 40).toString()); // REDUZIDO: Max quality 40%
     params.append('format', 'webp');
     params.append('resize', 'cover');
     
@@ -113,7 +112,15 @@ const imageCache = new ImageCacheManager();
 
 // Export optimized functions
 export const getCachedImageUrl = (originalUrl: string, options?: { width?: number; height?: number; quality?: number }) => {
-  return imageCache.getCachedUrl(originalUrl, options);
+  // FORÇAR qualidade baixa se não especificada
+  const optimizedOptions = {
+    ...options,
+    quality: Math.min(options?.quality || 30, 30), // Máximo 30% de qualidade
+    width: options?.width ? Math.min(options.width, 600) : undefined, // Máximo 600px
+    height: options?.height ? Math.min(options.height, 600) : undefined // Máximo 600px
+  };
+  
+  return imageCache.getCachedUrl(originalUrl, optimizedOptions);
 };
 
 // Preload critical images
@@ -127,7 +134,8 @@ export const preloadImage = (url: string): Promise<void> => {
 };
 
 // Batch preload images
-export const preloadImages = async (urls: string[], maxConcurrent = 3): Promise<void> => {
+export const preloadImages = async (urls: string[], maxConcurrent = 2): Promise<void> => {
+  // REDUZIDO: maxConcurrent de 3 para 2 para economizar bandwidth
   const chunks = [];
   for (let i = 0; i < urls.length; i += maxConcurrent) {
     chunks.push(urls.slice(i, i + maxConcurrent));

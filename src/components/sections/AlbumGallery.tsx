@@ -367,8 +367,13 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
                             <img
                               src={photo.image_url}
                               alt={photo.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               loading="lazy"
+                              style={{ 
+                                maxWidth: '100%',
+                                height: 'auto',
+                                imageRendering: 'auto'
+                              }}
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -487,8 +492,9 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
                   className="max-w-none transition-transform duration-200 select-none"
                   style={{
                     transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
-                    maxHeight: '90vh',
-                    maxWidth: '95vw'
+                    maxHeight: '85vh',
+                    maxWidth: '85vw',
+                    imageRendering: 'auto'
                   }}
                   draggable={false}
                 />

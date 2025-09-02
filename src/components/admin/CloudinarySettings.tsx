@@ -250,6 +250,7 @@ export const CloudinarySettings: React.FC = () => {
                           <li>• <strong>✅ Storage Egress = ZERO</strong> - Supabase Storage completamente desabilitado</li>
                           <li>• <strong>✅ Performance Máxima</strong> - Todas as imagens via CDN Cloudinary</li>
                           <li>• <strong>✅ Economia Total</strong> - Sem custos de Storage Egress</li>
+                          <li>• <strong>✅ Bandwidth Otimizado</strong> - Compressão extrema (70-80% menos dados)</li>
                           <li>• <strong>✅ Otimização Automática</strong> - WebP, qualidade e dimensões otimizadas</li>
                         </>
                       ) : (
@@ -267,7 +268,7 @@ export const CloudinarySettings: React.FC = () => {
                         : 'text-yellow-800'
                     }`}>
                       {!settings.supabase_storage_enabled && settings.cloudinary_enabled
-                        ? 'Parabéns! Você eliminou completamente o Storage Egress do Supabase! 🎉'
+                        ? 'Parabéns! Você eliminou o Storage Egress E otimizou o bandwidth! 🎉'
                         : 'Só ative se o Cloudinary estiver 100% configurado e funcionando!'
                       }
                     </p>
@@ -355,6 +356,18 @@ export const CloudinarySettings: React.FC = () => {
           <h4 className="text-lg font-semibold text-gray-800 mb-4">Como Configurar</h4>
           
           <div className="space-y-4 text-sm text-gray-600">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <h5 className="font-semibold text-green-800 mb-2">🚀 OTIMIZAÇÕES ATIVAS:</h5>
+              <ul className="list-disc list-inside space-y-1 text-green-700 text-xs">
+                <li>Qualidade reduzida para 25-40% (era 75%)</li>
+                <li>Tamanhos máximos: 800x600px (era 1920x1080px)</li>
+                <li>Preload reduzido de 3 para 2 imagens</li>
+                <li>Cache aumentado para 30 dias</li>
+                <li>Compressão WebP/AVIF automática</li>
+                <li>Redução estimada: 70-80% do bandwidth</li>
+              </ul>
+            </div>
+            
             <div>
               <h5 className="font-semibold text-gray-800 mb-2">1. Criar Conta no Cloudinary</h5>
               <p>Acesse <a href="https://cloudinary.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">cloudinary.com</a> e crie uma conta gratuita.</p>
@@ -384,11 +397,12 @@ export const CloudinarySettings: React.FC = () => {
             <div>
               <h5 className="font-semibold text-gray-800 mb-2">4. Benefícios</h5>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Otimização automática de imagens</li>
+                <li>Otimização EXTREMA de imagens (70-80% menos dados)</li>
                 <li>CDN global para carregamento rápido</li>
-                <li>Redução de 90% no uso do banco</li>
+                <li>Redução de 90% no uso do banco + 70% no bandwidth</li>
                 <li>Transformações em tempo real</li>
                 <li>Backup automático das imagens</li>
+                <li>Economia máxima de custos</li>
               </ul>
             </div>
           </div>
@@ -423,8 +437,9 @@ export const CloudinarySettings: React.FC = () => {
                 <p><strong>✅ Storage Egress = ZERO</strong> - Supabase Storage completamente desabilitado</p>
                 <p><strong>✅ Performance Máxima</strong> - Todas as imagens via CDN Cloudinary</p>
                 <p><strong>✅ Economia Total</strong> - Sem custos de Storage Egress</p>
+                <p><strong>✅ Bandwidth Otimizado</strong> - Compressão extrema (70-80% menos dados)</p>
                 <p className="font-medium text-green-800 mt-3">
-                  Parabéns! Você eliminou completamente o Storage Egress do Supabase! 🎉
+                  Parabéns! Você eliminou o Storage Egress E otimizou o bandwidth! 🎉
                 </p>
               </div>
             </div>

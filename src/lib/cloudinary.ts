@@ -72,7 +72,7 @@ export const invalidateConfigCache = () => {
   configCacheTime = 0;
 };
 
-// Gerar URL otimizada do Cloudinary
+// Gerar URL otimizada do Cloudinary com MÁXIMA ECONOMIA DE BANDWIDTH
 export const getCloudinaryUrl = (
   publicId: string,
   options: {
@@ -82,6 +82,8 @@ export const getCloudinaryUrl = (
     format?: string;
     crop?: string;
     gravity?: string;
+    progressive?: boolean;
+    fetchFormat?: string;
   } = {}
 ): string => {
   if (!configCache?.cloudName || !publicId) {
@@ -91,24 +93,37 @@ export const getCloudinaryUrl = (
   const {
     width,
     height,
-    quality = 'auto',
+    quality = 40, // REDUZIDO DRASTICAMENTE de auto:low para 40
     format = 'auto',
     crop = 'fill',
-    gravity = 'center'
+    gravity = 'center',
+    progressive = true
   } = options;
 
   let transformations = [];
   
+  // OTIMIZAÇÕES EXTREMAS PARA REDUZIR BANDWIDTH
+  transformations.push('f_auto'); // WebP/AVIF quando possível
+  transformations.push(`q_${quality}`); // Qualidade muito baixa mas aceitável
+  transformations.push('fl_progressive'); // Progressive JPEG
+  transformations.push('fl_lossy'); // Compressão lossy agressiva
+  transformations.push('fl_strip_profile'); // Remove metadados
+  transformations.push('dpr_auto'); // DPR automático
+  
+  // LIMITAR TAMANHOS MÁXIMOS DRASTICAMENTE
+  const maxWidth = Math.min(width || 800, 800); // Máximo 800px
+  const maxHeight = Math.min(height || 600, 600); // Máximo 600px
+  
   if (width || height) {
     let sizeTransform = `c_${crop}`;
     if (gravity) sizeTransform += `,g_${gravity}`;
-    if (width) sizeTransform += `,w_${width}`;
-    if (height) sizeTransform += `,h_${height}`;
+    sizeTransform += `,w_${maxWidth}`;
+    if (height) sizeTransform += `,h_${maxHeight}`;
     transformations.push(sizeTransform);
+  } else {
+    // Se não especificado, limitar a 400px para economizar
+    transformations.push(`c_limit,w_400,h_400`);
   }
-
-  transformations.push(`q_${quality}`);
-  transformations.push(`f_${format}`);
 
   const transformString = transformations.join(',');
   
@@ -204,7 +219,7 @@ export const validateCloudinaryConfig = async (): Promise<{
   // Testar conexão se todas as configurações estão presentes
   if (errors.length === 0 && config.enabled) {
     try {
-      const testUrl = `https://res.cloudinary.com/${config.cloudName}/image/upload/sample.jpg`;
+      const testUrl = `https://res.cloudinary.com/${configCache.cloudName}/image/upload/c_limit,w_100,h_100,q_30,f_auto/sample.jpg`;
       const response = await fetch(testUrl, { method: 'HEAD' });
       
       if (!response.ok) {
@@ -262,17 +277,128 @@ export const migrateImageToCloudinary = async (
   }
 };
 
-// Utilitários para diferentes tipos de imagem
+// CONFIGURAÇÕES EXTREMAMENTE OTIMIZADAS PARA ECONOMIA DE BANDWIDTH
 export const getOptimizedImageUrl = (
   publicId: string,
   type: 'thumbnail' | 'medium' | 'large' | 'hero' = 'medium'
 ): string => {
+  // Configurações MUITO mais agressivas para reduzir bandwidth
   const configs = {
-    thumbnail: { width: 150, height: 150, quality: 80 },
-    medium: { width: 400, height: 400, quality: 85 },
-    large: { width: 800, height: 600, quality: 90 },
-    hero: { width: 1920, height: 1080, quality: 85 }
+    thumbnail: { width: 80, height: 80, quality: 30, progressive: true }, // Reduzido de 120x120
+    medium: { width: 200, height: 200, quality: 35, progressive: true }, // Reduzido de 320x320
+    large: { width: 400, height: 300, quality: 40, progressive: true }, // Reduzido de 640x480
+    hero: { width: 800, height: 450, quality: 45, progressive: true } // Reduzido de 1280x720
   };
 
   return getCloudinaryUrl(publicId, configs[type]);
+};
+
+// Cache MUITO mais agressivo para URLs do Cloudinary
+const urlCache = new Map<string, { url: string; timestamp: number }>();
+const URL_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 dias (aumentado de 24h)
+
+export const getCachedCloudinaryUrl = (
+  publicId: string,
+  options: any = {}
+): string => {
+  const cacheKey = `${publicId}_${JSON.stringify(options)}`;
+  const cached = urlCache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < URL_CACHE_DURATION) {
+    return cached.url;
+  }
+  
+  const url = getCloudinaryUrl(publicId, options);
+  urlCache.set(cacheKey, { url, timestamp: Date.now() });
+  
+  return url;
+};
+
+// Função para gerar URLs responsivas com srcset OTIMIZADO
+export const getResponsiveImageUrls = (publicId: string, baseWidth: number = 200) => {
+  // REDUZIDO: baseWidth padrão de 400 para 200
+  const sizes = [1, 1.5]; // REDUZIDO: apenas 2 tamanhos em vez de 4
+  const urls = sizes.map(multiplier => {
+    const width = Math.min(Math.round(baseWidth * multiplier), 600); // Máximo 600px
+    return {
+      url: getCachedCloudinaryUrl(publicId, {
+        width,
+        quality: 35, // Qualidade muito baixa
+        format: 'auto',
+        progressive: true,
+        crop: 'fill'
+      }),
+      width: `${width}w`
+    };
+  });
+  
+  return {
+    src: urls[0].url, // 1x como fallback
+    srcSet: urls.map(u => `${u.url} ${u.width}`).join(', ')
+  };
+};
+
+// NOVA FUNÇÃO: Gerar URL ultra-comprimida para thumbnails
+export const getUltraCompressedUrl = (publicId: string, size: number = 100): string => {
+  return getCloudinaryUrl(publicId, {
+    width: size,
+    height: size,
+    quality: 25, // Qualidade muito baixa
+    format: 'auto',
+    crop: 'fill',
+    progressive: true
+  });
+};
+
+// NOVA FUNÇÃO: Detectar tipo de dispositivo e ajustar qualidade
+export const getDeviceOptimizedUrl = (
+  publicId: string,
+  width?: number,
+  height?: number
+): string => {
+  // Detectar conexão lenta ou dispositivo móvel
+  const isSlowConnection = (navigator as any).connection?.effectiveType === '2g' || 
+                          (navigator as any).connection?.effectiveType === 'slow-2g';
+  const isMobile = window.innerWidth < 768;
+  
+  // Ajustar qualidade baseado no dispositivo/conexão
+  let quality = 40;
+  if (isSlowConnection) quality = 25;
+  else if (isMobile) quality = 30;
+  
+  // Limitar tamanhos para mobile
+  const maxWidth = isMobile ? Math.min(width || 300, 300) : Math.min(width || 600, 600);
+  const maxHeight = isMobile ? Math.min(height || 300, 300) : Math.min(height || 600, 600);
+  
+  return getCloudinaryUrl(publicId, {
+    width: maxWidth,
+    height: maxHeight,
+    quality,
+    format: 'auto',
+    crop: 'fill',
+    progressive: true
+  });
+};
+
+// NOVA FUNÇÃO: Preload inteligente com economia
+export const preloadCriticalImages = async (publicIds: string[], maxConcurrent: number = 2) => {
+  // Reduzido de 3 para 2 para economizar bandwidth
+  const chunks = [];
+  for (let i = 0; i < publicIds.length; i += maxConcurrent) {
+    chunks.push(publicIds.slice(i, i + maxConcurrent));
+  }
+
+  for (const chunk of chunks) {
+    await Promise.allSettled(
+      chunk.map(publicId => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          // Usar versão ultra-comprimida para preload
+          img.src = getUltraCompressedUrl(publicId, 50);
+        });
+      })
+    );
+  }
 };
