@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { supabase, Slide } from '../../lib/supabase';
 
@@ -167,8 +167,27 @@ export const SlidesSection: React.FC = () => {
     );
   }
 
+  const handleButtonClick = (slide: Slide) => {
+    if (!slide.button_link) return;
+
+    if (slide.button_link_type === 'external') {
+      window.open(slide.button_link, '_blank', 'noopener,noreferrer');
+    } else {
+      const targetId = slide.button_link.replace('#', '');
+      const element = document.getElementById(targetId);
+
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (slide.button_open_new_tab) {
+        window.open(slide.button_link, '_blank', 'noopener,noreferrer');
+      } else {
+        window.location.href = slide.button_link;
+      }
+    }
+  };
+
   return (
-    <section className="relative w-full max-w-full overflow-hidden" style={{ height: '100vh', minHeight: '100vh', width: '100vw', maxWidth: '100vw' }}>
+    <section className="relative w-full max-w-full overflow-hidden bg-gradient-to-br from-red-900 to-red-800" style={{ minHeight: '400px', width: '100vw', maxWidth: '100vw' }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -176,19 +195,19 @@ export const SlidesSection: React.FC = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="absolute inset-0 w-full h-full max-w-full overflow-hidden"
+          className="relative w-full h-full max-w-full"
         >
-          {/* Background Image Container */}
-          <div className="absolute inset-0 w-full h-full max-w-full overflow-hidden">
+          {/* Background Image Container with aspect ratio preservation */}
+          <div className="relative w-full" style={{ paddingBottom: isMobile ? '75%' : '42.857%' }}>
             <img
               src={slides[currentSlide].image_url}
               alt={slides[currentSlide].title}
-              className="w-full h-full object-cover max-w-full"
+              className="absolute top-0 left-0 w-full h-full object-contain"
               style={{
                 objectPosition: 'center center',
+                objectFit: 'contain',
                 width: '100%',
                 height: '100%',
-                maxWidth: '100vw',
                 imageRendering: 'auto'
               }}
               loading="eager"
@@ -196,7 +215,6 @@ export const SlidesSection: React.FC = () => {
               onLoad={() => setImageLoaded(prev => ({ ...prev, [currentSlide]: true }))}
               onError={(e) => {
                 console.error('Error loading slide image:', e);
-                // Fallback to a gradient background if image fails
                 const target = e.currentTarget as HTMLImageElement;
                 target.style.display = 'none';
                 const parent = target.parentElement;
@@ -206,13 +224,13 @@ export const SlidesSection: React.FC = () => {
               }}
             />
           </div>
-          
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/30" />
-          
+
+          {/* Overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/60 pointer-events-none" />
+
           {/* Content */}
-          <div className="relative z-10 h-full flex items-center justify-center px-4 py-8 w-full max-w-full">
-            <div className="text-center text-white max-w-4xl mx-auto w-full max-w-full px-2">
+          <div className="absolute inset-0 z-10 flex items-center justify-center px-4 py-8 w-full">
+            <div className="text-center text-white max-w-4xl mx-auto w-full px-2">
               <motion.h1
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -230,6 +248,25 @@ export const SlidesSection: React.FC = () => {
               >
                 {slides[currentSlide].description}
               </motion.p>
+
+              {slides[currentSlide].button_text && slides[currentSlide].button_link && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  className="mt-6 sm:mt-8"
+                >
+                  <Button
+                    onClick={() => handleButtonClick(slides[currentSlide])}
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    {slides[currentSlide].button_text}
+                    {slides[currentSlide].button_link_type === 'external' && (
+                      <ExternalLink className="ml-2 h-4 w-4 sm:h-5 sm:w-5 inline-block" />
+                    )}
+                  </Button>
+                </motion.div>
+              )}
             </div>
           </div>
         </motion.div>

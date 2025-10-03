@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, Save, X, Eye, EyeOff, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, Eye, EyeOff, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { FileUpload } from '../ui/FileUpload'; // Assuming FileUpload takes a File object directly
 import { supabase, Slide } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+
+const availablePages = [
+  { id: '', label: 'Selecione uma página' },
+  { id: 'home', label: 'Início' },
+  { id: 'history', label: 'História' },
+  { id: 'priest', label: 'Padre' },
+  { id: 'timeline', label: 'Linha do Tempo' },
+  { id: 'photos', label: 'Fotos' },
+  { id: 'announcements', label: 'Eventos' },
+  { id: 'blog', label: 'Blog' },
+  { id: 'contact', label: 'Contato' },
+  { id: 'pastorals', label: 'Pastorais (Página)' },
+  { id: 'celebrations', label: 'Celebrações (Página)' }
+];
 
 export const SlideManager: React.FC = () => {
   const [slides, setSlides] = useState<Slide[]>([]);
@@ -44,6 +58,10 @@ export const SlideManager: React.FC = () => {
       image_url: '',
       order_index: slides.length, // Assign a unique order index for new slides
       is_active: true,
+      button_text: '',
+      button_link: '',
+      button_link_type: 'internal',
+      button_open_new_tab: false,
       created_at: new Date().toISOString()
     };
     setEditingSlide(newSlide);
@@ -67,7 +85,11 @@ export const SlideManager: React.FC = () => {
             description: editingSlide.description,
             image_url: editingSlide.image_url || '',
             order_index: newOrderIndex, // Use the new unique order index
-            is_active: editingSlide.is_active
+            is_active: editingSlide.is_active,
+            button_text: editingSlide.button_text || null,
+            button_link: editingSlide.button_link || null,
+            button_link_type: editingSlide.button_link_type || 'internal',
+            button_open_new_tab: editingSlide.button_open_new_tab || false
           }])
           .select()
           .single();
@@ -82,7 +104,11 @@ export const SlideManager: React.FC = () => {
             description: editingSlide.description,
             image_url: editingSlide.image_url,
             order_index: editingSlide.order_index,
-            is_active: editingSlide.is_active
+            is_active: editingSlide.is_active,
+            button_text: editingSlide.button_text || null,
+            button_link: editingSlide.button_link || null,
+            button_link_type: editingSlide.button_link_type || 'internal',
+            button_open_new_tab: editingSlide.button_open_new_tab || false
           })
           .eq('id', editingSlide.id);
 
@@ -447,6 +473,75 @@ export const SlideManager: React.FC = () => {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Texto do Botão (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSlide.button_text || ''}
+                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, button_text: e.target.value } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    placeholder="Ex: Saiba Mais, Contate-nos"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tipo de Link
+                  </label>
+                  <select
+                    value={editingSlide.button_link_type || 'internal'}
+                    onChange={(e) => setEditingSlide(prev => prev ? {
+                      ...prev,
+                      button_link_type: e.target.value as 'internal' | 'external',
+                      button_open_new_tab: e.target.value === 'external',
+                      button_link: e.target.value === 'internal' ? '' : prev.button_link
+                    } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                  >
+                    <option value="internal">Interno (navega no site)</option>
+                    <option value="external">Externo (abre em nova guia)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Link do Botão (opcional)
+                  </label>
+                  {editingSlide.button_link_type === 'internal' ? (
+                    <select
+                      value={editingSlide.button_link || ''}
+                      onChange={(e) => setEditingSlide(prev => prev ? { ...prev, button_link: e.target.value } : null)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    >
+                      {availablePages.map(page => (
+                        <option key={page.id} value={page.id}>
+                          {page.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="url"
+                      value={editingSlide.button_link || ''}
+                      onChange={(e) => setEditingSlide(prev => prev ? { ...prev, button_link: e.target.value } : null)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                      placeholder="https://exemplo.com"
+                    />
+                  )}
+                  {editingSlide.button_link_type === 'internal' && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Selecione a página para onde o botão deve navegar
+                    </p>
+                  )}
+                  {editingSlide.button_link_type === 'external' && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Digite a URL completa começando com https://
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2">
                     <input
@@ -457,6 +552,17 @@ export const SlideManager: React.FC = () => {
                     />
                     <span className="text-sm text-gray-700">Slide ativo</span>
                   </label>
+                  {editingSlide.button_link_type === 'internal' && (
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={editingSlide.button_open_new_tab || false}
+                        onChange={(e) => setEditingSlide(prev => prev ? { ...prev, button_open_new_tab: e.target.checked } : null)}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700">Abrir em nova guia</span>
+                    </label>
+                  )}
                 </div>
 
                 <div className="flex gap-2 pt-4">

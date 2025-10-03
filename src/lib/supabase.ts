@@ -185,6 +185,10 @@ export interface Slide {
   cloudinary_public_id: string | null;
   order_index: number;
   is_active: boolean;
+  button_text?: string | null;
+  button_link?: string | null;
+  button_link_type?: 'internal' | 'external' | null;
+  button_open_new_tab?: boolean | null;
   created_at: string;
 }
 

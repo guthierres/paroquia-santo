@@ -14,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { id: 'history', label: 'História' },
     { id: 'pastorals', label: 'Pastorais' },
     { id: 'celebrations', label: 'Celebrações' },
+    { id: 'announcements', label: 'Eventos' },
     { id: 'blog', label: 'Blog' },
     { id: 'photos', label: 'Fotos' },
     { id: 'contact', label: 'Contato' }
