@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, ChevronRight, Megaphone, X, User, MessageCircle } from 'lucide-react';
+import { Calendar, Clock, ChevronRight, Megaphone, X, User, MessageCircle, ZoomIn } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
@@ -21,6 +21,7 @@ interface ParishAnnouncement {
 export function AnnouncementsSection() {
   const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<ParishAnnouncement | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
@@ -141,7 +142,6 @@ export function AnnouncementsSection() {
             </motion.div>
           ) : (
             <>
-              {/* Grid de Avisos Compactos */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <AnimatePresence>
                   {displayedAnnouncements.map((announcement, index) => (
@@ -153,7 +153,6 @@ export function AnnouncementsSection() {
                       transition={{ duration: 0.6, delay: index * 0.1 }}
                       layout
                     >
-                      {/* Envolver o Card em um botão para torná-lo clicável por inteiro */}
                       <button
                         onClick={() => setSelectedAnnouncement(announcement)}
                         className="w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
@@ -161,7 +160,6 @@ export function AnnouncementsSection() {
                         <Card
                           className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-l-4 border-red-800 overflow-hidden"
                         >
-                          {/* Imagem do Flyer (se existir) */}
                           {announcement.flyer_url && (
                             <div className="relative w-full h-40 sm:h-48 overflow-hidden bg-gray-100">
                               <img
@@ -174,7 +172,6 @@ export function AnnouncementsSection() {
                             </div>
                           )}
 
-                          {/* Header com tipo e data */}
                           <div className={`p-3 ${
                             announcement.type === 'event'
                               ? 'bg-gradient-to-r from-blue-50 to-blue-100'
@@ -195,7 +192,7 @@ export function AnnouncementsSection() {
                                   {announcement.type === 'event' ? 'Evento' : 'Aviso'}
                                 </span>
                               </div>
-                              
+
                               {announcement.event_date && (
                                 <div className={`text-right ${
                                   isUpcoming(announcement.event_date)
@@ -211,8 +208,7 @@ export function AnnouncementsSection() {
                                 </div>
                               )}
                             </div>
-                            
-                            {/* Indicador de evento próximo */}
+
                             {announcement.event_date && isUpcoming(announcement.event_date) && (
                               <div className="flex items-center gap-1 text-xs text-green-700 font-medium">
                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -221,17 +217,15 @@ export function AnnouncementsSection() {
                             )}
                           </div>
 
-                          {/* Conteúdo principal */}
                           <div className="p-4 flex-1 flex flex-col">
                             <h3 className="font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2 line-clamp-2 text-sm sm:text-base">
                               {announcement.title}
                             </h3>
-                            
+
                             <p className="text-gray-600 text-xs sm:text-sm mb-3 flex-1 line-clamp-3 leading-relaxed">
                               {announcement.content}
                             </p>
 
-                            {/* Footer com data de criação e "Ver mais" como span */}
                             <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                               <div className="flex items-center gap-1 text-xs text-gray-500">
                                 <Clock className="h-3 w-3" />
@@ -242,8 +236,7 @@ export function AnnouncementsSection() {
                                   })}
                                 </span>
                               </div>
-                              
-                              {/* Alterado para <span> pois o Card já é um botão */}
+
                               <span
                                 className="flex items-center text-red-800 font-medium group-hover:text-red-900 transition-colors text-xs"
                               >
@@ -259,7 +252,6 @@ export function AnnouncementsSection() {
                 </AnimatePresence>
               </div>
 
-              {/* Botão Ver Mais */}
               {announcements.length > 6 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -285,35 +277,45 @@ export function AnnouncementsSection() {
         </div>
       </section>
 
-      {/* Modal de Detalhes */}
+      {/* Modal de Detalhes com Scroll */}
       <AnimatePresence>
         {selectedAnnouncement && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
             onClick={() => setSelectedAnnouncement(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              className="bg-white rounded-xl w-full max-w-2xl my-8 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Imagem do Flyer em destaque (se existir) */}
               {selectedAnnouncement.flyer_url && (
-                <div className="relative w-full h-64 sm:h-80 overflow-hidden bg-gray-100">
+                <div
+                  className="relative w-full h-64 sm:h-80 overflow-hidden bg-gray-100 cursor-pointer group"
+                  onClick={() => setFullscreenImage(selectedAnnouncement.flyer_url!)}
+                >
                   <img
                     src={selectedAnnouncement.flyer_url}
                     alt={selectedAnnouncement.title}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-3">
+                      <ZoomIn className="h-8 w-8 text-gray-800" />
+                    </div>
+                  </div>
                   <div className="absolute top-4 right-4">
                     <Button
                       variant="outline"
-                      onClick={() => setSelectedAnnouncement(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedAnnouncement(null);
+                      }}
                       className="w-8 h-8 p-0 rounded-full bg-white/90 hover:bg-white shadow-lg"
                     >
                       <X className="h-4 w-4" />
@@ -322,7 +324,6 @@ export function AnnouncementsSection() {
                 </div>
               )}
 
-              {/* Header do Modal */}
               <div className={`p-6 ${
                 selectedAnnouncement.type === 'event'
                   ? 'bg-gradient-to-r from-blue-600 to-blue-700'
@@ -347,7 +348,7 @@ export function AnnouncementsSection() {
                           </span>
                         )}
                       </div>
-                      <h3 className="text-xl font-bold truncate">{selectedAnnouncement.title}</h3>
+                      <h3 className="text-xl font-bold">{selectedAnnouncement.title}</h3>
                     </div>
                   </div>
                   {!selectedAnnouncement.flyer_url && (
@@ -361,7 +362,6 @@ export function AnnouncementsSection() {
                   )}
                 </div>
 
-                {/* Data e Hora em Destaque */}
                 {selectedAnnouncement.event_date && (
                   <div className="mt-4 p-4 bg-white/10 rounded-lg border border-white/20">
                     <div className="flex items-center justify-center gap-4 text-center">
@@ -392,17 +392,14 @@ export function AnnouncementsSection() {
                 )}
               </div>
 
-              {/* Conteúdo do Modal */}
-              <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+              <div className="p-6">
                 <div className="prose max-w-none">
                   <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify">
                     {selectedAnnouncement.content}
                   </div>
                 </div>
 
-                {/* Informações adicionais */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
-                  {/* Botão WhatsApp se disponível */}
                   {selectedAnnouncement.whatsapp_contact && (
                     <div className="mb-4">
                       <Button
@@ -415,7 +412,7 @@ export function AnnouncementsSection() {
                       </Button>
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <User className="h-4 w-4" />
@@ -434,7 +431,6 @@ export function AnnouncementsSection() {
                   </div>
                 </div>
 
-                {/* Botão de Fechar */}
                 <div className="text-center mt-6">
                   <Button
                     variant="primary"
@@ -444,6 +440,40 @@ export function AnnouncementsSection() {
                   </Button>
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Imagem em Tela Cheia */}
+      <AnimatePresence>
+        {fullscreenImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={fullscreenImage}
+                alt="Imagem em tela cheia"
+                className="max-w-full max-h-full object-contain"
+              />
+              <Button
+                variant="outline"
+                onClick={() => setFullscreenImage(null)}
+                className="absolute top-4 right-4 w-10 h-10 p-0 rounded-full bg-white/90 hover:bg-white shadow-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </motion.div>
           </motion.div>
         )}
