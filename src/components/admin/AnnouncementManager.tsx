@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, CreditCard as Edit, Trash2, Save, X, Calendar, Megaphone, Bell, Image } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { FileUpload } from '../ui/FileUpload'; // AGORA COM A IMPLEMENTAÇÃO CORRETA
+import { FileUpload } from '../ui/FileUpload';
 import { supabase, ParishAnnouncement } from '../../lib/supabase';
 import { uploadToCloudinary, getCloudinaryConfig } from '../../lib/cloudinary';
 import toast from 'react-hot-toast';
@@ -388,7 +388,6 @@ export const AnnouncementManager: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    {/* AQUI VOCÊ CHAMA O NOVO FILEUPLOAD */}
                     <FileUpload
                       onFileSelect={handleFlyerUpload}
                       accept="image/*"
