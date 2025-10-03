@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, Save, X, Calendar, Megaphone, Bell } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, Calendar, Megaphone, Bell, Image } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
+import { FileUpload } from '../ui/FileUpload';
 import { supabase, ParishAnnouncement } from '../../lib/supabase';
+import { uploadToCloudinary, getCloudinaryConfig } from '../../lib/cloudinary';
 import toast from 'react-hot-toast';
 
 export const AnnouncementManager: React.FC = () => {
@@ -36,6 +38,7 @@ export const AnnouncementManager: React.FC = () => {
       title: '',
       content: '',
       event_date: null,
+      flyer_url: null,
       whatsapp_contact: null,
       is_published: false,
       created_at: new Date().toISOString(),
@@ -43,6 +46,32 @@ export const AnnouncementManager: React.FC = () => {
     };
     setEditingAnnouncement(newAnnouncement);
     setIsCreating(true);
+  };
+
+  const handleFlyerUpload = async (file: File) => {
+    try {
+      const config = await getCloudinaryConfig();
+
+      if (!config.enabled) {
+        toast.error('Sistema de upload não está configurado');
+        return;
+      }
+
+      toast.loading('Enviando imagem...');
+      const result = await uploadToCloudinary(file, 'announcements');
+
+      setEditingAnnouncement(prev => prev ? {
+        ...prev,
+        flyer_url: result.secureUrl
+      } : null);
+
+      toast.dismiss();
+      toast.success('Imagem enviada com sucesso!');
+    } catch (error) {
+      toast.dismiss();
+      console.error('Erro no upload:', error);
+      toast.error('Erro ao enviar imagem');
+    }
   };
 
   const handleSaveAnnouncement = async () => {
@@ -56,8 +85,8 @@ export const AnnouncementManager: React.FC = () => {
         type: editingAnnouncement.type,
         title: editingAnnouncement.title,
         content: editingAnnouncement.content,
-        // O Supabase irá lidar com o fuso horário corretamente se o tipo for 'timestamp with time zone'
         event_date: editingAnnouncement.event_date,
+        flyer_url: editingAnnouncement.flyer_url,
         whatsapp_contact: editingAnnouncement.whatsapp_contact,
         is_published: editingAnnouncement.is_published,
         updated_at: new Date().toISOString()
@@ -330,6 +359,45 @@ export const AnnouncementManager: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 resize-none"
                     placeholder="Descrição completa do evento ou aviso"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Imagem do Flyer (opcional)
+                  </label>
+                  {editingAnnouncement.flyer_url ? (
+                    <div className="space-y-2">
+                      <div className="relative rounded-lg overflow-hidden border-2 border-gray-200">
+                        <img
+                          src={editingAnnouncement.flyer_url}
+                          alt="Preview do flyer"
+                          className="w-full h-48 object-cover"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingAnnouncement(prev => prev ? {
+                            ...prev,
+                            flyer_url: null
+                          } : null)}
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-white"
+                        >
+                          <X className="h-3 w-3" />
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <FileUpload
+                      onFileSelect={handleFlyerUpload}
+                      accept="image/*"
+                      maxSize={5}
+                      icon={Image}
+                    />
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Envie uma imagem para destacar o evento/aviso (máx. 5MB)
+                  </p>
                 </div>
 
                 <div>
