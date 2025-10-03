@@ -18,6 +18,7 @@ import { PastoralsPage } from './components/sections/PastoralsPage';
 import { AlbumGallery } from './components/sections/AlbumGallery';
 import { UrgentPopup } from './components/ui/UrgentPopup';
 import { ScrollToTopButton } from './components/ui/ScrollToTopButton';
+import { WhatsAppButton } from './components/ui/WhatsAppButton';
 import { ImagePreloader } from './components/ui/ImagePreloader';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
@@ -386,6 +387,9 @@ function App() {
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppButton />
 
       {/* Admin Modals */}
       <AnimatePresence>
