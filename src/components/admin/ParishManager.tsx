@@ -14,8 +14,13 @@ export const ParishManager: React.FC = () => {
     founded_year: 1985,
     address: '',
     phone: '',
+    landline_phone: '',
+    whatsapp_phone: '',
     email: '',
-    logo_url: null
+    logo_url: null,
+    confession_hours: '',
+    spiritual_direction_hours: '',
+    office_hours: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -207,12 +212,25 @@ export const ParishManager: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Telefone
+                Telefone Fixo
               </label>
               <input
                 type="text"
-                value={parish.phone || ''}
-                onChange={(e) => setParish(prev => ({ ...prev, phone: e.target.value }))}
+                value={parish.landline_phone || ''}
+                onChange={(e) => setParish(prev => ({ ...prev, landline_phone: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="(11) 1234-5678"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                WhatsApp
+              </label>
+              <input
+                type="text"
+                value={parish.whatsapp_phone || ''}
+                onChange={(e) => setParish(prev => ({ ...prev, whatsapp_phone: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="(11) 99999-9999"
               />
@@ -228,6 +246,45 @@ export const ParishManager: React.FC = () => {
                 onChange={(e) => setParish(prev => ({ ...prev, email: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="contato@paroquia.com.br"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Horários de Confissões
+              </label>
+              <textarea
+                value={parish.confession_hours || ''}
+                onChange={(e) => setParish(prev => ({ ...prev, confession_hours: e.target.value }))}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                placeholder="Ex: Sábado: 16h às 17h"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Horários de Direção Espiritual
+              </label>
+              <textarea
+                value={parish.spiritual_direction_hours || ''}
+                onChange={(e) => setParish(prev => ({ ...prev, spiritual_direction_hours: e.target.value }))}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                placeholder="Ex: Ter e Qui: 14h às 17h (com agendamento)"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Horários de Atendimento da Secretaria
+              </label>
+              <textarea
+                value={parish.office_hours || ''}
+                onChange={(e) => setParish(prev => ({ ...prev, office_hours: e.target.value }))}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                placeholder="Ex: Seg a Sex: 9h às 12h e 14h às 17h"
               />
             </div>
           </div>
