@@ -154,9 +154,14 @@ export interface Parish {
   founded_year: number;
   address: string;
   phone: string;
+  landline_phone?: string | null;
+  whatsapp_phone?: string | null;
   email: string;
   logo_url: string | null;
   cloudinary_public_id?: string | null;
+  confession_hours?: string | null;
+  spiritual_direction_hours?: string | null;
+  office_hours?: string | null;
   created_at: string;
   updated_at: string;
 }
