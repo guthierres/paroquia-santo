@@ -11,6 +11,7 @@ interface ParishAnnouncement {
   title: string;
   content: string;
   event_date?: string;
+  flyer_url?: string;
   whatsapp_contact?: string;
   is_published: boolean;
   created_at: string;
@@ -158,8 +159,21 @@ export function AnnouncementsSection() {
                         className="w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
                       >
                         <Card
-                          className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-l-4 border-red-800"
+                          className="group h-full flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-l-4 border-red-800 overflow-hidden"
                         >
+                          {/* Imagem do Flyer (se existir) */}
+                          {announcement.flyer_url && (
+                            <div className="relative w-full h-40 sm:h-48 overflow-hidden bg-gray-100">
+                              <img
+                                src={announcement.flyer_url}
+                                alt={announcement.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                            </div>
+                          )}
+
                           {/* Header com tipo e data */}
                           <div className={`p-3 ${
                             announcement.type === 'event'
@@ -288,6 +302,26 @@ export function AnnouncementsSection() {
               className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Imagem do Flyer em destaque (se existir) */}
+              {selectedAnnouncement.flyer_url && (
+                <div className="relative w-full h-64 sm:h-80 overflow-hidden bg-gray-100">
+                  <img
+                    src={selectedAnnouncement.flyer_url}
+                    alt={selectedAnnouncement.title}
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute top-4 right-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedAnnouncement(null)}
+                      className="w-8 h-8 p-0 rounded-full bg-white/90 hover:bg-white shadow-lg"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Header do Modal */}
               <div className={`p-6 ${
                 selectedAnnouncement.type === 'event'
@@ -316,13 +350,15 @@ export function AnnouncementsSection() {
                       <h3 className="text-xl font-bold truncate">{selectedAnnouncement.title}</h3>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedAnnouncement(null)}
-                    className="w-8 h-8 p-0 rounded-full flex-shrink-0 bg-white/20 border-white/30 text-white hover:bg-white/30"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  {!selectedAnnouncement.flyer_url && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedAnnouncement(null)}
+                      className="w-8 h-8 p-0 rounded-full flex-shrink-0 bg-white/20 border-white/30 text-white hover:bg-white/30"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
 
                 {/* Data e Hora em Destaque */}
