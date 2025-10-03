@@ -10,6 +10,7 @@ export const WhatsAppButton: React.FC = () => {
     fetchWhatsAppNumber();
 
     const handleScroll = () => {
+      // O botão se torna visível após rolar 300px
       setIsVisible(window.scrollY > 300);
     };
 
@@ -38,6 +39,7 @@ export const WhatsAppButton: React.FC = () => {
 
     const cleanNumber = whatsappNumber.replace(/\D/g, '');
     const message = encodeURIComponent('Olá! Gostaria de mais informações.');
+    // Usando 55 como código do Brasil. Ajuste se necessário.
     window.open(`https://wa.me/55${cleanNumber}?text=${message}`, '_blank');
   };
 
@@ -46,7 +48,8 @@ export const WhatsAppButton: React.FC = () => {
   return (
     <button
       onClick={handleClick}
-      className={`fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 ${
+      // CLASSE ALTERADA AQUI: 'right-6' foi trocado por 'left-6'
+      className={`fixed bottom-6 left-6 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       }`}
       aria-label="Contato via WhatsApp"
