@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Church } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Church, MessageCircle, BookOpen } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { supabase, Parish, Schedule } from '../../lib/supabase';
 
@@ -66,21 +66,21 @@ export const ContactSection: React.FC = () => {
     },
     {
       icon: Phone,
-      title: 'Telefone',
-      content: parishData?.phone || '(11) 9999-9999',
-      subContent: 'Segunda a Sexta, 8h às 18h'
+      title: 'Telefone Fixo',
+      content: parishData?.landline_phone || '(11) 1234-5678',
+      subContent: parishData?.office_hours || 'Segunda a Sexta, 9h às 17h'
+    },
+    {
+      icon: MessageCircle,
+      title: 'WhatsApp',
+      content: parishData?.whatsapp_phone || '(11) 99999-9999',
+      subContent: 'Atendimento da Secretaria'
     },
     {
       icon: Mail,
       title: 'E-mail',
       content: parishData?.email || 'contato@paroquiatiradentes.com.br',
       subContent: 'Resposta em até 24h'
-    },
-    {
-      icon: Clock,
-      title: 'Horário de Missas',
-      content: schedules.length > 0 ? 'Veja horários ao lado' : 'Dom: 8h, 10h e 19h',
-      subContent: schedules.length > 0 ? 'Horários atualizados' : 'Ter a Sex: 19h | Sáb: 17h'
     }
   ];
 
@@ -211,6 +211,37 @@ export const ContactSection: React.FC = () => {
           </motion.div>
         </div>
 
+        {/* Service Hours */}
+        {(parishData?.confession_hours || parishData?.spiritual_direction_hours) && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="grid md:grid-cols-2 gap-6 mb-16"
+          >
+            {parishData?.confession_hours && (
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Clock className="h-6 w-6 text-red-800" />
+                  <h3 className="text-xl font-bold text-gray-800">Horários de Confissões</h3>
+                </div>
+                <p className="text-gray-700 whitespace-pre-line">{parishData.confession_hours}</p>
+              </Card>
+            )}
+
+            {parishData?.spiritual_direction_hours && (
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <BookOpen className="h-6 w-6 text-red-800" />
+                  <h3 className="text-xl font-bold text-gray-800">Direção Espiritual</h3>
+                </div>
+                <p className="text-gray-700 whitespace-pre-line">{parishData.spiritual_direction_hours}</p>
+              </Card>
+            )}
+          </motion.div>
+        )}
+
         {/* Map placeholder */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -224,7 +255,7 @@ export const ContactSection: React.FC = () => {
               Localização
             </h3>
             <p className="text-gray-600 mb-6">
-              Estamos localizados no coração da Cidade Tiradentes, São Paulo. 
+              Estamos localizados no coração da Cidade Tiradentes, São Paulo.
               Venha nos visitar e participar das nossas celebrações.
             </p>
             <a
