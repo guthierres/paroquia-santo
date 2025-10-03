@@ -284,82 +284,72 @@ export function AnnouncementsSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-black/50 flex items-start sm:items-center justify-center overflow-y-auto"
             onClick={() => setSelectedAnnouncement(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 50 }}
-              className="bg-white rounded-xl w-full max-w-2xl my-8 shadow-2xl"
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-xl w-full max-w-2xl m-4 sm:my-8 shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {selectedAnnouncement.flyer_url && (
-                <div
-                  className="relative w-full h-64 sm:h-80 overflow-hidden bg-gray-100 cursor-pointer group"
-                  onClick={() => setFullscreenImage(selectedAnnouncement.flyer_url!)}
+              {/* Botão Fechar Fixo no Topo */}
+              <div className="absolute top-2 right-2 z-10">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedAnnouncement(null)}
+                  className="w-9 h-9 p-0 rounded-full bg-white hover:bg-gray-100 shadow-lg border-2 border-gray-300"
                 >
-                  <img
-                    src={selectedAnnouncement.flyer_url}
-                    alt={selectedAnnouncement.title}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-3">
-                      <ZoomIn className="h-8 w-8 text-gray-800" />
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Conteúdo com Scroll */}
+              <div className="overflow-y-auto flex-1">
+                {selectedAnnouncement.flyer_url && (
+                  <div
+                    className="relative w-full h-64 sm:h-80 overflow-hidden bg-gray-100 cursor-pointer group"
+                    onClick={() => setFullscreenImage(selectedAnnouncement.flyer_url!)}
+                  >
+                    <img
+                      src={selectedAnnouncement.flyer_url}
+                      alt={selectedAnnouncement.title}
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-3">
+                        <ZoomIn className="h-8 w-8 text-gray-800" />
+                      </div>
                     </div>
                   </div>
-                  <div className="absolute top-4 right-4">
-                    <Button
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedAnnouncement(null);
-                      }}
-                      className="w-8 h-8 p-0 rounded-full bg-white/90 hover:bg-white shadow-lg"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+                )}
 
-              <div className={`p-6 ${
+              <div className={`p-4 sm:p-6 pr-12 sm:pr-6 ${
                 selectedAnnouncement.type === 'event'
                   ? 'bg-gradient-to-r from-blue-600 to-blue-700'
                   : 'bg-gradient-to-r from-amber-600 to-amber-700'
               } text-white`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1 pr-4">
-                    {selectedAnnouncement.type === 'event' ? (
-                      <Calendar className="h-6 w-6" />
-                    ) : (
-                      <Megaphone className="h-6 w-6" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-1 text-xs font-medium bg-white/20 rounded-full">
-                          {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
-                        </span>
-                        {selectedAnnouncement.event_date && isUpcoming(selectedAnnouncement.event_date) && (
-                          <span className="px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full flex items-center gap-1">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                            Próximo
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="text-xl font-bold">{selectedAnnouncement.title}</h3>
-                    </div>
-                  </div>
-                  {!selectedAnnouncement.flyer_url && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectedAnnouncement(null)}
-                      className="w-8 h-8 p-0 rounded-full flex-shrink-0 bg-white/20 border-white/30 text-white hover:bg-white/30"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                <div className="flex items-center gap-3">
+                  {selectedAnnouncement.type === 'event' ? (
+                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+                  ) : (
+                    <Megaphone className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
                   )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="px-2 py-1 text-xs font-medium bg-white/20 rounded-full">
+                        {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
+                      </span>
+                      {selectedAnnouncement.event_date && isUpcoming(selectedAnnouncement.event_date) && (
+                        <span className="px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                          Próximo
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold">{selectedAnnouncement.title}</h3>
+                  </div>
                 </div>
 
                 {selectedAnnouncement.event_date && (
@@ -392,9 +382,9 @@ export function AnnouncementsSection() {
                 )}
               </div>
 
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="prose max-w-none">
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify">
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify text-sm sm:text-base">
                     {selectedAnnouncement.content}
                   </div>
                 </div>
@@ -405,21 +395,21 @@ export function AnnouncementsSection() {
                       <Button
                         variant="outline"
                         onClick={() => handleWhatsAppClick(selectedAnnouncement.whatsapp_contact!, selectedAnnouncement.title)}
-                        className="w-full flex items-center justify-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-300"
+                        className="w-full flex items-center justify-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-300 text-sm"
                       >
                         <MessageCircle className="h-4 w-4" />
-                        Entrar em Contato via WhatsApp
+                        <span className="truncate">Entrar em Contato via WhatsApp</span>
                       </Button>
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm text-gray-500">
                     <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
+                      <User className="h-4 w-4 flex-shrink-0" />
                       <span>Publicado pela Paróquia</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-4 w-4 flex-shrink-0" />
                       <span>
                         {new Date(selectedAnnouncement.created_at).toLocaleDateString('pt-BR', {
                           day: 'numeric',
@@ -435,10 +425,12 @@ export function AnnouncementsSection() {
                   <Button
                     variant="primary"
                     onClick={() => setSelectedAnnouncement(null)}
+                    className="w-full sm:w-auto"
                   >
                     Fechar
                   </Button>
                 </div>
+              </div>
               </div>
             </motion.div>
           </motion.div>
@@ -452,9 +444,16 @@ export function AnnouncementsSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-2 sm:p-4"
             onClick={() => setFullscreenImage(null)}
           >
+            <Button
+              variant="outline"
+              onClick={() => setFullscreenImage(null)}
+              className="fixed top-2 right-2 sm:top-4 sm:right-4 w-10 h-10 p-0 rounded-full bg-white hover:bg-gray-100 shadow-lg z-10 border-2 border-gray-300"
+            >
+              <X className="h-5 w-5" />
+            </Button>
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -467,13 +466,6 @@ export function AnnouncementsSection() {
                 alt="Imagem em tela cheia"
                 className="max-w-full max-h-full object-contain"
               />
-              <Button
-                variant="outline"
-                onClick={() => setFullscreenImage(null)}
-                className="absolute top-4 right-4 w-10 h-10 p-0 rounded-full bg-white/90 hover:bg-white shadow-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </motion.div>
           </motion.div>
         )}
