@@ -212,6 +212,7 @@ export interface ParishAnnouncement {
   title: string;
   content: string;
   event_date: string | null;
+  flyer_url: string | null;
   whatsapp_contact: string | null;
   is_published: boolean;
   created_at: string;
