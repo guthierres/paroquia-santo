@@ -162,8 +162,7 @@ export const SlidesSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      // Altura reduzida
-      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+      <section className="relative w-full h-[450px] md:h-[550px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
         <div className="text-center text-white px-4">
           <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-base sm:text-lg">Carregando slides...</p>
@@ -174,13 +173,12 @@ export const SlidesSection: React.FC = () => {
 
   if (slides.length === 0) {
     return (
-      // Altura reduzida
-      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+      <section className="relative w-full h-[450px] md:h-[550px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
         <div className="text-center text-white max-w-2xl mx-auto px-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
             Paróquia Senhor Santo Cristo dos Milagres
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-amber-200 mb-2 sm:mb-4">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-amber-200 mb-2">
             40 Anos de Fé e Comunhão
           </p>
           <p className="text-sm sm:text-base md:text-lg text-amber-100">
@@ -192,8 +190,7 @@ export const SlidesSection: React.FC = () => {
   }
 
   return (
-    // Altura reduzida
-    <section className="relative w-full h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800">
+    <section className="relative w-full h-[450px] md:h-[550px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800">
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full h-full max-w-7xl mx-auto px-4">
           <div className="relative h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
@@ -253,15 +250,14 @@ export const SlidesSection: React.FC = () => {
 
                     {isActive && (
                       <>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent" />
 
-                        {/* CLASSE DE PADDING ALTERADA AQUI: Reduzindo o espaçamento vertical */}
-                        <div className="absolute inset-0 flex flex-col justify-end px-6 py-4 md:px-8 md:py-6 lg:px-12 lg:py-8">
+                        <div className="absolute inset-0 flex flex-col justify-center px-6 py-6 md:px-10 md:py-8 lg:px-12 lg:py-10">
                           <motion.h2
                             initial={{ y: 30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
-                            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 md:mb-4 drop-shadow-lg"
+                            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-3 drop-shadow-lg"
                           >
                             {slide.title}
                           </motion.h2>
@@ -270,7 +266,7 @@ export const SlidesSection: React.FC = () => {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ duration: 0.6, delay: 0.4 }}
-                            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 mb-4 md:mb-6 max-w-3xl drop-shadow-md"
+                            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 mb-4 md:mb-5 max-w-3xl drop-shadow-md"
                           >
                             {slide.description}
                           </motion.p>
@@ -283,7 +279,7 @@ export const SlidesSection: React.FC = () => {
                             >
                               <Button
                                 onClick={() => handleButtonClick(slide)}
-                                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 md:px-6 md:py-3 text-sm md:text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                               >
                                 {slide.button_text}
                                 {slide.button_link_type === 'external' && (
