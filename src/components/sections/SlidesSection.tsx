@@ -162,7 +162,8 @@ export const SlidesSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="relative w-full h-[500px] md:h-[600px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+      // Altura reduzida
+      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
         <div className="text-center text-white px-4">
           <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-base sm:text-lg">Carregando slides...</p>
@@ -173,7 +174,8 @@ export const SlidesSection: React.FC = () => {
 
   if (slides.length === 0) {
     return (
-      <section className="relative w-full h-[500px] md:h-[600px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+      // Altura reduzida
+      <section className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
         <div className="text-center text-white max-w-2xl mx-auto px-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6">
             Paróquia Senhor Santo Cristo dos Milagres
@@ -190,7 +192,8 @@ export const SlidesSection: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full h-[500px] md:h-[600px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800">
+    // Altura reduzida
+    <section className="relative w-full h-[400px] md:h-[500px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800">
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full h-full max-w-7xl mx-auto px-4">
           <div className="relative h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
@@ -252,7 +255,8 @@ export const SlidesSection: React.FC = () => {
                       <>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8 lg:p-12">
+                        {/* CLASSE DE PADDING ALTERADA AQUI: Reduzindo o espaçamento vertical */}
+                        <div className="absolute inset-0 flex flex-col justify-end px-6 py-4 md:px-8 md:py-6 lg:px-12 lg:py-8">
                           <motion.h2
                             initial={{ y: 30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
@@ -316,26 +320,6 @@ export const SlidesSection: React.FC = () => {
           >
             <ChevronRight className="h-6 w-6" />
           </button>
-          
-          {/* BLOCO REMOVIDO: 
-            Aqui estava a div com os botões circulares de navegação.
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
-              <div className="flex gap-2">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`rounded-full transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'bg-white w-8 h-2'
-                        : 'bg-white/50 w-2 h-2 hover:bg-white/70'
-                    }`}
-                    aria-label={`Ir para slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div> 
-          */}
         </>
       )}
     </section>
