@@ -162,7 +162,7 @@ export const SlidesSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="relative w-full h-[450px] md:h-[550px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+      <section className="relative w-full h-[450px] md:h-[550px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800 pt-16 md:pt-20">
         <div className="text-center text-white px-4">
           <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-base sm:text-lg">Carregando slides...</p>
@@ -173,7 +173,7 @@ export const SlidesSection: React.FC = () => {
 
   if (slides.length === 0) {
     return (
-      <section className="relative w-full h-[450px] md:h-[550px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+      <section className="relative w-full h-[450px] md:h-[550px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800 pt-16 md:pt-20">
         <div className="text-center text-white max-w-2xl mx-auto px-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
             Paróquia Senhor Santo Cristo dos Milagres
@@ -190,10 +190,10 @@ export const SlidesSection: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full h-[450px] md:h-[550px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800">
-      <div className="absolute inset-0 flex items-center justify-center">
+    <section className="relative w-full h-[450px] md:h-[550px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800 pt-16 md:pt-20">
+      <div className="absolute inset-0 flex items-center justify-center pt-16 md:pt-20">
         <div className="relative w-full h-full max-w-7xl mx-auto px-4">
-          <div className="relative h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
+          <div className="relative h-full flex items-center justify-center -mt-8 md:-mt-10" style={{ perspective: '2000px' }}>
             {slides.map((slide, index) => {
               const position = getSlidePosition(index);
               const isActive = position === 0;
