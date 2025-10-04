@@ -12,15 +12,14 @@ export const SlidesSection: React.FC = () => {
   const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -28,15 +27,13 @@ export const SlidesSection: React.FC = () => {
     fetchSlides();
   }, []);
 
-  // Preload next slide image
   useEffect(() => {
-    if (slides.length > 1 && !isMobile) { // Não preload no mobile para economizar
+    if (slides.length > 1 && !isMobile) {
       const nextIndex = (currentSlide + 1) % slides.length;
       const nextSlide = slides[nextIndex];
       if (nextSlide?.image_url && !imageLoaded[nextIndex]) {
         const img = new Image();
         img.onload = () => setImageLoaded(prev => ({ ...prev, [nextIndex]: true }));
-        // Usar versão comprimida para preload
         img.src = nextSlide.image_url;
       }
     }
@@ -63,14 +60,12 @@ export const SlidesSection: React.FC = () => {
 
       if (data && data.length > 0) {
         setSlides(data);
-        // Preload first image
         if (data[0]?.image_url) {
           const img = new Image();
           img.onload = () => setImageLoaded(prev => ({ ...prev, 0: true }));
           img.src = data[0].image_url;
         }
       } else {
-        // Default slides with Pexels images
         const defaultSlides: Slide[] = [
           {
             id: '1',
@@ -101,7 +96,6 @@ export const SlidesSection: React.FC = () => {
           }
         ];
         setSlides(defaultSlides);
-        // Preload first default image
         const img = new Image();
         img.onload = () => setImageLoaded(prev => ({ ...prev, 0: true }));
         img.src = defaultSlides[0].image_url;
@@ -138,35 +132,6 @@ export const SlidesSection: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <section className="relative w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
-        <div className="text-center text-white px-4">
-          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-base sm:text-lg">Carregando slides...</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (slides.length === 0) {
-    return (
-      <section className="relative w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
-        <div className="text-center text-white max-w-2xl mx-auto px-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6">
-            Paróquia Senhor Santo Cristo dos Milagres
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-amber-200 mb-2 sm:mb-4">
-            40 Anos de Fé e Comunhão
-          </p>
-          <p className="text-sm sm:text-base md:text-lg text-amber-100">
-            Cid. Tiradentes, São Paulo
-          </p>
-        </div>
-      </section>
-    );
-  }
-
   const handleButtonClick = (slide: Slide) => {
     if (!slide.button_link) return;
 
@@ -186,174 +151,192 @@ export const SlidesSection: React.FC = () => {
     }
   };
 
+  const getSlidePosition = (index: number) => {
+    const diff = index - currentSlide;
+    const total = slides.length;
+
+    if (diff > total / 2) return diff - total;
+    if (diff < -total / 2) return diff + total;
+    return diff;
+  };
+
+  if (isLoading) {
+    return (
+      <section className="relative w-full h-[500px] md:h-[600px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+        <div className="text-center text-white px-4">
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-base sm:text-lg">Carregando slides...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (slides.length === 0) {
+    return (
+      <section className="relative w-full h-[500px] md:h-[600px] flex items-center justify-center bg-gradient-to-br from-red-900 to-red-800">
+        <div className="text-center text-white max-w-2xl mx-auto px-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6">
+            Paróquia Senhor Santo Cristo dos Milagres
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-amber-200 mb-2 sm:mb-4">
+            40 Anos de Fé e Comunhão
+          </p>
+          <p className="text-sm sm:text-base md:text-lg text-amber-100">
+            Cid. Tiradentes, São Paulo
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="relative w-full max-w-full overflow-hidden bg-gradient-to-br from-red-900 to-red-800" style={{ minHeight: '400px', width: '100vw', maxWidth: '100vw' }}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative w-full h-full max-w-full"
-        >
-          {/* Background Image Container with aspect ratio preservation */}
-          <div className="relative w-full" style={{ paddingBottom: isMobile ? '75%' : '42.857%' }}>
-            <img
-              src={slides[currentSlide].image_url}
-              alt={slides[currentSlide].title}
-              className="absolute top-0 left-0 w-full h-full object-contain"
-              style={{
-                objectPosition: 'center center',
-                objectFit: 'contain',
-                width: '100%',
-                height: '100%',
-                imageRendering: 'auto'
-              }}
-              loading="eager"
-              fetchPriority={currentSlide === 0 ? 'high' : 'low'}
-              onLoad={() => setImageLoaded(prev => ({ ...prev, [currentSlide]: true }))}
-              onError={(e) => {
-                console.error('Error loading slide image:', e);
-                const target = e.currentTarget as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                  parent.style.background = 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)';
-                }
-              }}
-            />
-          </div>
+    <section className="relative w-full h-[500px] md:h-[600px] overflow-hidden bg-gradient-to-br from-red-900 to-red-800">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-full h-full max-w-7xl mx-auto px-4">
+          <div className="relative h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
+            {slides.map((slide, index) => {
+              const position = getSlidePosition(index);
+              const isActive = position === 0;
+              const isVisible = Math.abs(position) <= (isMobile ? 0 : 1);
 
-          {/* Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/60 pointer-events-none" />
+              if (!isVisible && !isMobile) return null;
 
-          {/* Content */}
-          <div className="absolute inset-0 z-10 flex items-center justify-center px-4 py-8 w-full">
-            <div className="text-center text-white max-w-4xl mx-auto w-full px-2">
-              <motion.h1
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight drop-shadow-2xl px-2 w-full max-w-full word-wrap break-words"
-              >
-                {slides[currentSlide].title}
-              </motion.h1>
-              
-              <motion.p
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-100 leading-relaxed drop-shadow-lg px-4 max-w-3xl mx-auto w-full max-w-full word-wrap break-words"
-              >
-                {slides[currentSlide].description}
-              </motion.p>
-
-              {slides[currentSlide].button_text && slides[currentSlide].button_link && (
+              return (
                 <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
-                  className="mt-6 sm:mt-8"
+                  key={slide.id}
+                  className="absolute"
+                  initial={false}
+                  animate={{
+                    x: isMobile ? `${position * 100}%` : `${position * 55}%`,
+                    scale: isActive ? 1 : 0.85,
+                    z: isActive ? 0 : -100,
+                    opacity: Math.abs(position) > 1 ? 0 : 1,
+                    rotateY: isMobile ? 0 : position * 15,
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: 'easeInOut'
+                  }}
+                  style={{
+                    width: isMobile ? '90%' : '60%',
+                    transformStyle: 'preserve-3d',
+                    zIndex: isActive ? 10 : 5 - Math.abs(position),
+                  }}
                 >
-                  <Button
-                    onClick={() => handleButtonClick(slides[currentSlide])}
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  <div
+                    className={`relative rounded-xl overflow-hidden shadow-2xl ${
+                      isActive ? 'cursor-default' : 'cursor-pointer'
+                    }`}
+                    onClick={() => !isActive && goToSlide(index)}
+                    style={{
+                      aspectRatio: '16/9',
+                      filter: isActive ? 'none' : 'brightness(0.6)',
+                    }}
                   >
-                    {slides[currentSlide].button_text}
-                    {slides[currentSlide].button_link_type === 'external' && (
-                      <ExternalLink className="ml-2 h-4 w-4 sm:h-5 sm:w-5 inline-block" />
-                    )}
-                  </Button>
-                </motion.div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+                    <img
+                      src={slide.image_url}
+                      alt={slide.title}
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.style.background = 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)';
+                        }
+                      }}
+                    />
 
-      {/* Navigation Controls */}
+                    {isActive && (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8 lg:p-12">
+                          <motion.h2
+                            initial={{ y: 30, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 md:mb-4 drop-shadow-lg"
+                          >
+                            {slide.title}
+                          </motion.h2>
+
+                          <motion.p
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.4 }}
+                            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-100 mb-4 md:mb-6 max-w-3xl drop-shadow-md"
+                          >
+                            {slide.description}
+                          </motion.p>
+
+                          {slide.button_text && slide.button_link && (
+                            <motion.div
+                              initial={{ y: 20, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ duration: 0.6, delay: 0.6 }}
+                            >
+                              <Button
+                                onClick={() => handleButtonClick(slide)}
+                                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                              >
+                                {slide.button_text}
+                                {slide.button_link_type === 'external' && (
+                                  <ExternalLink className="ml-2 h-4 w-4 inline-block" />
+                                )}
+                              </Button>
+                            </motion.div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {slides.length > 1 && (
         <>
-          {/* Mobile Navigation - Bottom indicators */}
-          {/* Mobile Navigation - Apenas setas laterais */}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={prevSlide}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 md:hidden bg-black/40 border-white/20 text-white hover:bg-black/60 rounded-full w-10 h-10 p-0 backdrop-blur-sm"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30 rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 hover:scale-110"
             aria-label="Slide anterior"
           >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+
+          <button
             onClick={nextSlide}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 md:hidden bg-black/40 border-white/20 text-white hover:bg-black/60 rounded-full w-10 h-10 p-0 backdrop-blur-sm"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30 rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 hover:scale-110"
             aria-label="Próximo slide"
           >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+            <ChevronRight className="h-6 w-6" />
+          </button>
           
-          {/* Desktop Navigation */}
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 hidden md:block">
-            <div className="flex items-center gap-4 bg-black/20 backdrop-blur-md rounded-full px-6 py-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={prevSlide}
-                className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-full w-10 h-10 p-0"
-                aria-label="Slide anterior"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-
+          {/* BLOCO REMOVIDO: 
+            Aqui estava a div com os botões circulares de navegação.
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
               <div className="flex gap-2">
                 {slides.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide ? 'bg-white w-8' : 'bg-white/50'
+                    className={`rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-white w-8 h-2'
+                        : 'bg-white/50 w-2 h-2 hover:bg-white/70'
                     }`}
                     aria-label={`Ir para slide ${index + 1}`}
                   />
                 ))}
               </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={nextSlide}
-                className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-full w-10 h-10 p-0"
-                aria-label="Próximo slide"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAutoPlay(!isAutoPlay)}
-                className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-full w-10 h-10 p-0"
-                aria-label={isAutoPlay ? 'Pausar slideshow' : 'Iniciar slideshow'}
-              >
-                {isAutoPlay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+            </div> 
+          */}
         </>
-      )}
-
-      {/* Slide Counter */}
-      {slides.length > 1 && (
-        <div className="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-md rounded-lg px-3 py-1">
-          <span className="text-white text-sm font-medium">
-            {currentSlide + 1} / {slides.length}
-          </span>
-        </div>
       )}
     </section>
   );
