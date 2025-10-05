@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // Adicionado AnimatePresence para o modal
-import { ArrowLeft, Calendar, MapPin, Share2, X, MessageCircle } from 'lucide-react'; // Adicionado X e MessageCircle
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Calendar, Share2, MessageCircle, X } from 'lucide-react'; // Adicionado X e MessageCircle
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { supabase, ParishAnnouncement } from '../lib/supabase';
@@ -10,11 +10,33 @@ interface AnnouncementsPageProps {
   onBack: () => void;
 }
 
+// Função auxiliar para formatar a data completa (copiada do seu outro componente)
+const formatFullDateTime = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Data não definida';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+  
+// Função para contato via WhatsApp (copiada do seu outro componente)
+const handleWhatsAppClick = (whatsappContact: string, title: string) => {
+    const cleanPhone = whatsappContact.replace(/\D/g, '');
+    const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${title}`);
+    window.open(`https://wa.me/55${cleanPhone}?text=${message}`, '_blank');
+  };
+
+
 export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) => {
   const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'event' | 'announcement'>('all');
-  // NOVO ESTADO: Armazena o aviso que está sendo visualizado (simula a página de detalhes)
+  // NOVO ESTADO: Armazena o aviso que está sendo visualizado
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<ParishAnnouncement | null>(null);
 
   useEffect(() => {
@@ -41,11 +63,10 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     }
   };
 
-  // ALTERADO: Agora apenas abre o modal/detalhes no estado
+  // ALTERADO: Agora abre o modal de detalhes diretamente
   const handleAnnouncementClick = (announcement: ParishAnnouncement) => {
     setSelectedAnnouncement(announcement);
-    // Remove a navegação baseada em hash que estava causando problemas
-    // window.location.hash = `#avisos/${announcement.slug}`; 
+    // REMOVIDO: window.location.hash = `#avisos/${announcement.slug}`;
   };
 
   const shareAnnouncement = (announcement: ParishAnnouncement, e: React.MouseEvent) => {
@@ -60,28 +81,6 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
       toast.success('Link copiado!');
     }
   };
-  
-  // NOVO: Função para formatar data completa no modal
-  const formatFullDateTime = (dateString: string | null | undefined) => {
-    if (!dateString) return 'Data não definida';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  
-  // NOVO: Função para contato via WhatsApp
-  const handleWhatsAppClick = (whatsappContact: string, title: string) => {
-    const cleanPhone = whatsappContact.replace(/\D/g, '');
-    const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${title}`);
-    window.open(`https://wa.me/55${cleanPhone}?text=${message}`, '_blank');
-  };
-
 
   const filteredAnnouncements = announcements.filter(a =>
     filter === 'all' || a.type === filter
@@ -109,6 +108,8 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
           <ArrowLeft className="h-4 w-4" />
           Voltar
         </Button>
+
+        {/* ... Cabeçalho e Filtros (sem alterações) ... */}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -164,7 +165,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
               >
                 <Card
                   className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col"
-                  onClick={() => handleAnnouncementClick(announcement)} // Chama o novo handler
+                  onClick={() => handleAnnouncementClick(announcement)}
                 >
                   {announcement.flyer_url && (
                     <div className="aspect-video overflow-hidden rounded-t-xl">
@@ -225,7 +226,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
           </div>
         )}
       </div>
-      
+
       {/* NOVO: Modal de Detalhes para exibir o aviso selecionado */}
       <AnimatePresence>
         {selectedAnnouncement && (
@@ -282,7 +283,8 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
                 <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                     <Button
                         variant="outline"
-                        onClick={() => shareAnnouncement(selectedAnnouncement, new MouseEvent('click') as any)}
+                        // Passa 'selectedAnnouncement' para 'shareAnnouncement'
+                        onClick={() => shareAnnouncement(selectedAnnouncement, new MouseEvent('click') as any)} 
                         className="flex items-center gap-2"
                     >
                         <Share2 className="h-4 w-4" />
@@ -298,6 +300,6 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </div>
   );
 };
