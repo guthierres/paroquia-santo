@@ -16,6 +16,8 @@ interface ParishAnnouncement {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  // NOVO CAMPO: Adicionado o slug
+  slug?: string; 
 }
 
 export function AnnouncementsSection() {
@@ -31,9 +33,10 @@ export function AnnouncementsSection() {
 
   const fetchAnnouncements = async () => {
     try {
+      // O Supabase irá retornar o campo 'slug' automaticamente se ele for adicionado à tabela
       const { data, error } = await supabase
         .from('parish_announcements')
-        .select('*')
+        .select('*') 
         .eq('is_published', true)
         .order('event_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
@@ -154,6 +157,8 @@ export function AnnouncementsSection() {
                       layout
                     >
                       <button
+                        // Se você quiser usar o slug para navegação, mude este <button> para um <Link>
+                        // Ex: <Link to={`/avisos/${announcement.slug}`}>
                         onClick={() => setSelectedAnnouncement(announcement)}
                         className="w-full h-full text-left focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-xl"
                       >
@@ -221,6 +226,10 @@ export function AnnouncementsSection() {
                             <h3 className="font-bold text-gray-800 group-hover:text-red-800 transition-colors mb-2 line-clamp-2 text-sm sm:text-base">
                               {announcement.title}
                             </h3>
+                            
+                            {/* O slug não é exibido, mas pode ser útil para debug:
+                            {announcement.slug && <p className="text-xs text-gray-400">Slug: {announcement.slug}</p>}
+                            */}
 
                             <p className="text-gray-600 text-xs sm:text-sm mb-3 flex-1 line-clamp-3 leading-relaxed">
                               {announcement.content}
@@ -277,7 +286,7 @@ export function AnnouncementsSection() {
         </div>
       </section>
 
-      {/* Modal de Detalhes com Scroll */}
+      {/* Modal de Detalhes com Scroll (sem alterações de funcionalidade) */}
       <AnimatePresence>
         {selectedAnnouncement && (
           <motion.div
@@ -437,7 +446,7 @@ export function AnnouncementsSection() {
         )}
       </AnimatePresence>
 
-      {/* Modal de Imagem em Tela Cheia */}
+      {/* Modal de Imagem em Tela Cheia (sem alterações) */}
       <AnimatePresence>
         {fullscreenImage && (
           <motion.div
