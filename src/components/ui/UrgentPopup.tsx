@@ -156,14 +156,13 @@ export const UrgentPopup: React.FC = () => {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-500">{timeLeft}s</span>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => handleClose(false)}
-                className="w-8 h-8 p-0 rounded-full flex-shrink-0 border-gray-300 text-gray-600 hover:text-gray-800 hover:border-gray-400"
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors"
+                aria-label="Fechar"
               >
-                <X className="h-4 w-4 text-current" />
-              </Button>
+                <X className="h-4 w-4" />
+              </button>
             </div>
           </div>
 

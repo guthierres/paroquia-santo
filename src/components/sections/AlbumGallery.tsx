@@ -128,7 +128,12 @@ export const AlbumGallery: React.FC<AlbumGalleryProps> = ({ onBack }) => {
   };
 
   const handleAlbumSelect = async (album: PhotoAlbum) => {
-    window.location.hash = `#album/${album.slug}`;
+    if (album.slug) {
+      window.location.hash = `#album/${album.slug}`;
+    } else {
+      setSelectedAlbum(album);
+      await fetchAlbumPhotos(album.id);
+    }
   };
 
   const handleBackToAlbums = () => {

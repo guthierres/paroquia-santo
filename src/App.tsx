@@ -80,7 +80,30 @@ function App() {
 
     handleInitialHash();
 
-    return () => subscription.unsubscribe();
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+
+      if (hash.startsWith('#post/')) {
+        const slug = hash.replace('#post/', '');
+        setCurrentBlogPostSlug(slug);
+        setCurrentAlbumSlug(null);
+      } else if (hash.startsWith('#album/')) {
+        const slug = hash.replace('#album/', '');
+        setCurrentAlbumSlug(slug);
+        setCurrentBlogPostSlug(null);
+      } else {
+        setCurrentBlogPostSlug(null);
+        setCurrentAlbumSlug(null);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   const handleNavigate = (section: string) => {

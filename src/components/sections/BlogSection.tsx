@@ -181,9 +181,9 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
                 >
                   {/* O Card inteiro agora é um link */}
                   <a
-                    href={`#blog-post-${post.id}`}
+                    href={`#post/${post.slug}`}
                     onClick={(e) => {
-                      e.preventDefault(); // Impede a navegação padrão
+                      e.preventDefault();
                       handlePostClick(post);
                     }}
                     className="block"
