@@ -22,6 +22,8 @@ import { WhatsAppButton } from './components/ui/WhatsAppButton';
 import { ImagePreloader } from './components/ui/ImagePreloader';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
+import { BlogPostPage } from './pages/BlogPostPage';
+import { AlbumViewPage } from './pages/AlbumViewPage';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -38,6 +40,8 @@ function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentBlogPostSlug, setCurrentBlogPostSlug] = useState<string | null>(null);
+  const [currentAlbumSlug, setCurrentAlbumSlug] = useState<string | null>(null);
 
   React.useEffect(() => {
     // Check if user is already authenticated
@@ -57,10 +61,13 @@ function App() {
     const handleInitialHash = () => {
       const hash = window.location.hash;
       const path = window.location.pathname;
-      
+
       if (hash.startsWith('#post/')) {
-        // Navigate to blog section when a post is accessed directly
-        setCurrentSection('blog');
+        const slug = hash.replace('#post/', '');
+        setCurrentBlogPostSlug(slug);
+      } else if (hash.startsWith('#album/')) {
+        const slug = hash.replace('#album/', '');
+        setCurrentAlbumSlug(slug);
       } else if (path === '/admin' || path === '/login') {
         // Show admin panel or login based on authentication
         if (isAuthenticated) {
@@ -263,7 +270,19 @@ function App() {
       
       <Header onNavigate={handleNavigate} />
 
-      {showCelebrations ? (
+      {currentBlogPostSlug ? (
+        <BlogPostPage slug={currentBlogPostSlug} onBack={() => {
+          setCurrentBlogPostSlug(null);
+          window.history.pushState({}, '', '/');
+          handleNavigate('blog');
+        }} />
+      ) : currentAlbumSlug ? (
+        <AlbumViewPage slug={currentAlbumSlug} onBack={() => {
+          setCurrentAlbumSlug(null);
+          window.history.pushState({}, '', '/');
+          handleNavigate('photos');
+        }} />
+      ) : showCelebrations ? (
         <CelebrationsPage onBack={handleBackFromCelebrations} />
       ) : showPastorals ? (
         <PastoralsPage onBack={handleBackFromPastorals} />

@@ -224,6 +224,7 @@ export interface ParishAnnouncement {
   flyer_url: string | null;
   whatsapp_contact: string | null;
   is_published: boolean;
+  slug: string;
   created_at: string;
   updated_at: string;
 }
@@ -252,6 +253,7 @@ export interface Celebration {
   day_of_week: string;
   is_active: boolean;
   order_index: number;
+  slug: string;
   created_at: string;
   updated_at: string;
 }
@@ -278,6 +280,7 @@ export interface Pastoral {
   contact_phone: string;
   is_active: boolean;
   order_index: number;
+  slug: string;
   created_at: string;
   updated_at: string;
 }
@@ -290,6 +293,7 @@ export interface PhotoAlbum {
   cloudinary_public_id: string | null;
   is_active: boolean;
   order_index: number;
+  slug: string;
   created_at: string;
   updated_at: string;
 }

@@ -42,7 +42,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   };
 
   const handlePostClick = (post: BlogPost) => {
-    setSelectedPost(post);
+    window.location.hash = `#post/${post.slug}`;
   };
 
   const handleClosePost = () => {
@@ -51,7 +51,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   };
 
   const copyPostLink = (post: BlogPost) => {
-    const url = `${window.location.origin}${window.location.pathname}#blog-post-${post.id}`;
+    const url = `${window.location.origin}${window.location.pathname}#post/${post.slug}`;
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(url).then(() => {
         alert('Link copiado para a área de transferência!');
@@ -85,7 +85,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onNavigateHome }) => {
   };
 
   const sharePost = (post: BlogPost, platform: string) => {
-    const url = `${window.location.origin}${window.location.pathname}#blog-post-${post.id}`;
+    const url = `${window.location.origin}${window.location.pathname}#post/${post.slug}`;
     const text = `Confira esta postagem: ${post.title}`;
 
     switch (platform) {
