@@ -24,6 +24,8 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { BlogPostPage } from './pages/BlogPostPage';
 import { AlbumViewPage } from './pages/AlbumViewPage';
+import { AnnouncementsPage } from './pages/AnnouncementsPage';
+import { AnnouncementViewPage } from './pages/AnnouncementViewPage';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
 import { Button } from './components/ui/Button';
@@ -42,6 +44,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentBlogPostSlug, setCurrentBlogPostSlug] = useState<string | null>(null);
   const [currentAlbumSlug, setCurrentAlbumSlug] = useState<string | null>(null);
+  const [currentAnnouncementSlug, setCurrentAnnouncementSlug] = useState<string | null>(null);
+  const [showAnnouncementsPage, setShowAnnouncementsPage] = useState(false);
 
   React.useEffect(() => {
     // Check if user is already authenticated
@@ -68,6 +72,11 @@ function App() {
       } else if (hash.startsWith('#album/')) {
         const slug = hash.replace('#album/', '');
         setCurrentAlbumSlug(slug);
+      } else if (hash.startsWith('#avisos/')) {
+        const slug = hash.replace('#avisos/', '');
+        setCurrentAnnouncementSlug(slug);
+      } else if (hash === '#avisos') {
+        setShowAnnouncementsPage(true);
       } else if (path === '/admin' || path === '/login') {
         // Show admin panel or login based on authentication
         if (isAuthenticated) {
@@ -88,13 +97,30 @@ function App() {
         const slug = hash.replace('#post/', '');
         setCurrentBlogPostSlug(slug);
         setCurrentAlbumSlug(null);
+        setCurrentAnnouncementSlug(null);
+        setShowAnnouncementsPage(false);
       } else if (hash.startsWith('#album/')) {
         const slug = hash.replace('#album/', '');
         setCurrentAlbumSlug(slug);
         setCurrentBlogPostSlug(null);
+        setCurrentAnnouncementSlug(null);
+        setShowAnnouncementsPage(false);
+      } else if (hash.startsWith('#avisos/')) {
+        const slug = hash.replace('#avisos/', '');
+        setCurrentAnnouncementSlug(slug);
+        setCurrentBlogPostSlug(null);
+        setCurrentAlbumSlug(null);
+        setShowAnnouncementsPage(false);
+      } else if (hash === '#avisos') {
+        setShowAnnouncementsPage(true);
+        setCurrentBlogPostSlug(null);
+        setCurrentAlbumSlug(null);
+        setCurrentAnnouncementSlug(null);
       } else {
         setCurrentBlogPostSlug(null);
         setCurrentAlbumSlug(null);
+        setCurrentAnnouncementSlug(null);
+        setShowAnnouncementsPage(false);
       }
     };
 
@@ -304,6 +330,17 @@ function App() {
           setCurrentAlbumSlug(null);
           window.history.pushState({}, '', '/');
           handleNavigate('photos');
+        }} />
+      ) : currentAnnouncementSlug ? (
+        <AnnouncementViewPage slug={currentAnnouncementSlug} onBack={() => {
+          setCurrentAnnouncementSlug(null);
+          window.history.pushState({}, '', '/#avisos');
+        }} />
+      ) : showAnnouncementsPage ? (
+        <AnnouncementsPage onBack={() => {
+          setShowAnnouncementsPage(false);
+          window.history.pushState({}, '', '/');
+          handleNavigate('home');
         }} />
       ) : showCelebrations ? (
         <CelebrationsPage onBack={handleBackFromCelebrations} />
