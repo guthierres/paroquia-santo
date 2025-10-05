@@ -1,3 +1,5 @@
+// Arquivo: AnnouncementManager.tsx
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, CreditCard as Edit, Trash2, Save, X, Calendar, Megaphone, Bell, Image } from 'lucide-react';
@@ -6,6 +8,17 @@ import { Card } from '../ui/Card';
 import { FileUpload } from '../ui/FileUpload';
 import { supabase, ParishAnnouncement } from '../../lib/supabase';
 import toast from 'react-hot-toast';
+
+// Função auxiliar para gerar o slug (pode ser colocada em um utilitário, se preferir)
+const generateSlug = (title: string): string => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove caracteres especiais, mas mantém espaços e hífens
+    .replace(/[\s_-]+/g, '-') // Substitui espaços e múltiplos hífens por um único hífen
+    .replace(/^-+|-+$/g, ''); // Remove hífens do início e do fim
+};
 
 export const AnnouncementManager: React.FC = () => {
   const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
@@ -41,10 +54,27 @@ export const AnnouncementManager: React.FC = () => {
       whatsapp_contact: null,
       is_published: false,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      slug: null, // Inicializa o slug como nulo
     };
     setEditingAnnouncement(newAnnouncement);
     setIsCreating(true);
+  };
+  
+  // NOVO: Função para gerenciar a mudança de título e preencher o slug
+  const handleTitleChange = (newTitle: string) => {
+    setEditingAnnouncement(prev => {
+      if (!prev) return null;
+      
+      const newSlug = generateSlug(newTitle);
+      
+      return { 
+        ...prev, 
+        title: newTitle,
+        // Preenche o slug automaticamente, mantendo o slug existente se já foi customizado
+        slug: prev.slug || !prev.id ? newSlug : prev.slug
+      };
+    });
   };
 
   const handleFlyerUpload = async (result: { publicId: string; url: string; secureUrl: string }) => {
@@ -59,6 +89,9 @@ export const AnnouncementManager: React.FC = () => {
       toast.error('Preencha título e conteúdo');
       return;
     }
+    
+    // NOVO: Garante que um slug final exista antes de salvar
+    const finalSlug = editingAnnouncement.slug || generateSlug(editingAnnouncement.title);
 
     try {
       const announcementData = {
@@ -69,6 +102,7 @@ export const AnnouncementManager: React.FC = () => {
         flyer_url: editingAnnouncement.flyer_url,
         whatsapp_contact: editingAnnouncement.whatsapp_contact,
         is_published: editingAnnouncement.is_published,
+        slug: finalSlug, // <-- INCLUI O SLUG NO OBJETO DE DADOS
         updated_at: new Date().toISOString()
       };
 
@@ -149,6 +183,7 @@ export const AnnouncementManager: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Botão Novo/Cabeçalho (sem alterações) */}
       <div className="flex items-center justify-between">
         <h3 className="text-2xl font-bold text-gray-800">Eventos e Avisos Paroquiais</h3>
         <Button onClick={handleCreateAnnouncement}>
@@ -157,6 +192,7 @@ export const AnnouncementManager: React.FC = () => {
         </Button>
       </div>
 
+      {/* Mensagem de Vazio (sem alterações) */}
       {announcements.length === 0 && (
         <Card className="p-8 text-center">
           <Megaphone className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -173,6 +209,7 @@ export const AnnouncementManager: React.FC = () => {
         </Card>
       )}
 
+      {/* Lista de Avisos (sem alterações) */}
       <div className="space-y-4">
         <AnimatePresence>
           {announcements.map((announcement) => {
@@ -194,6 +231,7 @@ export const AnnouncementManager: React.FC = () => {
                       <IconComponent className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
+                      {/* ... (Conteúdo da lista) ... */}
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="text-lg font-semibold text-gray-800">{announcement.title}</h4>
                         <span className={`px-2 py-1 text-xs rounded-full ${
@@ -216,6 +254,7 @@ export const AnnouncementManager: React.FC = () => {
                         )}
                         {announcement.whatsapp_contact && (
                           <span className="flex items-center gap-1 text-green-600">
+                            {/* ... (SVG do WhatsApp) ... */}
                             <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                             </svg>
@@ -225,6 +264,7 @@ export const AnnouncementManager: React.FC = () => {
                         <span>Criado: {new Date(announcement.created_at).toLocaleDateString('pt-BR')}</span>
                       </div>
                     </div>
+                    {/* ... (Botões de Ação) ... */}
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -264,6 +304,7 @@ export const AnnouncementManager: React.FC = () => {
               className="bg-white rounded-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* ... (Cabeçalho do Modal) ... */}
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
                 <h4 className="text-lg font-semibold flex-1 pr-4">
                   {isCreating ? 'Novo' : 'Editar'} {editingAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
@@ -282,6 +323,7 @@ export const AnnouncementManager: React.FC = () => {
               </div>
 
               <div className="p-6 space-y-4">
+                {/* Campo Tipo (sem alterações) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Tipo
@@ -299,6 +341,7 @@ export const AnnouncementManager: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Campo Título (ALTERADO) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Título *
@@ -306,12 +349,35 @@ export const AnnouncementManager: React.FC = () => {
                   <input
                     type="text"
                     value={editingAnnouncement.title}
-                    onChange={(e) => setEditingAnnouncement(prev => prev ? { ...prev, title: e.target.value } : null)}
+                    // ALTERADO: Usa a nova função que também preenche o slug
+                    onChange={(e) => handleTitleChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
                     placeholder="Título do evento ou aviso"
                   />
                 </div>
+                
+                {/* NOVO CAMPO: SLUG */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Slug (URL Amigável)
+                  </label>
+                  <input
+                    type="text"
+                    value={editingAnnouncement.slug || ''}
+                    // O onChange aqui permite que o usuário customiza o slug, aplicando a limpeza
+                    onChange={(e) => setEditingAnnouncement(prev => prev ? { 
+                        ...prev, 
+                        slug: generateSlug(e.target.value) 
+                      } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                    placeholder="ex: festa-junina-2025"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    URL (se implementada): `/avisos/{editingAnnouncement.slug || generateSlug(editingAnnouncement.title)}`
+                  </p>
+                </div>
 
+                {/* Campo Data e Hora (sem alterações) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Data e Hora {editingAnnouncement.type === 'event' ? '*' : '(opcional)'}
@@ -327,6 +393,7 @@ export const AnnouncementManager: React.FC = () => {
                   />
                 </div>
 
+                {/* Campo Conteúdo (sem alterações) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Conteúdo *
@@ -340,6 +407,7 @@ export const AnnouncementManager: React.FC = () => {
                   />
                 </div>
 
+                {/* Campo Imagem do Flyer (sem alterações) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Imagem do Flyer (opcional)
@@ -389,6 +457,7 @@ export const AnnouncementManager: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Campo WhatsApp (sem alterações) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     WhatsApp para Contato (opcional)
@@ -408,6 +477,7 @@ export const AnnouncementManager: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Checkbox Publicado (sem alterações) */}
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2">
                     <input
@@ -425,6 +495,7 @@ export const AnnouncementManager: React.FC = () => {
                   </label>
                 </div>
 
+                {/* Botões Salvar/Cancelar (sem alterações) */}
                 <div className="flex gap-2 pt-4 border-t">
                   <Button onClick={handleSaveAnnouncement} className="flex-1">
                     <Save className="h-4 w-4" />
