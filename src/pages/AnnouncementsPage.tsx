@@ -1,233 +1,216 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, Share2, MessageCircle, X } from 'lucide-react'; // Adicionado X e MessageCircle
+import { ArrowLeft, Calendar, Share2, MessageCircle, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { supabase, ParishAnnouncement } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 interface AnnouncementsPageProps {
-  onBack: () => void;
+  onBack: () => void;
 }
 
-// Função auxiliar para formatar a data completa (copiada do seu outro componente)
-const formatFullDateTime = (dateString: string | null | undefined) => {
-    if (!dateString) return 'Data não definida';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  
-// Função para contato via WhatsApp (copiada do seu outro componente)
-const handleWhatsAppClick = (whatsappContact: string, title: string) => {
-    const cleanPhone = whatsappContact.replace(/\D/g, '');
-    const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${title}`);
-    window.open(`https://wa.me/55${cleanPhone}?text=${message}`, '_blank');
-  };
-
-
 export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) => {
-  const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'event' | 'announcement'>('all');
-  // NOVO ESTADO: Armazena o aviso que está sendo visualizado
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<ParishAnnouncement | null>(null);
+  const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'event' | 'announcement'>('all');
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<ParishAnnouncement | null>(null);
 
-  useEffect(() => {
-    fetchAnnouncements();
-  }, []);
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
 
-  const fetchAnnouncements = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('parish_announcements')
-        .select('*')
-        .eq('is_published', true)
-        .order('event_date', { ascending: false, nullsFirst: false })
-        .order('created_at', { ascending: false });
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('parish_announcements')
+        .select('*')
+        .eq('is_published', true)
+        .order('event_date', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setAnnouncements(data || []);
-    } catch (error) {
-      console.error('Error fetching announcements:', error);
-      toast.error('Erro ao carregar avisos');
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      toast.error('Erro ao carregar avisos');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // ALTERADO: Agora abre o modal de detalhes diretamente
-  const handleAnnouncementClick = (announcement: ParishAnnouncement) => {
-    setSelectedAnnouncement(announcement);
-    // REMOVIDO: window.location.hash = `#avisos/${announcement.slug}`;
-  };
+  const handleAnnouncementClick = (announcement: ParishAnnouncement) => {
+    setSelectedAnnouncement(announcement);
+  };
 
-  const shareAnnouncement = (announcement: ParishAnnouncement, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const url = `${window.location.origin}/#avisos/${announcement.slug}`;
-    const text = `${announcement.title}`;
+  const shareAnnouncement = (announcement: ParishAnnouncement, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/#avisos/${announcement.slug}`;
+    const text = `${announcement.title}`;
 
-    if (navigator.share) {
-      navigator.share({ title: announcement.title, text, url });
-    } else {
-      navigator.clipboard.writeText(url);
-      toast.success('Link copiado!');
-    }
-  };
+    if (navigator.share) {
+      navigator.share({ title: announcement.title, text, url });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copiado!');
+    }
+  };
 
-  const filteredAnnouncements = announcements.filter(a =>
-    filter === 'all' || a.type === filter
-  );
+  const contactWhatsApp = (announcement: ParishAnnouncement) => {
+    if (!announcement.whatsapp_contact) return;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-800 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando avisos...</p>
-        </div>
-      </div>
-    );
-  }
+    const phone = announcement.whatsapp_contact.replace(/\D/g, '');
+    const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${announcement.title}`);
+    window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
+  };
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
+  const filteredAnnouncements = announcements.filter(a =>
+    filter === 'all' || a.type === filter
+  );
 
-        {/* ... Cabeçalho e Filtros (sem alterações) ... */}
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-800 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando avisos...</p>
+        </div>
+      </div>
+    );
+  }
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Avisos e Eventos
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Fique por dentro de todos os acontecimentos da nossa paróquia
-          </p>
+  return (
+    <>
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className="mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
 
-          <div className="flex gap-4 flex-wrap">
-            <Button
-              variant={filter === 'all' ? 'primary' : 'outline'}
-              onClick={() => setFilter('all')}
-            >
-              Todos
-            </Button>
-            <Button
-              variant={filter === 'event' ? 'primary' : 'outline'}
-              onClick={() => setFilter('event')}
-            >
-              Eventos
-            </Button>
-            <Button
-              variant={filter === 'announcement' ? 'primary' : 'outline'}
-              onClick={() => setFilter('announcement')}
-            >
-              Avisos
-            </Button>
-          </div>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Avisos e Eventos
+            </h1>
+            <p className="text-lg text-gray-600 mb-6">
+              Fique por dentro de todos os acontecimentos da nossa paróquia
+            </p>
 
-        {filteredAnnouncements.length === 0 ? (
-          <Card className="p-12 text-center">
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              Nenhum aviso encontrado
-            </h3>
-            <p className="text-gray-500">
-              No momento não há avisos ou eventos publicados.
-            </p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAnnouncements.map((announcement, index) => (
-              <motion.div
-                key={announcement.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card
-                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col"
-                  onClick={() => handleAnnouncementClick(announcement)}
-                >
-                  {announcement.flyer_url && (
-                    <div className="aspect-video overflow-hidden rounded-t-xl">
-                      <img
-                        src={announcement.flyer_url}
-                        alt={announcement.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
+            <div className="flex gap-4 flex-wrap">
+              <Button
+                variant={filter === 'all' ? 'primary' : 'outline'}
+                onClick={() => setFilter('all')}
+              >
+                Todos
+              </Button>
+              <Button
+                variant={filter === 'event' ? 'primary' : 'outline'}
+                onClick={() => setFilter('event')}
+              >
+                Eventos
+              </Button>
+              <Button
+                variant={filter === 'announcement' ? 'primary' : 'outline'}
+                onClick={() => setFilter('announcement')}
+              >
+                Avisos
+              </Button>
+            </div>
+          </motion.div>
 
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        announcement.type === 'event'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {announcement.type === 'event' ? 'Evento' : 'Aviso'}
-                      </span>
-                      {announcement.event_date && (
-                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(announcement.event_date).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </div>
-                      )}
-                    </div>
+          {filteredAnnouncements.length === 0 ? (
+            <Card className="p-12 text-center">
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                Nenhum aviso encontrado
+              </h3>
+              <p className="text-gray-500">
+                No momento não há avisos ou eventos publicados.
+              </p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAnnouncements.map((announcement, index) => (
+                <motion.div
+                  key={announcement.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card
+                    className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                    onClick={() => handleAnnouncementClick(announcement)}
+                  >
+                    {announcement.flyer_url && (
+                      <div className="aspect-video overflow-hidden rounded-t-xl">
+                        <img
+                          src={announcement.flyer_url}
+                          alt={announcement.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
 
-                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
-                      {announcement.title}
-                    </h3>
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          announcement.type === 'event'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {announcement.type === 'event' ? 'Evento' : 'Aviso'}
+                        </span>
+                        {announcement.event_date && (
+                          <div className="flex items-center gap-1 text-sm text-gray-500">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(announcement.event_date).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </div>
+                        )}
+                      </div>
 
-                    <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
-                      {announcement.content}
-                    </p>
+                      <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
+                        {announcement.title}
+                      </h3>
 
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <span className="text-sm text-gray-500">
-                        Ver detalhes
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => shareAnnouncement(announcement, e)}
-                        className="flex items-center gap-2"
-                      >
-                        <Share2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
+                      <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
+                        {announcement.content}
+                      </p>
 
-      {/* NOVO: Modal de Detalhes para exibir o aviso selecionado */}
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <span className="text-sm text-gray-500">
+                          Ver detalhes
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => shareAnnouncement(announcement, e)}
+                          className="flex items-center gap-2"
+                        >
+                          <Share2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal de Detalhes */}
       <AnimatePresence>
         {selectedAnnouncement && (
           <motion.div
@@ -238,68 +221,93 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
             onClick={() => setSelectedAnnouncement(null)}
           >
             <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {selectedAnnouncement.flyer_url && (
-                <img
-                  src={selectedAnnouncement.flyer_url}
-                  alt={selectedAnnouncement.title}
-                  className="w-full h-48 object-cover rounded-t-xl"
-                />
+                <div className="aspect-video w-full overflow-hidden">
+                  <img
+                    src={selectedAnnouncement.flyer_url}
+                    alt={selectedAnnouncement.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               )}
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">{selectedAnnouncement.title}</h2>
-                
-                <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    selectedAnnouncement.type === 'event' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+
+              <div className="p-6 max-h-[60vh] overflow-y-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    selectedAnnouncement.type === 'event'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-blue-100 text-blue-800'
                   }`}>
                     {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
                   </span>
                   {selectedAnnouncement.event_date && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3"/> {formatFullDateTime(selectedAnnouncement.event_date)}
-                    </span>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-5 w-5" />
+                      <span>
+                        {new Date(selectedAnnouncement.event_date).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                <p className="text-gray-700 whitespace-pre-wrap mb-6">{selectedAnnouncement.content}</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                  {selectedAnnouncement.title}
+                </h2>
 
-                {selectedAnnouncement.whatsapp_contact && (
+                <div className="prose prose-lg max-w-none mb-6">
+                  {selectedAnnouncement.content.split('\n').map((paragraph, index) => (
+                    <p key={index} className="text-gray-700 mb-4 leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+
+                <div className="flex gap-3 pt-6 border-t">
                   <Button
                     variant="primary"
-                    onClick={() => handleWhatsAppClick(selectedAnnouncement.whatsapp_contact!, selectedAnnouncement.title)}
-                    className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 mb-4"
+                    onClick={(e) => shareAnnouncement(selectedAnnouncement, e as any)}
+                    className="flex items-center gap-2 flex-1"
                   >
-                    <MessageCircle className="h-4 w-4" />
-                    Falar no WhatsApp
+                    <Share2 className="h-4 w-4" />
+                    Compartilhar
                   </Button>
-                )}
-                
-                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+
+                  {selectedAnnouncement.whatsapp_contact && (
                     <Button
-                        variant="outline"
-                        // Passa 'selectedAnnouncement' para 'shareAnnouncement'
-                        onClick={() => shareAnnouncement(selectedAnnouncement, new MouseEvent('click') as any)} 
-                        className="flex items-center gap-2"
+                      variant="outline"
+                      onClick={() => contactWhatsApp(selectedAnnouncement)}
+                      className="flex items-center gap-2 flex-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                     >
-                        <Share2 className="h-4 w-4" />
-                        Compartilhar
+                      <MessageCircle className="h-4 w-4" />
+                      WhatsApp
                     </Button>
-                    <Button variant="primary" onClick={() => setSelectedAnnouncement(null)}>
-                        <X className="h-4 w-4" />
-                        Fechar
-                    </Button>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedAnnouncement(null)}
+                    className="flex items-center gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  );
+    </>
+  );
 };
