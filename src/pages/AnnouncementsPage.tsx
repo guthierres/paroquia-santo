@@ -40,8 +40,16 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     }
   };
 
-  const handleAnnouncementClick = (announcement: ParishAnnouncement) => {
+  const handleAnnouncementClick = (announcement: ParishAnnouncement, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setSelectedAnnouncement(announcement);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedAnnouncement(null);
   };
 
   const shareAnnouncement = (announcement: ParishAnnouncement, e: React.MouseEvent) => {
@@ -147,7 +155,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
                 >
                   <Card
                     className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col"
-                    onClick={() => handleAnnouncementClick(announcement)}
+                    onClick={(e) => handleAnnouncementClick(announcement, e)}
                   >
                     {announcement.flyer_url && (
                       <div className="aspect-video overflow-hidden rounded-t-xl">
@@ -218,7 +226,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-            onClick={() => setSelectedAnnouncement(null)}
+            onClick={handleCloseModal}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -297,7 +305,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
 
                   <Button
                     variant="outline"
-                    onClick={() => setSelectedAnnouncement(null)}
+                    onClick={handleCloseModal}
                     className="flex items-center gap-2"
                   >
                     <X className="h-4 w-4" />
