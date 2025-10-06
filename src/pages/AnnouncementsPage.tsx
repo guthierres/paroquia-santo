@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, MessageCircle, X, Share2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Calendar, MessageCircle, Share2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { supabase, ParishAnnouncement } from '../lib/supabase';
@@ -10,7 +10,7 @@ interface AnnouncementsPageProps {
   onBack: () => void;
 }
 
-// Formata data completa
+// Formata data
 const formatFullDateTime = (dateString: string | null | undefined) => {
   if (!dateString) return 'Data não definida';
   const date = new Date(dateString);
@@ -24,6 +24,7 @@ const formatFullDateTime = (dateString: string | null | undefined) => {
   });
 };
 
+// Abre WhatsApp
 const contactWhatsApp = (announcement: ParishAnnouncement) => {
   if (!announcement.whatsapp_contact) return;
   const phone = announcement.whatsapp_contact.replace(/\D/g, '');
@@ -31,12 +32,23 @@ const contactWhatsApp = (announcement: ParishAnnouncement) => {
   window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
 };
 
+// Compartilhar
+const shareAnnouncement = (announcement: ParishAnnouncement) => {
+  const url = `${window.location.origin}/#avisos/${encodeURIComponent(announcement.slug)}`;
+  if (navigator.share) {
+    navigator.share({ title: announcement.title, text: announcement.title, url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => toast.success('Link copiado!'));
+  }
+};
+
 export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) => {
   const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'event' | 'announcement'>('all');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<ParishAnnouncement | null>(null);
+  const [filter, setFilter] = useState<'all' | 'event' | 'announcement'>('all');
+  const [loading, setLoading] = useState(true);
 
+  // Busca dados
   useEffect(() => {
     fetchAnnouncements();
   }, []);
@@ -48,260 +60,185 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
         .from('parish_announcements')
         .select('*')
         .eq('is_published', true)
-        .order('event_date', { ascending: false, nullsFirst: false })
+        .order('event_date', { ascending: false })
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setAnnouncements(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar avisos:', error);
+    } catch (err) {
+      console.error(err);
       toast.error('Erro ao carregar avisos');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAnnouncementClick = useCallback((announcement: ParishAnnouncement) => {
-    setSelectedAnnouncement(announcement);
-    try {
-      // Atualiza a URL com hash (não empurra histórico)
-      history.replaceState(null, '', `#avisos/${encodeURIComponent(announcement.slug)}`);
-    } catch {
-      // se history não disponível, ignore
-    }
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedAnnouncement(null);
-    // Remove o hash da URL se estiver no formato #avisos/...
-    try {
-      if (window.location.hash?.startsWith('#avisos/')) {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  const shareAnnouncement = (announcement: ParishAnnouncement) => {
-    const url = `${window.location.origin}/#avisos/${encodeURIComponent(announcement.slug)}`;
-    const text = `${announcement.title}`;
-
-    if (navigator.share) {
-      navigator.share({ title: announcement.title, text, url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        toast.success('Link copiado!');
-      }).catch(() => {
-        toast.error('Não foi possível copiar o link');
-      });
-    }
+  // Abre aviso (tela cheia)
+  const handleOpen = (a: ParishAnnouncement) => {
+    setSelectedAnnouncement(a);
+    history.replaceState(null, '', `#avisos/${a.slug}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Abre modal automaticamente se hash tiver slug; também responde a mudanças de hash
+  // Fecha aviso
+  const handleClose = () => {
+    setSelectedAnnouncement(null);
+    history.replaceState(null, '', window.location.pathname);
+  };
+
+  // Detecta hash na URL (abre aviso direto)
   useEffect(() => {
-    if (!announcements || announcements.length === 0) return;
-
-    const checkHashAndOpen = () => {
-      const hash = window.location.hash || '';
-      if (hash.startsWith('#avisos/')) {
-        const slug = decodeURIComponent(hash.replace('#avisos/', ''));
-        const found = announcements.find(a => a.slug === slug);
-        if (found) {
-          setSelectedAnnouncement(found);
-          return;
-        }
-      }
-      // se hash não corresponder, não fecha automaticamente aqui (mantemos controle via close)
-    };
-
-    checkHashAndOpen();
-    window.addEventListener('hashchange', checkHashAndOpen);
-    return () => window.removeEventListener('hashchange', checkHashAndOpen);
+    if (!announcements.length) return;
+    const hash = window.location.hash;
+    if (hash.startsWith('#avisos/')) {
+      const slug = decodeURIComponent(hash.replace('#avisos/', ''));
+      const found = announcements.find(a => a.slug === slug);
+      if (found) setSelectedAnnouncement(found);
+    }
   }, [announcements]);
 
-  const filteredAnnouncements = announcements.filter(
-    (a) => filter === 'all' || a.type === filter
-  );
-
-  if (loading) {
+  // Se estiver em modo “detalhe” (tela cheia)
+  if (selectedAnnouncement) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-800 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando avisos...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-white shadow-md sticky top-0 z-10 p-4 flex items-center justify-between">
+          <Button variant="outline" onClick={handleClose} className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+          <div className="flex gap-2">
+            <Button variant="primary" onClick={() => shareAnnouncement(selectedAnnouncement)} className="flex items-center gap-2">
+              <Share2 className="h-4 w-4" />
+              Compartilhar
+            </Button>
+            {selectedAnnouncement.whatsapp_contact && (
+              <Button
+                variant="outline"
+                onClick={() => contactWhatsApp(selectedAnnouncement)}
+                className="flex items-center gap-2 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+              >
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp
+              </Button>
+            )}
+          </div>
         </div>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 overflow-y-auto">
+          {selectedAnnouncement.flyer_url && (
+            <div className="w-full aspect-video bg-gray-200 overflow-hidden">
+              <img
+                src={selectedAnnouncement.flyer_url}
+                alt={selectedAnnouncement.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          <div className="max-w-4xl mx-auto p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                selectedAnnouncement.type === 'event'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-blue-100 text-blue-800'
+              }`}>
+                {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
+              </span>
+              {selectedAnnouncement.event_date && (
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4" />
+                  {formatFullDateTime(selectedAnnouncement.event_date)}
+                </div>
+              )}
+            </div>
+
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              {selectedAnnouncement.title}
+            </h1>
+
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+              {selectedAnnouncement.content
+                ?.split('\n')
+                .map((p, i) => <p key={i} className="mb-4">{p}</p>)}
+            </div>
+          </div>
+        </motion.div>
       </div>
     );
   }
 
-  return (
-    <>
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <Button variant="outline" onClick={onBack} className="mb-6">
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Avisos e Eventos
-            </h1>
-            <p className="text-lg text-gray-600 mb-6">
-              Fique por dentro de todos os acontecimentos da nossa paróquia
-            </p>
-
-            <div className="flex gap-4 flex-wrap">
-              <Button variant={filter === 'all' ? 'primary' : 'outline'} onClick={() => setFilter('all')}>Todos</Button>
-              <Button variant={filter === 'event' ? 'primary' : 'outline'} onClick={() => setFilter('event')}>Eventos</Button>
-              <Button variant={filter === 'announcement' ? 'primary' : 'outline'} onClick={() => setFilter('announcement')}>Avisos</Button>
-            </div>
-          </motion.div>
-
-          {filteredAnnouncements.length === 0 ? (
-            <Card className="p-12 text-center">
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">Nenhum aviso encontrado</h3>
-              <p className="text-gray-500">No momento não há avisos ou eventos publicados.</p>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAnnouncements.map((announcement, index) => (
-                <motion.div
-                  key={announcement.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  {/* CLICKABLE WRAPPER (garante que o clique dispare) */}
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => handleAnnouncementClick(announcement)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleAnnouncementClick(announcement);
-                      }
-                    }}
-                    className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col outline-none"
-                  >
-                    <Card className="h-full flex flex-col">
-                      {announcement.flyer_url && (
-                        <div className="aspect-video overflow-hidden rounded-t-xl">
-                          <img
-                            src={announcement.flyer_url}
-                            alt={announcement.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      )}
-
-                      <div className="p-6 flex-1 flex flex-col">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${announcement.type === 'event' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
-                            {announcement.type === 'event' ? 'Evento' : 'Aviso'}
-                          </span>
-                          {announcement.event_date && (
-                            <div className="flex items-center gap-1 text-sm text-gray-500">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(announcement.event_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </div>
-                          )}
-                        </div>
-
-                        <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
-                          {announcement.title}
-                        </h3>
-
-                        <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
-                          {announcement.content}
-                        </p>
-
-                        <div className="flex items-center justify-between pt-4 border-t">
-                          <span className="text-sm text-gray-500">Ver detalhes</span>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
+  // Página principal (lista)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600">Carregando avisos...</p>
       </div>
+    );
+  }
 
-      {/* Modal */}
-      <AnimatePresence>
-        {selectedAnnouncement && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-            onClick={handleCloseModal}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {selectedAnnouncement.flyer_url && (
-                <div className="aspect-video w-full overflow-hidden">
-                  <img src={selectedAnnouncement.flyer_url} alt={selectedAnnouncement.title} className="w-full h-full object-cover" />
-                </div>
-              )}
+  const filtered = announcements.filter(a => filter === 'all' || a.type === filter);
 
-              <div className="p-6 max-h-[60vh] overflow-y-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${selectedAnnouncement.type === 'event' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
-                    {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
-                  </span>
-                  {selectedAnnouncement.event_date && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-5 w-5" />
-                      <span>{formatFullDateTime(selectedAnnouncement.event_date)}</span>
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <Button variant="outline" onClick={onBack} className="mb-6">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Button>
+
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Avisos e Eventos</h1>
+        <p className="text-lg text-gray-600 mb-6">Fique por dentro das novidades da paróquia</p>
+
+        <div className="flex gap-3 mb-8 flex-wrap">
+          <Button variant={filter === 'all' ? 'primary' : 'outline'} onClick={() => setFilter('all')}>Todos</Button>
+          <Button variant={filter === 'event' ? 'primary' : 'outline'} onClick={() => setFilter('event')}>Eventos</Button>
+          <Button variant={filter === 'announcement' ? 'primary' : 'outline'} onClick={() => setFilter('announcement')}>Avisos</Button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <Card className="p-12 text-center">
+            <h3 className="text-lg text-gray-600">Nenhum aviso encontrado</h3>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((a, i) => (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => handleOpen(a)}
+                className="cursor-pointer group"
+              >
+                <Card className="overflow-hidden h-full flex flex-col">
+                  {a.flyer_url && (
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={a.flyer_url}
+                        alt={a.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                   )}
-                </div>
-
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">{selectedAnnouncement.title}</h2>
-
-                <div className="prose prose-lg max-w-none mb-6">
-                  {selectedAnnouncement.content.split('\n').map((paragraph, idx) => (
-                    <p key={idx} className="text-gray-700 mb-4 leading-relaxed">{paragraph}</p>
-                  ))}
-                </div>
-
-                <div className="flex gap-3 pt-6 border-t">
-                  <Button variant="primary" onClick={() => shareAnnouncement(selectedAnnouncement)} className="flex items-center gap-2 flex-1">
-                    <Share2 className="h-4 w-4" />
-                    Compartilhar
-                  </Button>
-
-                  {selectedAnnouncement.whatsapp_contact && (
-                    <Button variant="outline" onClick={() => contactWhatsApp(selectedAnnouncement)} className="flex items-center gap-2 flex-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
-                      <MessageCircle className="h-4 w-4" />
-                      WhatsApp
-                    </Button>
-                  )}
-
-                  <Button variant="outline" onClick={handleCloseModal} className="flex items-center gap-2">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <div className="p-6 flex-1 flex flex-col">
+                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-red-800 transition">
+                      {a.title}
+                    </h3>
+                    <p className="text-gray-600 line-clamp-3 flex-1">{a.content}</p>
+                    <div className="mt-4 flex items-center text-sm text-gray-500">
+                      {a.event_date && (
+                        <>
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {new Date(a.event_date).toLocaleDateString('pt-BR')}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         )}
-      </AnimatePresence>
-    </>
+      </div>
+    </div>
   );
 };
 
