@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, Share2, MessageCircle, X } from 'lucide-react';
+import { ArrowLeft, Calendar, MessageCircle, X, Share2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { supabase, ParishAnnouncement } from '../lib/supabase';
@@ -9,6 +9,28 @@ import toast from 'react-hot-toast';
 interface AnnouncementsPageProps {
   onBack: () => void;
 }
+
+// Função auxiliar para formatar data e hora completa
+const formatFullDateTime = (dateString: string | null | undefined) => {
+  if (!dateString) return 'Data não definida';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Função para contato via WhatsApp
+const contactWhatsApp = (announcement: ParishAnnouncement) => {
+  if (!announcement.whatsapp_contact) return;
+  const phone = announcement.whatsapp_contact.replace(/\D/g, '');
+  const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${announcement.title}`);
+  window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
+};
 
 export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) => {
   const [announcements, setAnnouncements] = useState<ParishAnnouncement[]>([]);
@@ -33,18 +55,14 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
       if (error) throw error;
       setAnnouncements(data || []);
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      console.error('Erro ao carregar avisos:', error);
       toast.error('Erro ao carregar avisos');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAnnouncementClick = (announcement: ParishAnnouncement, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleAnnouncementClick = (announcement: ParishAnnouncement) => {
     setSelectedAnnouncement(announcement);
   };
 
@@ -52,8 +70,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     setSelectedAnnouncement(null);
   };
 
-  const shareAnnouncement = (announcement: ParishAnnouncement, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const shareAnnouncement = (announcement: ParishAnnouncement) => {
     const url = `${window.location.origin}/#avisos/${announcement.slug}`;
     const text = `${announcement.title}`;
 
@@ -65,16 +82,8 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     }
   };
 
-  const contactWhatsApp = (announcement: ParishAnnouncement) => {
-    if (!announcement.whatsapp_contact) return;
-
-    const phone = announcement.whatsapp_contact.replace(/\D/g, '');
-    const message = encodeURIComponent(`Olá! Gostaria de saber mais sobre: ${announcement.title}`);
-    window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
-  };
-
-  const filteredAnnouncements = announcements.filter(a =>
-    filter === 'all' || a.type === filter
+  const filteredAnnouncements = announcements.filter(
+    (a) => filter === 'all' || a.type === filter
   );
 
   if (loading) {
@@ -92,11 +101,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     <>
       <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-7xl mx-auto">
-          <Button
-            variant="outline"
-            onClick={onBack}
-            className="mb-6"
-          >
+          <Button variant="outline" onClick={onBack} className="mb-6">
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Button>
@@ -155,7 +160,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
                 >
                   <Card
                     className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col"
-                    onClick={(e) => handleAnnouncementClick(announcement, e)}
+                    onClick={() => handleAnnouncementClick(announcement)}
                   >
                     {announcement.flyer_url && (
                       <div className="aspect-video overflow-hidden rounded-t-xl">
@@ -169,17 +174,21 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
 
                     <div className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          announcement.type === 'event'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            announcement.type === 'event'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
                           {announcement.type === 'event' ? 'Evento' : 'Aviso'}
                         </span>
                         {announcement.event_date && (
                           <div className="flex items-center gap-1 text-sm text-gray-500">
                             <Calendar className="h-3 w-3" />
-                            {new Date(announcement.event_date).toLocaleDateString('pt-BR', {
+                            {new Date(
+                              announcement.event_date
+                            ).toLocaleDateString('pt-BR', {
                               day: '2-digit',
                               month: 'short',
                               year: 'numeric'
@@ -200,14 +209,6 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
                         <span className="text-sm text-gray-500">
                           Ver detalhes
                         </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => shareAnnouncement(announcement, e)}
-                          className="flex items-center gap-2"
-                        >
-                          <Share2 className="h-3 w-3" />
-                        </Button>
                       </div>
                     </div>
                   </Card>
@@ -247,24 +248,20 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
 
               <div className="p-6 max-h-[60vh] overflow-y-auto">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    selectedAnnouncement.type === 'event'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
+                  <span
+                    className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      selectedAnnouncement.type === 'event'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}
+                  >
                     {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
                   </span>
                   {selectedAnnouncement.event_date && (
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar className="h-5 w-5" />
                       <span>
-                        {new Date(selectedAnnouncement.event_date).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {formatFullDateTime(selectedAnnouncement.event_date)}
                       </span>
                     </div>
                   )}
@@ -275,17 +272,22 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
                 </h2>
 
                 <div className="prose prose-lg max-w-none mb-6">
-                  {selectedAnnouncement.content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="text-gray-700 mb-4 leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
+                  {selectedAnnouncement.content
+                    .split('\n')
+                    .map((paragraph, index) => (
+                      <p
+                        key={index}
+                        className="text-gray-700 mb-4 leading-relaxed"
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
                 </div>
 
                 <div className="flex gap-3 pt-6 border-t">
                   <Button
                     variant="primary"
-                    onClick={(e) => shareAnnouncement(selectedAnnouncement, e as any)}
+                    onClick={() => shareAnnouncement(selectedAnnouncement)}
                     className="flex items-center gap-2 flex-1"
                   >
                     <Share2 className="h-4 w-4" />
