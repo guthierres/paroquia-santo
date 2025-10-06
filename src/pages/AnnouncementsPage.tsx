@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Calendar, MessageCircle, X, Share2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -10,7 +10,7 @@ interface AnnouncementsPageProps {
   onBack: () => void;
 }
 
-// Função auxiliar para formatar data e hora completa
+// Formata data completa
 const formatFullDateTime = (dateString: string | null | undefined) => {
   if (!dateString) return 'Data não definida';
   const date = new Date(dateString);
@@ -24,7 +24,6 @@ const formatFullDateTime = (dateString: string | null | undefined) => {
   });
 };
 
-// Função para contato via WhatsApp
 const contactWhatsApp = (announcement: ParishAnnouncement) => {
   if (!announcement.whatsapp_contact) return;
   const phone = announcement.whatsapp_contact.replace(/\D/g, '');
@@ -62,25 +61,64 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     }
   };
 
-  const handleAnnouncementClick = (announcement: ParishAnnouncement) => {
+  const handleAnnouncementClick = useCallback((announcement: ParishAnnouncement) => {
     setSelectedAnnouncement(announcement);
-  };
+    try {
+      // Atualiza a URL com hash (não empurra histórico)
+      history.replaceState(null, '', `#avisos/${encodeURIComponent(announcement.slug)}`);
+    } catch {
+      // se history não disponível, ignore
+    }
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setSelectedAnnouncement(null);
-  };
+    // Remove o hash da URL se estiver no formato #avisos/...
+    try {
+      if (window.location.hash?.startsWith('#avisos/')) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const shareAnnouncement = (announcement: ParishAnnouncement) => {
-    const url = `${window.location.origin}/#avisos/${announcement.slug}`;
+    const url = `${window.location.origin}/#avisos/${encodeURIComponent(announcement.slug)}`;
     const text = `${announcement.title}`;
 
     if (navigator.share) {
-      navigator.share({ title: announcement.title, text, url });
+      navigator.share({ title: announcement.title, text, url }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(url);
-      toast.success('Link copiado!');
+      navigator.clipboard.writeText(url).then(() => {
+        toast.success('Link copiado!');
+      }).catch(() => {
+        toast.error('Não foi possível copiar o link');
+      });
     }
   };
+
+  // Abre modal automaticamente se hash tiver slug; também responde a mudanças de hash
+  useEffect(() => {
+    if (!announcements || announcements.length === 0) return;
+
+    const checkHashAndOpen = () => {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#avisos/')) {
+        const slug = decodeURIComponent(hash.replace('#avisos/', ''));
+        const found = announcements.find(a => a.slug === slug);
+        if (found) {
+          setSelectedAnnouncement(found);
+          return;
+        }
+      }
+      // se hash não corresponder, não fecha automaticamente aqui (mantemos controle via close)
+    };
+
+    checkHashAndOpen();
+    window.addEventListener('hashchange', checkHashAndOpen);
+    return () => window.removeEventListener('hashchange', checkHashAndOpen);
+  }, [announcements]);
 
   const filteredAnnouncements = announcements.filter(
     (a) => filter === 'all' || a.type === filter
@@ -119,35 +157,16 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
             </p>
 
             <div className="flex gap-4 flex-wrap">
-              <Button
-                variant={filter === 'all' ? 'primary' : 'outline'}
-                onClick={() => setFilter('all')}
-              >
-                Todos
-              </Button>
-              <Button
-                variant={filter === 'event' ? 'primary' : 'outline'}
-                onClick={() => setFilter('event')}
-              >
-                Eventos
-              </Button>
-              <Button
-                variant={filter === 'announcement' ? 'primary' : 'outline'}
-                onClick={() => setFilter('announcement')}
-              >
-                Avisos
-              </Button>
+              <Button variant={filter === 'all' ? 'primary' : 'outline'} onClick={() => setFilter('all')}>Todos</Button>
+              <Button variant={filter === 'event' ? 'primary' : 'outline'} onClick={() => setFilter('event')}>Eventos</Button>
+              <Button variant={filter === 'announcement' ? 'primary' : 'outline'} onClick={() => setFilter('announcement')}>Avisos</Button>
             </div>
           </motion.div>
 
           {filteredAnnouncements.length === 0 ? (
             <Card className="p-12 text-center">
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                Nenhum aviso encontrado
-              </h3>
-              <p className="text-gray-500">
-                No momento não há avisos ou eventos publicados.
-              </p>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">Nenhum aviso encontrado</h3>
+              <p className="text-gray-500">No momento não há avisos ou eventos publicados.</p>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -156,62 +175,59 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
                   key={announcement.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  <Card
-                    className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                  {/* CLICKABLE WRAPPER (garante que o clique dispare) */}
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleAnnouncementClick(announcement)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleAnnouncementClick(announcement);
+                      }
+                    }}
+                    className="group cursor-pointer hover:shadow-xl transition-all duration-300 h-full flex flex-col outline-none"
                   >
-                    {announcement.flyer_url && (
-                      <div className="aspect-video overflow-hidden rounded-t-xl">
-                        <img
-                          src={announcement.flyer_url}
-                          alt={announcement.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                    <Card className="h-full flex flex-col">
+                      {announcement.flyer_url && (
+                        <div className="aspect-video overflow-hidden rounded-t-xl">
+                          <img
+                            src={announcement.flyer_url}
+                            alt={announcement.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+
+                      <div className="p-6 flex-1 flex flex-col">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${announcement.type === 'event' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                            {announcement.type === 'event' ? 'Evento' : 'Aviso'}
+                          </span>
+                          {announcement.event_date && (
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(announcement.event_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </div>
+                          )}
+                        </div>
+
+                        <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
+                          {announcement.title}
+                        </h3>
+
+                        <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
+                          {announcement.content}
+                        </p>
+
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <span className="text-sm text-gray-500">Ver detalhes</span>
+                        </div>
                       </div>
-                    )}
-
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            announcement.type === 'event'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {announcement.type === 'event' ? 'Evento' : 'Aviso'}
-                        </span>
-                        {announcement.event_date && (
-                          <div className="flex items-center gap-1 text-sm text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(
-                              announcement.event_date
-                            ).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-red-800 transition-colors line-clamp-2">
-                        {announcement.title}
-                      </h3>
-
-                      <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
-                        {announcement.content}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <span className="text-sm text-gray-500">
-                          Ver detalhes
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -219,7 +235,7 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
         </div>
       </div>
 
-      {/* Modal de Detalhes */}
+      {/* Modal */}
       <AnimatePresence>
         {selectedAnnouncement && (
           <motion.div
@@ -238,78 +254,45 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
             >
               {selectedAnnouncement.flyer_url && (
                 <div className="aspect-video w-full overflow-hidden">
-                  <img
-                    src={selectedAnnouncement.flyer_url}
-                    alt={selectedAnnouncement.title}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={selectedAnnouncement.flyer_url} alt={selectedAnnouncement.title} className="w-full h-full object-cover" />
                 </div>
               )}
 
               <div className="p-6 max-h-[60vh] overflow-y-auto">
                 <div className="flex items-center gap-3 mb-4">
-                  <span
-                    className={`px-4 py-2 rounded-full text-sm font-medium ${
-                      selectedAnnouncement.type === 'event'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}
-                  >
+                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${selectedAnnouncement.type === 'event' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
                     {selectedAnnouncement.type === 'event' ? 'Evento' : 'Aviso'}
                   </span>
                   {selectedAnnouncement.event_date && (
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar className="h-5 w-5" />
-                      <span>
-                        {formatFullDateTime(selectedAnnouncement.event_date)}
-                      </span>
+                      <span>{formatFullDateTime(selectedAnnouncement.event_date)}</span>
                     </div>
                   )}
                 </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                  {selectedAnnouncement.title}
-                </h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">{selectedAnnouncement.title}</h2>
 
                 <div className="prose prose-lg max-w-none mb-6">
-                  {selectedAnnouncement.content
-                    .split('\n')
-                    .map((paragraph, index) => (
-                      <p
-                        key={index}
-                        className="text-gray-700 mb-4 leading-relaxed"
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
+                  {selectedAnnouncement.content.split('\n').map((paragraph, idx) => (
+                    <p key={idx} className="text-gray-700 mb-4 leading-relaxed">{paragraph}</p>
+                  ))}
                 </div>
 
                 <div className="flex gap-3 pt-6 border-t">
-                  <Button
-                    variant="primary"
-                    onClick={() => shareAnnouncement(selectedAnnouncement)}
-                    className="flex items-center gap-2 flex-1"
-                  >
+                  <Button variant="primary" onClick={() => shareAnnouncement(selectedAnnouncement)} className="flex items-center gap-2 flex-1">
                     <Share2 className="h-4 w-4" />
                     Compartilhar
                   </Button>
 
                   {selectedAnnouncement.whatsapp_contact && (
-                    <Button
-                      variant="outline"
-                      onClick={() => contactWhatsApp(selectedAnnouncement)}
-                      className="flex items-center gap-2 flex-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                    >
+                    <Button variant="outline" onClick={() => contactWhatsApp(selectedAnnouncement)} className="flex items-center gap-2 flex-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
                       <MessageCircle className="h-4 w-4" />
                       WhatsApp
                     </Button>
                   )}
 
-                  <Button
-                    variant="outline"
-                    onClick={handleCloseModal}
-                    className="flex items-center gap-2"
-                  >
+                  <Button variant="outline" onClick={handleCloseModal} className="flex items-center gap-2">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -321,3 +304,5 @@ export const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onBack }) 
     </>
   );
 };
+
+export default AnnouncementsPage;
