@@ -258,6 +258,20 @@ export interface Celebration {
   updated_at: string;
 }
 
+export interface Program {
+  id: string;
+  title: string;
+  description: string;
+  featured_image: string | null;
+  days_of_week: string[];
+  time: string;
+  slug: string;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UrgentPopup {
   id: string;
   title: string;

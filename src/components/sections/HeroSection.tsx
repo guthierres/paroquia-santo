@@ -47,7 +47,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigate }) => {
             40 Anos de Fé e Comunhão
           </h2>
           <p className="text-base sm:text-lg text-white leading-relaxed mb-6">
-            Celebrando quase quatro décadas de fé, esperança e amor em nossa comunidade. 
+            Celebrando quatro décadas de fé, esperança e amor em nossa comunidade.
             Uma jornada de milagres, bênçãos e união entre irmãos em Cristo.
           </p>
           

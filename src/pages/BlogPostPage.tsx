@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, User, Loader } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Loader, Share2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { supabase, BlogPost } from '../lib/supabase';
 import toast from 'react-hot-toast';
@@ -46,6 +46,33 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onBack }) => {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: post?.title || '',
+      text: post?.excerpt || '',
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        toast.success('Compartilhado com sucesso!');
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error sharing:', error);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copiado para a área de transferência!');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        toast.error('Erro ao copiar link');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -59,17 +86,31 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-gradient-to-r from-red-900 to-red-800 text-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <Button
+              variant="outline"
+              onClick={onBack}
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleShare}
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            >
+              <Share2 className="h-4 w-4" />
+              Compartilhar
+            </Button>
+          </div>
+        </div>
+      </div>
 
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <motion.article
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

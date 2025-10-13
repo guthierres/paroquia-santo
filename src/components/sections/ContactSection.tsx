@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Church, MessageCircle, BookOpen } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Church, MessageCircle, BookOpen, Calendar } from 'lucide-react';
 import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 import { supabase, Parish, Schedule } from '../../lib/supabase';
 
-export const ContactSection: React.FC = () => {
+interface ContactSectionProps {
+  onNavigateToPrograms?: () => void;
+}
+
+export const ContactSection: React.FC<ContactSectionProps> = ({ onNavigateToPrograms }) => {
   const [parishData, setParishData] = useState<Parish | null>(null);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -203,10 +208,29 @@ export const ContactSection: React.FC = () => {
                 className="mt-6 p-4 bg-gradient-to-r from-red-50 to-amber-50 rounded-lg border border-red-100"
               >
                 <p className="text-sm text-gray-700">
-                  <strong>Nota:</strong> Em datas especiais e festividades, os horários podem sofrer alterações. 
+                  <strong>Nota:</strong> Em datas especiais e festividades, os horários podem sofrer alterações.
                   Consulte nossos avisos paroquiais ou entre em contato conosco.
                 </p>
               </motion.div>
+
+              {onNavigateToPrograms && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="mt-6"
+                >
+                  <Button
+                    onClick={onNavigateToPrograms}
+                    className="w-full"
+                    variant="secondary"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Todas as Programações
+                  </Button>
+                </motion.div>
+              )}
             </Card>
           </motion.div>
         </div>

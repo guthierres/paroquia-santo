@@ -7,13 +7,13 @@ import { HeroSection } from './components/sections/HeroSection';
 import { HistorySection } from './components/sections/HistorySection';
 import { PhotoGallery } from './components/sections/PhotoGallery';
 import { ContactSection } from './components/sections/ContactSection';
-import { TimelineSection } from './components/sections/TimelineSection';
 import { SlidesSection } from './components/sections/SlidesSection';
 import { AnnouncementsSection } from './components/sections/AnnouncementsSection';
 import { BlogSection } from './components/sections/BlogSection';
 import { PriestSection } from './components/sections/PriestSection';
 import { FullGallery } from './components/sections/FullGallery';
 import { CelebrationsPage } from './components/sections/CelebrationsPage';
+import { ProgramsPage } from './pages/ProgramsPage';
 import { PastoralsPage } from './components/sections/PastoralsPage';
 import { AlbumGallery } from './components/sections/AlbumGallery';
 import { UrgentPopup } from './components/ui/UrgentPopup';
@@ -35,6 +35,7 @@ function App() {
   const [currentSection, setCurrentSection] = useState('home');
   const [showFullGallery, setShowFullGallery] = useState(false);
   const [showCelebrations, setShowCelebrations] = useState(false);
+  const [showPrograms, setShowPrograms] = useState(false);
   const [showPastorals, setShowPastorals] = useState(false);
   const [showAlbumGallery, setShowAlbumGallery] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -136,6 +137,7 @@ function App() {
     if (section === 'celebrations') {
       setShowCelebrations(true);
       setShowFullGallery(false);
+      setShowPrograms(false);
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
@@ -143,10 +145,23 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    
+
+    if (section === 'programs') {
+      setShowPrograms(true);
+      setShowFullGallery(false);
+      setShowCelebrations(false);
+      setShowPastorals(false);
+      setShowAlbumGallery(false);
+      setShowPrivacyPolicy(false);
+      setShowTermsOfUse(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (section === 'pastorals') {
       setShowPastorals(true);
       setShowFullGallery(false);
+      setShowPrograms(false);
       setShowCelebrations(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
@@ -180,6 +195,7 @@ function App() {
     setCurrentSection(section);
     setShowFullGallery(false);
     setShowCelebrations(false);
+    setShowPrograms(false);
     setShowPastorals(false);
     setShowAlbumGallery(false);
     setShowPrivacyPolicy(false);
@@ -232,6 +248,7 @@ function App() {
     setShowAlbumGallery(true);
     setShowFullGallery(false);
     setShowCelebrations(false);
+    setShowPrograms(false);
     setShowPastorals(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -249,6 +266,11 @@ function App() {
 
   const handleBackFromCelebrations = () => {
     setShowCelebrations(false);
+    handleNavigate('home');
+  };
+
+  const handleBackFromPrograms = () => {
+    setShowPrograms(false);
     handleNavigate('home');
   };
 
@@ -344,6 +366,8 @@ function App() {
         }} />
       ) : showCelebrations ? (
         <CelebrationsPage onBack={handleBackFromCelebrations} />
+      ) : showPrograms ? (
+        <ProgramsPage onBack={handleBackFromPrograms} />
       ) : showPastorals ? (
         <PastoralsPage onBack={handleBackFromPastorals} />
       ) : showAlbumGallery ? (
@@ -358,17 +382,16 @@ function App() {
           <HeroSection onNavigate={handleNavigate} />
           <HistorySection />
           <PriestSection />
-          <TimelineSection />
           <PhotoGallery onNavigateToFullGallery={handleShowFullGallery} />
           <AnnouncementsSection />
           <BlogSection onNavigateHome={() => handleNavigate('home')} />
-          <ContactSection />
+          <ContactSection onNavigateToPrograms={() => handleNavigate('programs')} />
         </main>
       )}
 
       {/* Admin Access Button - Removed from main page */}
       
-      {!showAlbumGallery && !showCelebrations && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && (
+      {!showAlbumGallery && !showCelebrations && !showPrograms && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div

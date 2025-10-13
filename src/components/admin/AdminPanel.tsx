@@ -13,6 +13,7 @@ import { ScheduleManager } from './ScheduleManager';
 import { PriestManager } from './PriestManager';
 import { CloudinarySettings } from './CloudinarySettings';
 import { CelebrationManager } from './CelebrationManager';
+import { ProgramManager } from './ProgramManager';
 import { PastoralManager } from './PastoralManager';
 import { UrgentPopupManager } from './UrgentPopupManager';
 import { AlbumManager } from './AlbumManager';
@@ -35,6 +36,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     { id: 'blog', label: 'Blog', icon: FileText },
     { id: 'priests', label: 'Clero', icon: Users },
     { id: 'celebrations', label: 'Celebrações', icon: Calendar },
+    { id: 'programs', label: 'Programações', icon: Calendar },
     { id: 'albums', label: 'Álbuns de Fotos', icon: Image },
     { id: 'photos', label: 'Galeria de Fotos', icon: Image },
     { id: 'timeline', label: 'Linha do Tempo', icon: Calendar },
@@ -70,6 +72,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         return <PriestManager />;
       case 'celebrations':
         return <CelebrationManager />;
+      case 'programs':
+        return <ProgramManager />;
       case 'albums':
         return <AlbumManager />;
       case 'photos':
