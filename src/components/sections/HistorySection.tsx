@@ -55,7 +55,7 @@ Hoje, olhamos para o futuro com esperança, gratos por tudo que o Senhor nos con
 
   const milestones = [
     {
-      year: '1984',
+      year: '1985',
       title: 'Fundação da Paróquia',
       description: 'Início das atividades religiosas na comunidade',
       icon: Calendar
