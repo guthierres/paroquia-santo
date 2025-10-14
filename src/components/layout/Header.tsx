@@ -13,7 +13,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { id: 'home', label: 'Início' },
     { id: 'history', label: 'História' },
     { id: 'pastorals', label: 'Pastorais' },
-    { id: 'celebrations', label: 'Celebrações' },
+    { id: 'programs', label: 'Programações' },
     { id: 'announcements', label: 'Eventos' },
     { id: 'blog', label: 'Blog' },
     { id: 'photos', label: 'Fotos' },
@@ -58,38 +58,24 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             </div>
           </motion.div>
 
-          {/* Desktop Menu */}
-          <nav className="hidden lg:flex space-x-6 xl:space-x-8">
-            {menuItems.map((item) => (
-              <motion.button
-                key={item.id}
-                onClick={() => handleNavigate(item.id)}
-                className="text-white hover:text-amber-300 font-medium transition-colors duration-200 text-sm xl:text-base"
-                whileHover={{ y: -2 }}
-              >
-                {item.label}
-              </motion.button>
-            ))}
-          </nav>
-
-          {/* Mobile Menu Button */}
+          {/* Hamburger Menu Button - Always visible */}
           <button
-            className="lg:hidden text-white hover:text-amber-300 p-2 -mr-2"
+            className="text-white hover:text-amber-300 p-2 -mr-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             style={{ touchAction: 'manipulation' }}
           >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Dropdown Menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.nav
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden py-4 border-t border-red-700/50 bg-red-900/98 backdrop-blur-md w-full max-w-full overflow-hidden"
+              className="py-4 border-t border-red-700/50 bg-red-900/98 backdrop-blur-md w-full max-w-full overflow-hidden"
             >
               {menuItems.map((item) => (
                 <motion.div

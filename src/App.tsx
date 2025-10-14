@@ -67,6 +67,12 @@ function App() {
       const hash = window.location.hash;
       const path = window.location.pathname;
 
+      // Handle /programacoes route
+      if (path === '/programacoes') {
+        setShowPrograms(true);
+        return;
+      }
+
       if (hash.startsWith('#post/')) {
         const slug = hash.replace('#post/', '');
         setCurrentBlogPostSlug(slug);
@@ -90,9 +96,20 @@ function App() {
 
     handleInitialHash();
 
-    // Listen for hash changes
+    // Listen for hash changes and path changes
     const handleHashChange = () => {
       const hash = window.location.hash;
+      const path = window.location.pathname;
+
+      // Handle /programacoes route
+      if (path === '/programacoes') {
+        setShowPrograms(true);
+        setCurrentBlogPostSlug(null);
+        setCurrentAlbumSlug(null);
+        setCurrentAnnouncementSlug(null);
+        setShowAnnouncementsPage(false);
+        return;
+      }
 
       if (hash.startsWith('#post/')) {
         const slug = hash.replace('#post/', '');
@@ -126,10 +143,12 @@ function App() {
     };
 
     window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
 
     return () => {
       subscription.unsubscribe();
       window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
     };
   }, []);
 
