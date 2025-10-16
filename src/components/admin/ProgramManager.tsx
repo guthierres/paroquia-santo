@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, Save, X, Calendar, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Calendar, ArrowUp, ArrowDown, Image } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { supabase, Program } from '../../lib/supabase';
@@ -186,6 +186,13 @@ export const ProgramManager: React.FC = () => {
     setEditingProgram({ ...editingProgram, days_of_week: days });
   };
 
+  const handleImageUpload = (result: { publicId: string; url: string; secureUrl: string }) => {
+    setEditingProgram(prev => prev ? {
+      ...prev,
+      featured_image: result.secureUrl || result.url
+    } : null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -367,15 +374,51 @@ export const ProgramManager: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Imagem de Destaque
+                    Imagem de Destaque (opcional)
                   </label>
-                  <FileUpload
-                    onUpload={(result) => setEditingProgram(prev => prev ? {
-                      ...prev,
-                      featured_image: result.secureUrl || result.url
-                    } : null)}
-                    currentImageUrl={editingProgram.featured_image || undefined}
-                  />
+                  {editingProgram.featured_image ? (
+                    <div className="space-y-2">
+                      <div className="relative rounded-lg overflow-hidden border-2 border-gray-200">
+                        <img
+                          src={editingProgram.featured_image}
+                          alt="Preview da imagem"
+                          className="w-full h-48 object-cover"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingProgram(prev => prev ? {
+                            ...prev,
+                            featured_image: null
+                          } : null)}
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-white"
+                        >
+                          <X className="h-3 w-3" />
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <FileUpload
+                      onCloudinaryUpload={handleImageUpload}
+                      accept="image/*"
+                      folder="programs"
+                      useCloudinary={true}
+                    >
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-red-500 transition-colors">
+                        <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-sm font-medium text-gray-700 mb-1">
+                          Clique para selecionar uma imagem
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG ou WEBP (máx. 1MB)
+                        </p>
+                      </div>
+                    </FileUpload>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Envie uma imagem para destacar a programação (máx. 1MB)
+                  </p>
                 </div>
 
                 <div>

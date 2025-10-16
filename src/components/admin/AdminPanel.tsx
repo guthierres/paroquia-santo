@@ -16,6 +16,7 @@ import { ProgramManager } from './ProgramManager';
 import { PastoralManager } from './PastoralManager';
 import { UrgentPopupManager } from './UrgentPopupManager';
 import { AlbumManager } from './AlbumManager';
+import { LogoManager } from './LogoManager';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -28,6 +29,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
   const tabs = [
     { id: 'parish', label: 'Informações da Paróquia', icon: FileText },
+    { id: 'logo', label: 'Logo do Site', icon: Image },
     { id: 'cloudinary', label: 'Cloudinary', icon: Settings },
     { id: 'popups', label: 'Pop-ups Urgentes', icon: Calendar },
     { id: 'pastorals', label: 'Pastorais', icon: Users },
@@ -56,6 +58,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     switch (activeTab) {
       case 'parish':
         return <ParishManager />;
+      case 'logo':
+        return <LogoManager />;
       case 'cloudinary':
         return <CloudinarySettings />;
       case 'popups':

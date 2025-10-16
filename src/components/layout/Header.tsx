@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Church } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface HeaderProps {
   onNavigate: (section: string) => void;
@@ -8,6 +9,31 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoAlt, setLogoAlt] = useState('Logo da Paróquia');
+
+  useEffect(() => {
+    fetchLogo();
+  }, []);
+
+  const fetchLogo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('logo_url, logo_alt')
+        .eq('key', 'logo_settings')
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        setLogoUrl(data.logo_url);
+        setLogoAlt(data.logo_alt || 'Logo da Paróquia');
+      }
+    } catch (error) {
+      console.error('Error fetching logo:', error);
+    }
+  };
 
   const menuItems = [
     { id: 'home', label: 'Início' },
@@ -43,19 +69,29 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-900/95 to-red-800/95 backdrop-blur-md shadow-lg safe-area-inset-top will-change-transform w-full max-w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 w-full">
-          <motion.div 
+          <motion.div
             className="flex items-center gap-2 sm:gap-3 cursor-pointer"
             onClick={() => handleNavigate('home')}
             whileHover={{ scale: 1.05 }}
           >
-            <Church className="h-6 w-6 sm:h-8 sm:w-8 text-amber-400" />
-            <div className="hidden sm:block">
-              <h1 className="text-white font-bold text-sm sm:text-lg">Paróquia Senhor Santo Cristo</h1>
-              <p className="text-amber-200 text-xs sm:text-sm">40 Anos de Fé</p>
-            </div>
-            <div className="block sm:hidden">
-              <h1 className="text-white font-bold text-sm">Paróquia Santo Cristo</h1>
-            </div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={logoAlt}
+                className="h-8 sm:h-12 w-auto object-contain max-w-[200px] sm:max-w-[300px]"
+              />
+            ) : (
+              <>
+                <Church className="h-6 w-6 sm:h-8 sm:w-8 text-amber-400" />
+                <div className="hidden sm:block">
+                  <h1 className="text-white font-bold text-sm sm:text-lg">Paróquia Senhor Santo Cristo</h1>
+                  <p className="text-amber-200 text-xs sm:text-sm">40 Anos de Fé</p>
+                </div>
+                <div className="block sm:hidden">
+                  <h1 className="text-white font-bold text-sm">Paróquia Santo Cristo</h1>
+                </div>
+              </>
+            )}
           </motion.div>
 
           {/* Hamburger Menu Button - Always visible */}
