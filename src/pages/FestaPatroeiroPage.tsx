@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Church, Music, Users, Heart, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
-// CORREÇÃO APLICADA AQUI: Ajuste do caminho relativo para acessar 'public' na raiz do projeto.
+// Caminho de importação corrigido (assumindo src/pages/FestaPatroeiroPage.tsx)
 import festaImage from '../../public/festa-santo.png';
 
 interface FestaPatroeiroPageProps {
@@ -12,11 +12,18 @@ interface FestaPatroeiroPageProps {
 
 export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-background">
-      {/* Hero Section */}
+    // Personalização do fundo do DIV PRINCIPAL (body):
+    // Usando um gradiente suave do topo (bg-gray-50) para um tom mais quente (via-stone-50)
+    // Isso dá um toque de "papel envelhecido" ou solenidade.
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-stone-50 to-amber-50/50">
+      
+      {/* Hero Section - Mantido com cores fortes de fundo (primary/vinho) */}
       <div className="relative bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground py-16 overflow-hidden">
+        
+        {/* Fundo de Padrão (Pattern Background) */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6TTEyIDM0YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6bTAtMTBjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSAzLjM5LTQgMy4zOS00LTEuMTgtNC0zLjM5ek0yNCAzNGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6bTAtMTBjMC0yLjIxLTEuNzktNC00LTRsLTQgNC4yMSAxLjI1IDMuNDkgMy4zOS00LjY4IDMuNDktMS42MS0xLjI1LTN6bTAtMTBjMC0yLjIxLTEuNzktNC00LTRsLTQuNDUgMy4zNy0uNzgtLjIzLjY5LTMuMTQgLTIuOTMtLjc4IDIuNzktLjY0LTQuNjktLjI0LTQuMTItLjQ0eiIvPjwvZz48L2c+PC9zdmc+')] animate-pulse"></div>
+          {/* Padrão animado sutil - Mantido para um toque de animação no topo */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC41Ij48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6TTEyIDM0YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6bTAtMTBjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSAzLjM5LTQgMy4zOS00LTEuMTgtNC0zLjM5ek0yNCAzNGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6bTAtMTBjMC0yLjIxLTEuNzktNC00LTRsLTQgNC4yMSAxLjI1IDMuNDkgMy4zOS00LjY4IDMuNDktMS42MS0xLjI1LTN6bTAtMTBjMC0yLjIxLTEuNzktNC00LTRsLTQuNDUgMy4zNy0uNzgtLjIzLjY5LTMuMTQgLTIuOTMtLjc4IDIuNzktLjY0LTQuNjktLjI0LTQuMTItLjQ0eiIvPjwvZz48L2c+PC9zdmc=')] animate-pulse"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
