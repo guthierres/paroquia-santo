@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Church, Music, Users, Heart, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import festaImage from '../public/festa-padroeiro-2025.png';
+import festaImage from '../public/festa-santo.png';
 
 interface FestaPatroeiroPageProps {
   onBack: () => void;
