@@ -12,13 +12,10 @@ interface FestaPatroeiroPageProps {
 
 export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }) => {
   return (
-    // Personalização do fundo do DIV PRINCIPAL (body):
-    // Usando um gradiente suave do topo (bg-gray-50) para um tom mais quente (via-stone-50)
-    // Isso dá um toque de "papel envelhecido" ou solenidade.
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-stone-50 to-amber-50/50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
       
-      {/* Hero Section - Mantido com cores fortes de fundo (primary/vinho) */}
-      <div className="relative bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground py-16 overflow-hidden">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-red-900 via-red-800 to-amber-900 text-white py-16 overflow-hidden">
         
         {/* Fundo de Padrão (Pattern Background) */}
         <div className="absolute inset-0 opacity-10">
@@ -68,17 +65,17 @@ export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="bg-gradient-to-br from-accent via-accent/95 to-accent/90 rounded-2xl p-8 mb-12 shadow-2xl"
+          className="bg-gradient-to-br from-amber-600 via-orange-600 to-red-600 rounded-2xl p-8 mb-12 shadow-2xl"
         >
           <div className="flex items-center justify-center gap-3 mb-6">
-            <Calendar className="h-8 w-8 text-accent-foreground" />
-            <h2 className="text-3xl font-bold text-accent-foreground">Data da Celebração</h2>
+            <Calendar className="h-8 w-8 text-white" />
+            <h2 className="text-3xl font-bold text-white">Data da Celebração</h2>
           </div>
           <div className="text-center">
-            <p className="text-5xl sm:text-6xl font-bold text-accent-foreground mb-2">
+            <p className="text-5xl sm:text-6xl font-bold text-white mb-2">
               13 a 23 de Novembro
             </p>
-            <p className="text-xl text-accent-foreground/80">
+            <p className="text-xl text-white/90">
               Novena e Festa Paroquial
             </p>
           </div>
@@ -106,45 +103,45 @@ export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="bg-card rounded-2xl p-8 sm:p-12 mb-12 shadow-xl"
+          className="bg-white rounded-2xl p-8 sm:p-12 mb-12 shadow-xl"
         >
           <div className="prose prose-lg max-w-none">
-            <h2 className="text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
-              <Heart className="h-8 w-8 text-primary" />
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+              <Heart className="h-8 w-8 text-red-700" />
               Convite Especial
             </h2>
             
-            <div className="space-y-6 text-muted-foreground leading-relaxed">
+            <div className="space-y-6 text-gray-700 leading-relaxed">
               <p className="text-lg">
                 Queridos irmãos e irmãs em Cristo,
               </p>
               
               <p className="text-lg">
                 Com imensa alegria e gratidão ao Senhor, convidamos toda a comunidade paroquial e amigos para participarem 
-                da <strong className="text-foreground">Festa do Padroeiro 2025</strong>, em honra ao <strong className="text-foreground">Senhor Santo Cristo dos Milagres</strong>.
+                da <strong className="text-gray-900">Festa do Padroeiro 2025</strong>, em honra ao <strong className="text-gray-900">Senhor Santo Cristo dos Milagres</strong>.
               </p>
 
               <p className="text-lg">
-                Este ano é ainda mais especial, pois celebramos <strong className="text-primary text-xl">40 anos de fundação</strong> da 
+                Este ano é ainda mais especial, pois celebramos <strong className="text-red-700 text-xl">40 anos de fundação</strong> da 
                 nossa querida Paróquia! Quatro décadas de fé, comunhão e serviço ao Reino de Deus, sempre sob a proteção e 
                 bênção do nosso Padroeiro.
               </p>
 
-              <div className="bg-accent/20 rounded-xl p-6 my-8 border-l-4 border-primary">
-                <p className="text-lg font-semibold text-foreground mb-2">
+              <div className="bg-amber-50 rounded-xl p-6 my-8 border-l-4 border-red-700">
+                <p className="text-lg font-semibold text-gray-900 mb-2">
                   A celebração será marcada por:
                 </p>
                 <ul className="space-y-2 text-lg">
                   <li className="flex items-start gap-2">
-                    <Church className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <Church className="h-5 w-5 text-red-700 mt-1 flex-shrink-0" />
                     <span><strong>Novena Solene:</strong> De 13 a 21 de novembro, momentos de oração, reflexão e louvor</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Music className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <Music className="h-5 w-5 text-red-700 mt-1 flex-shrink-0" />
                     <span><strong>Festividades:</strong> Programação especial celebrando 40 anos de nossa paróquia</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Users className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <Users className="h-5 w-5 text-red-700 mt-1 flex-shrink-0" />
                     <span><strong>Confraternização:</strong> Momentos de comunhão e união fraterna</span>
                   </li>
                 </ul>
@@ -160,7 +157,7 @@ export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }
                 as graças e bênçãos do Senhor Santo Cristo dos Milagres.
               </p>
 
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-lg font-semibold text-gray-900">
                 Que o Senhor Santo Cristo dos Milagres continue abençoando nossa paróquia, nossas famílias e toda a nossa 
                 comunidade. Contamos com a presença de todos!
               </p>
@@ -175,38 +172,38 @@ export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }
           transition={{ delay: 0.5, duration: 0.6 }}
           className="grid md:grid-cols-3 gap-6 mb-12"
         >
-          <div className="bg-card rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Church className="h-6 w-6 text-primary" />
+              <div className="p-3 bg-red-100 rounded-full">
+                <Church className="h-6 w-6 text-red-700" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">Novena</h3>
+              <h3 className="text-xl font-bold text-gray-900">Novena</h3>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-gray-700">
               Acompanhe a novena diária com reflexões profundas e momentos de oração em comunidade.
             </p>
           </div>
 
-          <div className="bg-card rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Sparkles className="h-6 w-6 text-primary" />
+              <div className="p-3 bg-amber-100 rounded-full">
+                <Sparkles className="h-6 w-6 text-amber-700" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">40 Anos</h3>
+              <h3 className="text-xl font-bold text-gray-900">40 Anos</h3>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-gray-700">
               Celebração especial pelos 40 anos de fundação da nossa paróquia e sua história de fé.
             </p>
           </div>
 
-          <div className="bg-card rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Heart className="h-6 w-6 text-primary" />
+              <div className="p-3 bg-red-100 rounded-full">
+                <Heart className="h-6 w-6 text-red-700" />
               </div>
-              <h3 className="text-xl font-bold text-foreground">Comunhão</h3>
+              <h3 className="text-xl font-bold text-gray-900">Comunhão</h3>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-gray-700">
               Momentos de confraternização e união entre os fiéis, fortalecendo os laços fraternos.
             </p>
           </div>
@@ -217,11 +214,11 @@ export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="bg-gradient-to-r from-accent/20 to-accent/10 rounded-xl p-8 text-center border border-accent/30"
+          className="bg-white rounded-xl p-8 text-center border-2 border-amber-200"
         >
-          <p className="text-muted-foreground mb-2">Com as bênçãos do Senhor,</p>
-          <p className="text-2xl font-bold text-foreground mb-1">Padre Márcio Rodrigues</p>
-          <p className="text-primary font-semibold">Pároco</p>
+          <p className="text-gray-600 mb-2">Com as bênçãos do Senhor,</p>
+          <p className="text-2xl font-bold text-gray-900 mb-1">Padre Márcio Rodrigues</p>
+          <p className="text-red-700 font-semibold">Pároco</p>
         </motion.div>
       </div>
     </div>
