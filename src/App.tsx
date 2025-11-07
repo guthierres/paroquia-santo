@@ -24,6 +24,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { BlogPostPage } from './pages/BlogPostPage';
 import { AlbumViewPage } from './pages/AlbumViewPage';
+import { FestaPatroeiroPage } from './pages/FestaPatroeiroPage';
 import { AnnouncementsPage } from './pages/AnnouncementsPage';
 import { AnnouncementViewPage } from './pages/AnnouncementViewPage';
 import { AdminPanel } from './components/admin/AdminPanel';
