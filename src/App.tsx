@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
+import { Settings as AdminSettingsIcon } from 'lucide-react';
 import { Header } from './components/layout/Header';
 import { HeroSection } from './components/sections/HeroSection';
 import { HistorySection } from './components/sections/HistorySection';
@@ -10,6 +11,7 @@ import { SlidesSection } from './components/sections/SlidesSection';
 import { AnnouncementsSection } from './components/sections/AnnouncementsSection';
 import { BlogSection } from './components/sections/BlogSection';
 import { PriestSection } from './components/sections/PriestSection';
+import { FullGallery } from './components/sections/FullGallery';
 import { CelebrationsPage } from './components/sections/CelebrationsPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { PastoralsPage } from './components/sections/PastoralsPage';
@@ -22,21 +24,23 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { BlogPostPage } from './pages/BlogPostPage';
 import { AlbumViewPage } from './pages/AlbumViewPage';
+import { FestaPatroeiroPage } from './pages/FestaPatroeiroPage';
 import { AnnouncementsPage } from './pages/AnnouncementsPage';
 import { AnnouncementViewPage } from './pages/AnnouncementViewPage';
-import { FestaPatroeiroPage } from './pages/FestaPatroeiroPage';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LoginForm } from './components/admin/LoginForm';
+import { Button } from './components/ui/Button';
 import { supabase } from './lib/supabase';
 
 function App() {
+  const [currentSection, setCurrentSection] = useState('home');
+  const [showFullGallery, setShowFullGallery] = useState(false);
   const [showCelebrations, setShowCelebrations] = useState(false);
   const [showPrograms, setShowPrograms] = useState(false);
   const [showPastorals, setShowPastorals] = useState(false);
   const [showAlbumGallery, setShowAlbumGallery] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfUse, setShowTermsOfUse] = useState(false);
-  const [showFesta2025, setShowFesta2025] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,7 +56,7 @@ function App() {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
       if (!session) {
         setShowAdmin(false);
@@ -67,12 +71,6 @@ function App() {
       // Handle /programacoes route
       if (path === '/programacoes') {
         setShowPrograms(true);
-        return;
-      }
-
-      // Handle /festa-padroeiro route
-      if (path === '/festa-padroeiro') {
-        setShowFesta2025(true);
         return;
       }
 
@@ -111,18 +109,6 @@ function App() {
         setCurrentAlbumSlug(null);
         setCurrentAnnouncementSlug(null);
         setShowAnnouncementsPage(false);
-        setShowFesta2025(false);
-        return;
-      }
-
-      // Handle /festa-padroeiro route
-      if (path === '/festa-padroeiro') {
-        setShowFesta2025(true);
-        setCurrentBlogPostSlug(null);
-        setCurrentAlbumSlug(null);
-        setCurrentAnnouncementSlug(null);
-        setShowAnnouncementsPage(false);
-        setShowPrograms(false);
         return;
       }
 
@@ -168,88 +154,77 @@ function App() {
   }, []);
 
   const handleNavigate = (section: string) => {
-    if (section === 'festa2025') {
-      setShowFesta2025(true);
-      setShowCelebrations(false);
-      setShowPrograms(false);
-      setShowPastorals(false);
-      setShowAlbumGallery(false);
-      setShowPrivacyPolicy(false);
-      setShowTermsOfUse(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
     if (section === 'celebrations') {
       setShowCelebrations(true);
+      setShowFullGallery(false);
       setShowPrograms(false);
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
       setShowTermsOfUse(false);
-      setShowFesta2025(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     if (section === 'programs') {
       setShowPrograms(true);
+      setShowFullGallery(false);
       setShowCelebrations(false);
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
       setShowTermsOfUse(false);
-      setShowFesta2025(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     if (section === 'pastorals') {
       setShowPastorals(true);
+      setShowFullGallery(false);
       setShowPrograms(false);
       setShowCelebrations(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
       setShowTermsOfUse(false);
-      setShowFesta2025(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     if (section === 'privacy') {
       setShowPrivacyPolicy(true);
+      setShowFullGallery(false);
       setShowCelebrations(false);
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowTermsOfUse(false);
-      setShowFesta2025(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     if (section === 'terms') {
       setShowTermsOfUse(true);
+      setShowFullGallery(false);
       setShowCelebrations(false);
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
-      setShowFesta2025(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     
+    setCurrentSection(section);
+    setShowFullGallery(false);
     setShowCelebrations(false);
     setShowPrograms(false);
     setShowPastorals(false);
     setShowAlbumGallery(false);
     setShowPrivacyPolicy(false);
     setShowTermsOfUse(false);
-    setShowFesta2025(false);
     
     // Close mobile menu if open
     const mobileMenuButton = document.querySelector('[data-mobile-menu]');
     if (mobileMenuButton) {
-      (mobileMenuButton as HTMLButtonElement).click();
+      mobileMenuButton.click();
     }
     
     // Navegação melhorada para Android
@@ -263,8 +238,9 @@ function App() {
         if (window.navigator.userAgent.includes('Android')) {
           window.scrollTo({ 
             top: elementPosition, 
-            behavior: 'auto'
+            behavior: 'auto' // Usa auto no Android para garantir funcionamento
           });
+          // Depois aplica smooth se suportado
           setTimeout(() => {
             window.scrollTo({ 
               top: elementPosition, 
@@ -290,16 +266,22 @@ function App() {
 
   const handleShowFullGallery = () => {
     setShowAlbumGallery(true);
+    setShowFullGallery(false);
     setShowCelebrations(false);
     setShowPrograms(false);
     setShowPastorals(false);
-    setShowFesta2025(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackFromGallery = () => {
     setShowAlbumGallery(false);
+    setShowFullGallery(false);
     handleNavigate('photos');
+  };
+
+  const handleShowCelebrations = () => {
+    setShowCelebrations(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackFromCelebrations = () => {
@@ -314,11 +296,6 @@ function App() {
 
   const handleBackFromPastorals = () => {
     setShowPastorals(false);
-    handleNavigate('home');
-  };
-
-  const handleBackFromFesta2025 = () => {
-    setShowFesta2025(false);
     handleNavigate('home');
   };
 
@@ -407,8 +384,6 @@ function App() {
           window.history.pushState({}, '', '/');
           handleNavigate('home');
         }} />
-      ) : showFesta2025 ? (
-        <FestaPatroeiroPage onBack={handleBackFromFesta2025} />
       ) : showCelebrations ? (
         <CelebrationsPage onBack={handleBackFromCelebrations} />
       ) : showPrograms ? (
@@ -436,7 +411,7 @@ function App() {
 
       {/* Admin Access Button - Removed from main page */}
       
-      {!showAlbumGallery && !showCelebrations && !showPrograms && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && !showFesta2025 && (
+      {!showAlbumGallery && !showCelebrations && !showPrograms && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && (
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
