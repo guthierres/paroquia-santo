@@ -48,6 +48,8 @@ function App() {
   const [currentAlbumSlug, setCurrentAlbumSlug] = useState<string | null>(null);
   const [currentAnnouncementSlug, setCurrentAnnouncementSlug] = useState<string | null>(null);
   const [showAnnouncementsPage, setShowAnnouncementsPage] = useState(false);
+  // Adição do novo estado para a página da festa
+  const [showFesta2025, setShowFesta2025] = useState(false);
 
   React.useEffect(() => {
     // Check if user is already authenticated
@@ -67,6 +69,12 @@ function App() {
     const handleInitialHash = () => {
       const hash = window.location.hash;
       const path = window.location.pathname;
+
+      // Adição da lógica para a rota /festa-padroeiro
+      if (path === '/festa-padroeiro') {
+        setShowFesta2025(true);
+        return;
+      }
 
       // Handle /programacoes route
       if (path === '/programacoes') {
@@ -101,6 +109,20 @@ function App() {
     const handleHashChange = () => {
       const hash = window.location.hash;
       const path = window.location.pathname;
+      
+      // Adição da lógica para a rota /festa-padroeiro
+      if (path === '/festa-padroeiro') {
+        setShowFesta2025(true);
+        setShowPrograms(false); // Limpa outros estados
+        setCurrentBlogPostSlug(null);
+        setCurrentAlbumSlug(null);
+        setCurrentAnnouncementSlug(null);
+        setShowAnnouncementsPage(false);
+        return;
+      } else {
+         setShowFesta2025(false); // Garante que é escondido se o caminho for outro
+      }
+
 
       // Handle /programacoes route
       if (path === '/programacoes') {
@@ -118,28 +140,33 @@ function App() {
         setCurrentAlbumSlug(null);
         setCurrentAnnouncementSlug(null);
         setShowAnnouncementsPage(false);
+        setShowPrograms(false); // Garante que programas é escondido
       } else if (hash.startsWith('#album/')) {
         const slug = hash.replace('#album/', '');
         setCurrentAlbumSlug(slug);
         setCurrentBlogPostSlug(null);
         setCurrentAnnouncementSlug(null);
         setShowAnnouncementsPage(false);
+        setShowPrograms(false); // Garante que programas é escondido
       } else if (hash.startsWith('#avisos/')) {
         const slug = hash.replace('#avisos/', '');
         setCurrentAnnouncementSlug(slug);
         setCurrentBlogPostSlug(null);
         setCurrentAlbumSlug(null);
         setShowAnnouncementsPage(false);
+        setShowPrograms(false); // Garante que programas é escondido
       } else if (hash === '#avisos') {
         setShowAnnouncementsPage(true);
         setCurrentBlogPostSlug(null);
         setCurrentAlbumSlug(null);
         setCurrentAnnouncementSlug(null);
+        setShowPrograms(false); // Garante que programas é escondido
       } else {
         setCurrentBlogPostSlug(null);
         setCurrentAlbumSlug(null);
         setCurrentAnnouncementSlug(null);
         setShowAnnouncementsPage(false);
+        setShowPrograms(false); // Garante que programas é escondido
       }
     };
 
@@ -151,9 +178,23 @@ function App() {
       window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('popstate', handleHashChange);
     };
-  }, []);
+  }, [isAuthenticated]); // Adicionado isAuthenticated nas dependências, se não estava
 
   const handleNavigate = (section: string) => {
+    // Adição da navegação para festa
+    if (section === 'festa-padroeiro') {
+      setShowFesta2025(true);
+      setShowFullGallery(false);
+      setShowCelebrations(false);
+      setShowPrograms(false);
+      setShowPastorals(false);
+      setShowAlbumGallery(false);
+      setShowPrivacyPolicy(false);
+      setShowTermsOfUse(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (section === 'celebrations') {
       setShowCelebrations(true);
       setShowFullGallery(false);
@@ -162,6 +203,7 @@ function App() {
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
       setShowTermsOfUse(false);
+      setShowFesta2025(false); // Limpa estado da festa
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -174,6 +216,7 @@ function App() {
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
       setShowTermsOfUse(false);
+      setShowFesta2025(false); // Limpa estado da festa
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -186,6 +229,7 @@ function App() {
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
       setShowTermsOfUse(false);
+      setShowFesta2025(false); // Limpa estado da festa
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -197,6 +241,7 @@ function App() {
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowTermsOfUse(false);
+      setShowFesta2025(false); // Limpa estado da festa
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -208,6 +253,7 @@ function App() {
       setShowPastorals(false);
       setShowAlbumGallery(false);
       setShowPrivacyPolicy(false);
+      setShowFesta2025(false); // Limpa estado da festa
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -220,6 +266,7 @@ function App() {
     setShowAlbumGallery(false);
     setShowPrivacyPolicy(false);
     setShowTermsOfUse(false);
+    setShowFesta2025(false); // Limpa estado da festa
     
     // Close mobile menu if open
     const mobileMenuButton = document.querySelector('[data-mobile-menu]');
@@ -270,6 +317,7 @@ function App() {
     setShowCelebrations(false);
     setShowPrograms(false);
     setShowPastorals(false);
+    setShowFesta2025(false); // Limpa estado da festa
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -296,6 +344,13 @@ function App() {
 
   const handleBackFromPastorals = () => {
     setShowPastorals(false);
+    handleNavigate('home');
+  };
+
+  // Função para retornar da Festa (novo)
+  const handleBackFromFesta = () => {
+    setShowFesta2025(false);
+    window.history.pushState({}, '', '/');
     handleNavigate('home');
   };
 
@@ -361,6 +416,7 @@ function App() {
       
       <Header onNavigate={handleNavigate} />
 
+      {/* Adição da renderização condicional para FestaPatroeiroPage */}
       {currentBlogPostSlug ? (
         <BlogPostPage slug={currentBlogPostSlug} onBack={() => {
           setCurrentBlogPostSlug(null);
@@ -384,6 +440,8 @@ function App() {
           window.history.pushState({}, '', '/');
           handleNavigate('home');
         }} />
+      ) : showFesta2025 ? ( // Novo estado
+        <FestaPatroeiroPage onBack={handleBackFromFesta} />
       ) : showCelebrations ? (
         <CelebrationsPage onBack={handleBackFromCelebrations} />
       ) : showPrograms ? (
@@ -411,7 +469,7 @@ function App() {
 
       {/* Admin Access Button - Removed from main page */}
       
-      {!showAlbumGallery && !showCelebrations && !showPrograms && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && (
+      {!showAlbumGallery && !showCelebrations && !showPrograms && !showPastorals && !showPrivacyPolicy && !showTermsOfUse && !showFesta2025 && ( // Adicionado !showFesta2025
         <footer className="bg-gradient-to-r from-red-900 to-red-800 text-white py-8 sm:py-12 safe-area-inset-bottom w-full max-w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -447,7 +505,7 @@ function App() {
                     title="Instagram"
                   >
                     <svg className="w-5 h-5 text-white group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM12 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
                   </a>
 
@@ -472,7 +530,7 @@ function App() {
                   className="h-8 w-auto object-contain"
                 />
               </div>
-                            <p className="text-sm text-red-200 mb-2">
+                                            <p className="text-sm text-red-200 mb-2">
                 © 2024 Paróquia Senhor Santo Cristo dos Milagres. Cidade Cid. Tiradentes, SP.
               </p>
               <div className="flex items-center justify-center gap-4 text-xs text-red-300/80 mb-2">
