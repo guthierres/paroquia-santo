@@ -43,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { id: 'announcements', label: 'Eventos' },
     { id: 'blog', label: 'Blog' },
     { id: 'photos', label: 'Fotos' },
+    { id: 'festa2025', label: 'Festa 2025 🎉' },
     { id: 'contact', label: 'Contato' }
   ];
 
