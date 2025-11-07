@@ -46,7 +46,15 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { id: 'festa2025', label: 'Festa 2025 🎉' },
     { id: 'contact', label: 'Contato' }
   ];
-
+  const handleNavigate = (section: string) => {
+    if (section === 'festa2025') {
+      window.location.pathname = '/festa-padroeiro';
+      setIsMenuOpen(false);
+      return;
+    }
+    onNavigate(section);
+    setIsMenuOpen(false);
+  };
   const handleNavigate = (section: string) => {
     onNavigate(section);
     setIsMenuOpen(false);
