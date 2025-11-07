@@ -40,12 +40,13 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { id: 'history', label: 'História' },
     { id: 'pastorals', label: 'Pastorais' },
     { id: 'programs', label: 'Programações' },
+    { id: 'festa2025', label: 'Festa 2025 🎉' },
     { id: 'announcements', label: 'Eventos' },
     { id: 'blog', label: 'Blog' },
     { id: 'photos', label: 'Fotos' },
-    { id: 'festa2025', label: 'Festa 2025 🎉' },
     { id: 'contact', label: 'Contato' }
   ];
+
   const handleNavigate = (section: string) => {
     if (section === 'festa2025') {
       window.location.pathname = '/festa-padroeiro';
@@ -55,15 +56,19 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     onNavigate(section);
     setIsMenuOpen(false);
   };
-  const handleNavigate = (section: string) => {
-    onNavigate(section);
-    setIsMenuOpen(false);
-  };
 
   // Função específica para Android com preventDefault e stopPropagation
   const handleMobileNavigate = (e: React.MouseEvent, section: string) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (section === 'festa2025') {
+      setIsMenuOpen(false);
+      setTimeout(() => {
+        window.location.pathname = '/festa-padroeiro';
+      }, 100);
+      return;
+    }
     
     // Força o fechamento do menu primeiro
     setIsMenuOpen(false);
