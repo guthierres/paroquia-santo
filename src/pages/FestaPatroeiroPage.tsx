@@ -10,20 +10,22 @@ interface FestaPatroeiroPageProps {
   onBack: () => void;
 }
 
-// 1. Componente de SEO para injetar as metatags
+// 1. Componente de SEO Refinado para limpeza agressiva
 const FestaPatroeiroSEO: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
   
-  // Dados de SEO
   const title = "Festa do Padroeiro 2025 - Senhor Santo Cristo (40 Anos)";
   const description = "Convidamos você e sua família para a Novena e Festa Paroquial em honra ao Senhor Santo Cristo dos Milagres, celebrando 40 anos de fundação. De 13 a 23 de Novembro.";
-  const url = `${window.location.origin}/festa-padroeiro`; // Assumindo o domínio e a rota
+  const url = `${window.location.origin}/festa-padroeiro`;
 
   useEffect(() => {
     const head = document.head;
 
-    // Remove tags de SEO anteriores (para limpeza ao navegar)
-    const existingMeta = head.querySelectorAll('[data-seo-tag]');
-    existingMeta.forEach(meta => meta.remove());
+    // --- LÓGICA DE LIMPEZA AGRESSIVA ---
+    // Remove as tags de SEO padrão do index.html para que as novas possam ser aplicadas.
+    const tagsToRemove = head.querySelectorAll(
+      '[property^="og:"], [name^="twitter:"], [name="description"], [rel="canonical"]'
+    );
+    tagsToRemove.forEach(meta => meta.remove());
 
     // 1. Define o título do documento
     document.title = title;
@@ -32,45 +34,56 @@ const FestaPatroeiroSEO: React.FC<{ imageUrl: string }> = ({ imageUrl }) => {
     const tagsData = [
       // SEO Básico
       { name: 'description', content: description },
+      { rel: 'canonical', href: url },
       
-      // Open Graph (WhatsApp, Facebook, LinkedIn, etc.)
+      // Open Graph
       { property: 'og:title', content: title },
       { property: 'og:description', content: description },
-      { property: 'og:image', content: imageUrl },
       { property: 'og:url', content: url },
       { property: 'og:type', content: 'website' },
+      { property: 'og:image', content: `${window.location.origin}${imageUrl}` }, // URL ABSOLUTA
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
       
       // Twitter Card
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: title },
       { name: 'twitter:description', content: description },
-      { name: 'twitter:image', content: imageUrl },
+      { name: 'twitter:image', content: `${window.location.origin}${imageUrl}` }, // URL ABSOLUTA
     ];
 
-    tagsData.forEach(({ name, property, content }) => {
-      const meta = document.createElement('meta');
-      if (name) meta.setAttribute('name', name);
-      if (property) meta.setAttribute('property', property);
-      meta.setAttribute('content', content);
-      meta.setAttribute('data-seo-tag', 'festa-page'); // Marcador para limpeza
-      head.appendChild(meta);
+    tagsData.forEach(({ name, property, content, rel, href }) => {
+      const tag = rel === 'canonical' ? document.createElement('link') : document.createElement('meta');
+      
+      if (name) tag.setAttribute('name', name);
+      if (property) tag.setAttribute('property', property);
+      if (content) tag.setAttribute('content', content);
+      if (rel) tag.setAttribute('rel', rel);
+      if (href) tag.setAttribute('href', href);
+      
+      tag.setAttribute('data-seo-tag', 'festa-page'); // Marcador
+      head.appendChild(tag);
     });
 
     return () => {
-      // 3. Função de limpeza: remove as tags ao sair da página
-      const cleanupTags = head.querySelectorAll('[data-seo-tag]');
+      // 3. Função de limpeza: remove as tags específicas desta página ao navegar
+      const cleanupTags = head.querySelectorAll('[data-seo-tag="festa-page"]');
       cleanupTags.forEach(tag => tag.remove());
-      // Se necessário, defina um document.title padrão aqui
+      // Você deve re-aplicar o SEO padrão do index.html aqui se necessário,
+      // mas geralmente o próximo componente/rota fará isso.
     };
   }, [imageUrl, title, description, url]);
 
-  return null; // Não renderiza nada visualmente
+  return null;
 };
 
 export const FestaPatroeiroPage: React.FC<FestaPatroeiroPageProps> = ({ onBack }) => {
   return (
-    // 2. Chama o componente de SEO no topo da renderização
     <>
+      {/* O valor de festaImage aqui precisa ser a URL pública, que é o que o bundler retorna. */}
+      {/* Se o bundler injeta o caminho completo (ex: /assets/festa-santo.xxxx.png), 
+          usamos ele diretamente. Se ele retorna o caminho para a importação, usamos. 
+          Assumindo que o bundler retorna um caminho público iniciado por '/' */}
       <FestaPatroeiroSEO imageUrl={festaImage as string} /> 
       
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
